@@ -1,2 +1,4 @@
 *.pyc
 *.swp
+sra.egg-info
+sra.sqlite
