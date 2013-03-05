@@ -5,13 +5,10 @@
         <title>iPlant Public Files</title>
         <meta name="description" content="">
         <meta name="author" content="">
-        <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
-        <link type="text/css" rel="stylesheet" href="css/global.css" />
-        <link type="text/css" rel="stylesheet" href="js/jqueryFileTree/jqueryFileTree.css" />
-        <script src="js/jquery-1.7.1.min.js"></script>
-        <script src="bootstrap/js/bootstrap.min.js"></script>
-        <script src="js/jqueryFileTree/jqueryFileTree.js"></script>
-        <script src="js/jquery.zclip.min.js"></script>
+        <link type="text/css" rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
+        <link type="text/css" rel="stylesheet" href="static/css/global.css" />
+        <script src="static/js/jquery-1.9.1.min.js"></script>
+        <script src="static/bootstrap/js/bootstrap.min.js"></script>
         <script type="text/javascript">
             function base_url(path) {
                 return "${base_url}" + path;
@@ -19,7 +16,7 @@
             var root = "${root}";
             var dir = "${dir}";
         </script>
-        <script src="js/global.js"></script>
+        <script src="static/js/global.js"></script>
 </head>
 
 <body>
@@ -28,7 +25,7 @@
 
 <div class="content">
                 <div id="header">
-                        <img src="imgs/logo.jpg"  alt="iPlant Collaborative" /> <h1>Public Files</h1>
+                        <img src="static/imgs/logo.jpg"  alt="iPlant Collaborative" /> <h1>Public Files</h1>
                         <div id="headers">
                                 <span>File name</span>
                                 <span>Size</span>
