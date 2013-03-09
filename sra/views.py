@@ -8,6 +8,8 @@ from .models import (
     MyModel,
     )
 
+from datastore import DataStoreSession
+
 
 #@view_config(route_name='home', renderer='templates/mytemplate.pt')
 #def my_view(request):
@@ -19,6 +21,8 @@ from .models import (
 
 @view_config(route_name='home', renderer='templates/home.pt')
 def my_vew(request):
+    print request.registry.settings
+    print DataStoreSession.get_studies()
     return {
         'base_url' : '123', 
         'root': '/',
