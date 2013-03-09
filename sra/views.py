@@ -21,14 +21,23 @@ from datastore import DataStoreSession
 
 @view_config(route_name='home', renderer='templates/home.pt')
 def my_vew(request):
-    print request.registry.settings
-    print DataStoreSession.get_studies()
     return {
         'base_url' : '123', 
         'root': '/',
         'dir': 'hello',
         'year': '2013'
     }
+
+@view_config(route_name='studies', renderer='json')
+def show_studies(request):
+    def format_study(study):
+        return {
+            'name': study['name'],
+            'path': study['path'],
+            'url': request.route_path('study', study_id=study['name']),
+        }
+
+    return map(format_study, DataStoreSession.get_studies())
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem

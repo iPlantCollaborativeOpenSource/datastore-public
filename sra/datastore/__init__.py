@@ -18,6 +18,9 @@ class DataStore(object):
     def get_studies(self):
         conn = self._connect()
         c = irodsCollection(conn, self.path)
-        return c.getSubCollections()
+        base_path = c.getCollName()
+
+        studies = map(lambda dir_name: {"name": dir_name, "path" : base_path + "/" + dir_name}, c.getSubCollections())
+        return studies
 
 DataStoreSession = DataStore()
