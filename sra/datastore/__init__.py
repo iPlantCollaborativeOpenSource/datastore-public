@@ -20,7 +20,7 @@ class DataStore(object):
         c = irodsCollection(conn, self.path)
         base_path = c.getCollName()
 
-        studies = map(lambda dir_name: {"name": dir_name, "path" : base_path + "/" + dir_name}, c.getSubCollections())
+        studies = map(lambda dir_name: {"id": dir_name, "path" : base_path + "/" + dir_name}, c.getSubCollections())
         return studies
 
 DataStoreSession = DataStore()

@@ -28,7 +28,7 @@
 
 <div class="content">
         <div id="header">
-            <img src="static/imgs/logo.jpg"  alt="iPlant Collaborative" /> <h1>Sequence DB</h1>
+            <img src="static/imgs/logo.jpg" alt="iPlant Collaborative" width="252" height="67" /> <h1>Sequence DB</h1>
         </div>
         <div id="bd" class="row">
             <div id="sidebar" class="span4">

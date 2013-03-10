@@ -24,7 +24,7 @@ App.Views.StudyList = Backbone.View.extend({
         App.studies.each(function(model) {
             $('<li>')
                 .append(
-                    $('<a>', {href: '#'}).append(model.get('name'))
+                    $('<a>', {href: '#study/' + model.id}).append(model.id)
                 )
                 .data('model', model)
                 .appendTo($list); 
@@ -32,7 +32,6 @@ App.Views.StudyList = Backbone.View.extend({
         this.$el.append($list);
     },
     select_study: function(e) {
-        e.preventDefault();
         var model = $(e.currentTarget).closest('li').data('model');
         console.log(model);
         App.studies.trigger('select', model);
@@ -48,21 +47,33 @@ App.Views.ContentArea = Backbone.View.extend({
     display_study: function(study) {
         this.$el.empty();
         $('<h2>')
-            .append(study.get('name'))
+            .append(study.id)
             .appendTo(this.$el);
     }
 });
 
 App.Router = Backbone.Router.extend({
     routes: {
-        "" : "list"
+        "" : "list",
+        "study/:study_id": "select_study"
     },
-    list: function() {
+    initialize: function() {
         App.studies = new App.Collections.StudyCollection();
         new App.Views.StudyList({el: $('#sidebar')[0]}).render();
         new App.Views.ContentArea({el: $('#main')[0]}).render();
+    },
+    list: function() {
         App.studies.fetch();
         console.log(App.studies);
+    },
+    select_study: function(study_id) {
+        App.studies.fetch({
+            success: function() {
+                var model;
+                if (model = App.studies.get(study_id))
+                    App.studies.trigger('select', model);
+            }
+        });
     }
 });
 

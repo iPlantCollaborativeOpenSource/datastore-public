@@ -32,9 +32,9 @@ def my_vew(request):
 def show_studies(request):
     def format_study(study):
         return {
-            'name': study['name'],
+            'id': study['id'],
             'path': study['path'],
-            'url': request.route_path('study', study_id=study['name']),
+            'url': request.route_path('study', study_id=study['id']),
         }
 
     return map(format_study, DataStoreSession.get_studies())
