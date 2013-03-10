@@ -5,6 +5,22 @@ class DSFile(object):
     def __init__(self, conn, path):
         self._conn = conn
 
+    @staticmethod
+    def dictify_metadata(metadata):
+        def unpack_tuple(t):
+            return (t[0], (t[1], t[2]))
+        return dict(map(unpack_tuple, metadata))
+
+class DSDataObject(DSFile):
+    def __init__(self, conn, path):
+        DSFile.__init__(self, conn, path)
+        self._file = iRodsOpen(conn, path, 'r')
+        self.name = self._file.getDataName()
+        self.path = self._file.getPath() + "/" + self.name
+
+    def get_metadata(self):
+        return DSFile.dictify_metadata(self._file.getUserMetadata())
+
 class DSCollection(DSFile):
     def __init__(self, conn, path):
         DSFile.__init__(self, conn, path)
@@ -16,7 +32,9 @@ class DSCollection(DSFile):
         subcollections = self._collection.getSubCollections()
         return map(lambda dir_name: DSCollection(self._conn, self.path + "/" + dir_name), subcollections)
 
+    def get_objects(self):
+        objects = self._collection.getObjects()
+        return map(lambda obj: DSDataObject(self._conn, self.path + "/" + obj[0]), objects)
+
     def get_metadata(self):
-        def unpack_tuple(t):
-            return (t[0], (t[1], t[2]))
-        return dict(map(unpack_tuple, self._collection.getUserMetadata()))
+        return DSFile.dictify_metadata(self._collection.getUserMetadata())
