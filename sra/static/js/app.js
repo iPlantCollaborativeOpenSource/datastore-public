@@ -53,9 +53,21 @@ App.Views.ContentArea = Backbone.View.extend({
     },
     display_study: function(study) {
         this.$el.empty();
+
         $('<h2>')
-            .append(study.id)
+            .append(study.id + ' ' + study.get('title'))
             .appendTo(this.$el);
+
+        var $dl = $('<dl>')
+            .append($("<dt>").append("Abstract"))
+            .append($("<dd>").append(study.get('abstract')));
+
+        var desc;
+        if ((desc = study.get('description')) != null)
+            $dl.append($("<dt>").append("Description"))
+            .append($("<dd>").append(desc));
+
+        $dl.appendTo(this.$el);
     }
 });
 
