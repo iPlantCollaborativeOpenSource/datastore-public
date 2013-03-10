@@ -105,6 +105,11 @@ ul.jqueryFileTree li {
 .jqueryFileTree li.file.ext_tar-gz {background: url('../js/jqueryFileTree/images/zip.png') left top no-repeat; }
 .jqueryFileTree li.file.ext_rtf {background: url('../js/jqueryFileTree/images/page.png') left top no-repeat; }
 
+#header img {
+    width: 252px;
+    height: 67px;
+}
+
 /**
  * Footer
  */

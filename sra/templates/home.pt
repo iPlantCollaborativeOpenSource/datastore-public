@@ -40,7 +40,7 @@
             </div>
             <div id="main" class="span8">
                 <h2>Welcome to the iPlant Sequence Database!</h2>
-                <p>We store DNA 'n stuff! Click on a study to the left to explore details and download sequence reads.</p>
+                <p>Click on a study to the left to explore details and download sequence reads.</p>
             </div>
         </div>
         <div id="footer">
