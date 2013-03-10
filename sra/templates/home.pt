@@ -33,14 +33,13 @@
 
 <div class="content">
         <div id="header">
-            <img src="static/imgs/logo.jpg" alt="iPlant Collaborative" width="252" height="67" /> <h1>Sequence DB</h1>
+            <a href="/"><img src="static/imgs/logo.jpg" alt="iPlant Collaborative" width="252" height="67" /></a>
+            <h1><a href="/">Sequence DB</a></h1>
         </div>
         <div id="bd" class="row">
             <div id="sidebar" class="span4">
             </div>
             <div id="main" class="span8">
-                <h2>Welcome to the iPlant Sequence Database!</h2>
-                <p>Click on a study to the left to explore details and download sequence reads.</p>
             </div>
         </div>
         <div id="footer">

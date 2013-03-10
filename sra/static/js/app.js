@@ -17,6 +17,7 @@ App.Views.StudyList = Backbone.View.extend({
         App.studies.bind('select', this.highlight_study, this);
     },
     render: function() {
+        return this;
     },
     add_studies: function() {
         this.$el.empty();
@@ -38,19 +39,34 @@ App.Views.StudyList = Backbone.View.extend({
         App.studies.trigger('select', model);
     },
     highlight_study: function(model) {
-        this.$el.find('ul')
-            .children().removeClass('active')
-            .filter('li[data-model_id="' + model.id + '"]').addClass('active');
+        var $children = this.$el.find('ul').children().removeClass('active');
+        if (model)
+            $children.filter('li[data-model_id="' + model.id + '"]').addClass('active');
     }
 });
 
 App.Views.ContentArea = Backbone.View.extend({
     initialize: function(options) {
+        var self = this;
+        $('#header a').click(function(e) {
+            e.preventDefault();
+            App.studies.trigger('select', null);
+            App.router.navigate('');
+        });
         App.studies.bind('select', this.display_study, this);
     },
     render: function() {
+        this.$el
+            .empty()
+            .append($('<h2>').append('Welcome to the iPlant Sequence Database!'))
+            .append($('<p>').append('Click on a study to the left to explore details and download sequence reads.'));
+        return this;
     },
     display_study: function(study) {
+        if (!study) {
+            this.render();
+            return;
+        }
         this.$el.empty();
 
         $('<h2>')
@@ -107,6 +123,6 @@ App.Router = Backbone.Router.extend({
 });
 
 $(document).ready(function() {
-    var app = new App.Router();
+    App.router = new App.Router();
     Backbone.history.start();
 });
