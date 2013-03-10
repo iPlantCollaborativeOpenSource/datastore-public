@@ -14,6 +14,7 @@ App.Views.StudyList = Backbone.View.extend({
     initialize: function(options) {
         console.log(options);
         App.studies.bind('reset', this.add_studies, this);
+        App.studies.bind('select', this.highlight_study, this);
     },
     render: function() {
         this.$el.html("HELLO WORLD");
@@ -24,9 +25,10 @@ App.Views.StudyList = Backbone.View.extend({
         App.studies.each(function(model) {
             $('<li>')
                 .append(
-                    $('<a>', {href: '#study/' + model.id}).append(model.id)
+                    $('<a>', {href: '#study/' + model.id}).append(model.id + ' ' + model.get('title'))
                 )
                 .data('model', model)
+                .attr('data-model_id', model.id)
                 .appendTo($list); 
         });
         this.$el.append($list);
@@ -35,6 +37,11 @@ App.Views.StudyList = Backbone.View.extend({
         var model = $(e.currentTarget).closest('li').data('model');
         console.log(model);
         App.studies.trigger('select', model);
+    },
+    highlight_study: function(model) {
+        this.$el.find('ul')
+            .children().removeClass('active')
+            .filter('li[data-model_id="' + model.id + '"]').addClass('active');
     }
 });
 

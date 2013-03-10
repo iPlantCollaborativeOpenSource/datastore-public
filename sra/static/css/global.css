@@ -126,7 +126,30 @@ ul.jqueryFileTree li {
 	cursor: default;
 }
 
+/**
+ * Main content
+ */
 #bd {
     margin-top: 1.5em;
     margin-bottom: 1.5em;
+}
+
+/**
+ * Sidebar
+ */
+#study-list {
+    margin: 0;
+    list-style: none;
+}
+#study-list li a {
+    display: block;
+    text-decoration: none;
+    padding: .5em;
+}
+#study-list li a:hover {
+    background-color: #e6e6e6;
+}
+#study-list li.active a {
+    background-color: #0098aa;
+    color: #ffffff;
 }
