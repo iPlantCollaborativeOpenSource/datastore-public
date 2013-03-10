@@ -156,9 +156,17 @@ ul.jqueryFileTree li {
     padding: .5em;
 }
 #study-list li a:hover {
-    background-color: #e6e6e6;
+    background-color: rgba(0,152,170,.2);
 }
 #study-list li.active a {
     background-color: #0098aa;
     color: #ffffff;
+}
+#study-list .study-id {
+    float: left;
+    width: 6em;
+}
+#study-list .study-title {
+    display: block;
+    margin-left: 6em;
 }

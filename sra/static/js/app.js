@@ -25,7 +25,9 @@ App.Views.StudyList = Backbone.View.extend({
         App.studies.each(function(model) {
             $('<li>')
                 .append(
-                    $('<a>', {href: '#study/' + model.id}).append(model.id + ' ' + model.get('title'))
+                    $('<a>', {href: '#study/' + model.id})
+                        .append($('<span>', {'class': 'study-id'}).append(model.id))
+                        .append($('<span>', {'class': 'study-title'}).append(model.get('title')))
                 )
                 .data('model', model)
                 .attr('data-model_id', model.id)
