@@ -8,6 +8,9 @@ App.Collections.StudyCollection = Backbone.Collection.extend({
 });
 
 App.Views.StudyList = Backbone.View.extend({
+    events: {
+        'click li a': 'select_study'
+    },
     initialize: function(options) {
         console.log(options);
         App.studies.bind('reset', this.add_studies, this);
@@ -17,13 +20,22 @@ App.Views.StudyList = Backbone.View.extend({
     },
     add_studies: function() {
         this.$el.empty();
-        $list = $('<ul>', {id: 'study-list'});
+        var $list = $('<ul>', {id: 'study-list'});
         App.studies.each(function(model) {
-            $('<li>').append(
-                $('<a>', {href: '#'}).append(model.get('name'))
-            ).appendTo($list); 
+            $('<li>')
+                .append(
+                    $('<a>', {href: '#'}).append(model.get('name'))
+                )
+                .data('model', model)
+                .appendTo($list); 
         });
         this.$el.append($list);
+    },
+    select_study: function(e) {
+        e.preventDefault();
+        var model = $(e.currentTarget).closest('li').data('model');
+        console.log(model);
+        App.studies.trigger('select', null);
     }
 });
 
