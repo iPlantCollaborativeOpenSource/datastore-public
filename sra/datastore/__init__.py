@@ -5,11 +5,10 @@ class DataStore(object):
     def __init__(self):
         self._conn = None
 
-    def configure(self, host=None, port=None, zone=None, path=None, user=None, password=None):
+    def configure(self, host=None, port=None, zone=None, user=None, password=None):
         self.host = host
         self.port = port
         self.zone = zone
-        self.path = path
         self.user = user
         self.password = password
 
@@ -19,11 +18,6 @@ class DataStore(object):
             status = clientLoginWithPassword(conn, self.password)
             self._conn = conn
         return self._conn
-
-    def get_studies(self):
-        conn = self._connect()
-        collection = DSCollection(conn, self.path)
-        return collection.get_subcollections()
 
     def get_collection(self, path):
         conn = self._connect()

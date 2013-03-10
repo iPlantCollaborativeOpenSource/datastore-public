@@ -21,7 +21,7 @@ from datastore import DataStoreSession
 #    return {'one': one, 'project': 'sra'}
 
 @view_config(route_name='home', renderer='templates/home.pt')
-def my_vew(request):
+def home(request):
     return {
         'base_url' : '123', 
         'root': '/',
@@ -41,7 +41,8 @@ def show_studies(request):
             'description': study.metadata.getone('description')[0] if 'description' in study.metadata else None,
         }
 
-    return map(format_study, DataStoreSession.get_studies())
+    collection = DataStoreSession.get_collection(request.registry.settings['irods.path'])
+    return map(format_study, collection.get_subcollections())
 
 @view_config(route_name='file_tree')
 def file_tree(request):

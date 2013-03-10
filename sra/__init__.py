@@ -19,7 +19,6 @@ def main(global_config, **settings):
         host=settings['irods.host'],
         port=int(settings['irods.port']),
         zone=settings['irods.zone'],
-        path=settings['irods.path'],
         user=settings['irods.user'],
         password=settings['irods.password']
     )
