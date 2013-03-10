@@ -35,6 +35,9 @@ def show_studies(request):
             'id': study['id'],
             'path': study['path'],
             'url': request.route_path('study', study_id=study['id']),
+            'title': study['metadata']['title'][0],
+            'abstract': study['metadata']['abstract'][0],
+            'description': study['metadata']['description'][0] if 'description' in study['metadata'] else None
         }
 
     return map(format_study, DataStoreSession.get_studies())
