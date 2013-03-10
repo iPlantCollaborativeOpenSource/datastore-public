@@ -1,5 +1,5 @@
 from irods import *
-from DSFile import DSFile, DSCollection
+from DSFile import DSFile, DSCollection, DSDataObject
 
 class DataStore(object):
     def __init__(self):
@@ -28,5 +28,9 @@ class DataStore(object):
     def get_collection(self, path):
         conn = self._connect()
         return DSCollection(conn, path)
+
+    def get_file(self, path):
+        conn = self._connect()
+        return DSDataObject(conn, path)
 
 DataStoreSession = DataStore()

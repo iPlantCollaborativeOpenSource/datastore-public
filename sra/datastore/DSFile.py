@@ -21,6 +21,23 @@ class DSDataObject(DSFile):
     def get_metadata(self):
         return DSFile.dictify_metadata(self._file.getUserMetadata())
 
+    def __iter__(self):
+        return DSDataObjectIter(self._conn, self.path)
+
+class DSDataObjectIter(object):
+    def __init__(self, conn, path):
+        self.f = iRodsOpen(conn, path, 'r')
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        result = self.f.read(1<<16)
+        if result:
+            return result
+        else:
+            raise StopIteration
+
 class DSCollection(DSFile):
     def __init__(self, conn, path):
         DSFile.__init__(self, conn, path)
