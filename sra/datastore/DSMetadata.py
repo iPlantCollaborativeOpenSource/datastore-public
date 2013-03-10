@@ -91,3 +91,9 @@ class DSMetadata(object):
             raise TypeError
         self._delete_all_values(key)
         self._reset_metadata()
+
+    def __contains__(self, key):
+        if not isinstance(key, str):
+            raise TypeError
+        values = self.getall(key)
+        return len(values) > 0
