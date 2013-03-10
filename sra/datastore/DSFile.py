@@ -32,7 +32,7 @@ class DSDataObjectIter(object):
         return self
 
     def next(self):
-        result = self.f.read(1<<16)
+        result = self.f.read(1<<24)
         if result:
             return result
         else:
