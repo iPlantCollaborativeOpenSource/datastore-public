@@ -12,9 +12,11 @@ from sqlalchemy.orm import (
     )
 
 from zope.sqlalchemy import ZopeTransactionExtension
+from datastore import DataStore
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
+DataStoreSession = DataStore()
 
 
 class MyModel(Base):

@@ -7,10 +7,8 @@ from sqlalchemy.exc import DBAPIError
 from .models import (
     DBSession,
     MyModel,
-    )
-
-from datastore import DataStoreSession
-
+    DataStoreSession,
+)
 
 #@view_config(route_name='home', renderer='templates/mytemplate.pt')
 #def my_view(request):

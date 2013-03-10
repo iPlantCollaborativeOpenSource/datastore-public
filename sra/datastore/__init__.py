@@ -26,5 +26,3 @@ class DataStore(object):
     def get_file(self, path):
         conn = self._connect()
         return DSDataObject(conn, path)
-
-DataStoreSession = DataStore()

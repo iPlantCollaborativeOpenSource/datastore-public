@@ -4,10 +4,8 @@ from sqlalchemy import engine_from_config
 from .models import (
     DBSession,
     Base,
+    DataStoreSession
     )
-
-from datastore import DataStoreSession
-
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
