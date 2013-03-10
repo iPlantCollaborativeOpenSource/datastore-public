@@ -25,4 +25,8 @@ class DataStore(object):
         collection = DSCollection(conn, self.path)
         return collection.get_subcollections()
 
+    def get_collection(self, path):
+        conn = self._connect()
+        return DSCollection(conn, path)
+
 DataStoreSession = DataStore()
