@@ -35,7 +35,7 @@
                 sidebar content
             </div>
             <div id="main" class="span8">
-                <h3>Welcome to the iPlant Sequence Database!</h3>
+                <h2>Welcome to the iPlant Sequence Database!</h2>
                 <p>We store DNA 'n stuff! Click on a study to the left to explore details and download sequence reads.</p>
             </div>
         </div>

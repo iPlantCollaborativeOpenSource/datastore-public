@@ -35,7 +35,21 @@ App.Views.StudyList = Backbone.View.extend({
         e.preventDefault();
         var model = $(e.currentTarget).closest('li').data('model');
         console.log(model);
-        App.studies.trigger('select', null);
+        App.studies.trigger('select', model);
+    }
+});
+
+App.Views.ContentArea = Backbone.View.extend({
+    initialize: function(options) {
+        App.studies.bind('select', this.display_study, this);
+    },
+    render: function() {
+    },
+    display_study: function(study) {
+        this.$el.empty();
+        $('<h2>')
+            .append(study.get('name'))
+            .appendTo(this.$el);
     }
 });
 
@@ -46,6 +60,7 @@ App.Router = Backbone.Router.extend({
     list: function() {
         App.studies = new App.Collections.StudyCollection();
         new App.Views.StudyList({el: $('#sidebar')[0]}).render();
+        new App.Views.ContentArea({el: $('#main')[0]}).render();
         App.studies.fetch();
         console.log(App.studies);
     }
