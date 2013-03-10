@@ -1,5 +1,6 @@
 from pyramid.response import Response
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPBadRequest
 
 from sqlalchemy.exc import DBAPIError
 
@@ -42,6 +43,26 @@ def show_studies(request):
         }
 
     return map(format_study, DataStoreSession.get_studies())
+
+@view_config(route_name='file_tree')
+def file_tree(request):
+    from os.path import splitext
+    if not 'dir' in request.POST:
+        raise HTTPBadRequest()
+    dir_name = request.POST['dir']
+    coll = DataStoreSession.get_collection(dir_name)
+
+    def coll_to_li(coll):
+        return '<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (coll.path, coll.name)
+
+    def file_obj_to_li(f):
+        ext = splitext(f.name)[1][1:]
+        return '<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (ext, f.path, f.name)
+
+    resp = "\n".join(map(coll_to_li, coll.get_subcollections()) + map(file_obj_to_li, coll.get_objects()))
+    
+    resp = '<ul class="jqueryFileTree" style="display: none;">' + resp + '</ul>'
+    return Response(resp)
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem

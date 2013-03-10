@@ -68,6 +68,14 @@ App.Views.ContentArea = Backbone.View.extend({
             .append($("<dd>").append(desc));
 
         $dl.appendTo(this.$el);
+
+        $('<div>', {'class': 'file-tree'}).appendTo(this.$el).fileTree({
+            root: study.get('path'),
+            script: '/api/ls'
+        }, function(file) {
+            console.log(file); 
+        });
+
     }
 });
 

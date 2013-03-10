@@ -8,10 +8,15 @@
     <link rel="shortcut icon" href="static/favicon.ico" />
     <link type="text/css" rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="static/css/global.css" />
+    <!-- library deps -->
     <script src="static/js/jquery-1.9.1.min.js"></script>
     <script src="static/js/underscore-min.js"></script>
     <script src="static/js/backbone-min.js"></script>
     <script src="static/bootstrap/js/bootstrap.min.js"></script>
+    <!-- jqueryFileTree -->
+    <link type="text/css" rel="stylesheet" href="static/jqueryFileTree/jqueryFileTree.css" />
+    <script src="static/jqueryFileTree/jqueryFileTree.js"></script>
+    <!-- application code -->
     <script type="text/javascript">
         function base_url(path) {
         return "${base_url}" + path;
