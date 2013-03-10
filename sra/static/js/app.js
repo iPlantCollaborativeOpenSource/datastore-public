@@ -69,11 +69,14 @@ App.Views.ContentArea = Backbone.View.extend({
 
         $dl.appendTo(this.$el);
 
+        $('<h3>').append('Reads').appendTo(this.$el);
+
         $('<div>', {'class': 'file-tree'}).appendTo(this.$el).fileTree({
             root: study.get('path'),
             script: '/api/ls'
         }, function(file) {
             console.log(file); 
+            window.location.replace('/download?path=' + encodeURIComponent(file));
         });
 
     }

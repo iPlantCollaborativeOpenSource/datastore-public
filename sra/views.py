@@ -64,6 +64,18 @@ def file_tree(request):
     resp = '<ul class="jqueryFileTree" style="display: none;">' + resp + '</ul>'
     return Response(resp)
 
+@view_config(route_name='download_file')
+def download_file(request):
+    if not 'path' in request.GET:
+        raise HTTPBadRequest()
+    path = request.GET['path']
+    file = DataStoreSession.get_file(path)
+    return Response(
+        content_disposition='attachment; filename="%s"' % file.name,
+        content_type='application/octet-stream', 
+        app_iter=file
+    )
+
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
 might be caused by one of the following things:

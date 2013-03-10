@@ -29,5 +29,6 @@ def main(global_config, **settings):
     config.add_route('studies', '/api/study')
     config.add_route('study', '/api/study/{study_id}')
     config.add_route('file_tree', '/api/ls')
+    config.add_route('download_file', '/download')
     config.scan()
     return config.make_wsgi_app()
