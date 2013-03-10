@@ -125,3 +125,8 @@ ul.jqueryFileTree li {
 	border-bottom: #0298AA dashed 1px;
 	cursor: default;
 }
+
+#bd {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}

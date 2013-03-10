@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="utf-8">
-        <title>iPlant Sequence DB</title>
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <link rel="shortcut icon" href="static/favicon.ico" />
-        <link type="text/css" rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
-        <link type="text/css" rel="stylesheet" href="static/css/global.css" />
-        <script src="static/js/jquery-1.9.1.min.js"></script>
-        <script src="static/js/underscore-min.js"></script>
-        <script src="static/js/backbone-min.js"></script>
-        <script src="static/bootstrap/js/bootstrap.min.js"></script>
-        <script type="text/javascript">
-            function base_url(path) {
-                return "${base_url}" + path;
-            }
-            var root = "${root}";
-            var dir = "${dir}";
-        </script>
-        <script src="static/js/app.js"></script>
+    <meta charset="utf-8">
+    <title>iPlant Sequence DB</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="static/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="static/css/global.css" />
+    <script src="static/js/jquery-1.9.1.min.js"></script>
+    <script src="static/js/underscore-min.js"></script>
+    <script src="static/js/backbone-min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        function base_url(path) {
+        return "${base_url}" + path;
+        }
+        var root = "${root}";
+        var dir = "${dir}";
+    </script>
+    <script src="static/js/app.js"></script>
 </head>
 
 <body>
@@ -27,22 +27,25 @@
 <div class="container">
 
 <div class="content">
-                <div id="header">
-                        <img src="static/imgs/logo.jpg"  alt="iPlant Collaborative" /> <h1>Sequence DB</h1>
-                        <div id="headers">
-                                <span>File name</span>
-                                <span>Size</span>
-                                <span>Last modified</span>
-                        </div>
-                </div>
-                <div id="file-tree"></div>
-                <div id="footer">
-                        <p>
-                                <strong>iPlant Collaborative ${year}</strong>
-                                <br />
-                                <a href="http://www.iplantcollaborative.org" target="_blank">iPlant Collaborative's Website</a> &nbsp; &nbsp; &nbsp; <a href="http://preview.iplantcollaborative.org/de" target="_blank">Discovery Environment</a> &nbsp; &nbsp; &nbsp; <a href="http://atmo-beta.iplantcollaborative.org" target="_blank">Atmosphere</a>
-                        </p>
-                </div>
+        <div id="header">
+            <img src="static/imgs/logo.jpg"  alt="iPlant Collaborative" /> <h1>Sequence DB</h1>
+        </div>
+        <div id="bd" class="row">
+            <div id="sidebar" class="span4">
+                sidebar content
+            </div>
+            <div id="main" class="span8">
+                <h3>Welcome to the iPlant Sequence Database!</h3>
+                <p>We store DNA 'n stuff! Click on a study to the left to explore details and download sequence reads.</p>
+            </div>
+        </div>
+        <div id="footer">
+            <p>
+                <strong>iPlant Collaborative ${year}</strong>
+                <br />
+                <a href="http://www.iplantcollaborative.org" target="_blank">iPlant Collaborative's Website</a> &nbsp; &nbsp; &nbsp; <a href="http://preview.iplantcollaborative.org/de" target="_blank">Discovery Environment</a> &nbsp; &nbsp; &nbsp; <a href="http://atmo-beta.iplantcollaborative.org" target="_blank">Atmosphere</a>
+            </p>
+        </div>
 </div>
 
 </div> <!-- /container -->
