@@ -37,7 +37,6 @@
         </div>
         <div id="bd" class="row">
             <div id="sidebar" class="span4">
-                sidebar content
             </div>
             <div id="main" class="span8">
                 <h2>Welcome to the iPlant Sequence Database!</h2>

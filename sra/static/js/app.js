@@ -17,7 +17,6 @@ App.Views.StudyList = Backbone.View.extend({
         App.studies.bind('select', this.highlight_study, this);
     },
     render: function() {
-        this.$el.html("HELLO WORLD");
     },
     add_studies: function() {
         this.$el.empty();
