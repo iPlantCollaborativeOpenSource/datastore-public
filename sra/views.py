@@ -32,14 +32,13 @@ def my_vew(request):
 @view_config(route_name='studies', renderer='json')
 def show_studies(request):
     def format_study(study):
-        metadata = study.get_metadata()
         return {
             'id': study.name,
             'path': study.path,
             'url': request.route_path('study', study_id=study.name),
-            'title': metadata['title'][0],
-            'abstract': metadata['abstract'][0],
-            'description': metadata['description'][0] if 'description' in metadata else None
+            'title': study.metadata.getone('title')[0],
+            'abstract': study.metadata.getone('abstract')[0],
+            'description': study.metadata.getone('description')[0] if 'description' in study.metadata else None,
         }
 
     return map(format_study, DataStoreSession.get_studies())
