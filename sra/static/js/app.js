@@ -52,6 +52,7 @@ App.Views.ContentArea = Backbone.View.extend({
             e.preventDefault();
             App.studies.trigger('select', null);
             App.router.navigate('');
+            return false;
         });
         App.studies.bind('select', this.display_study, this);
     },
