@@ -1,6 +1,7 @@
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest
+import logging
 
 from sqlalchemy.exc import DBAPIError
 
@@ -42,6 +43,30 @@ def show_studies(request):
     collection = DataStoreSession.get_collection(request.registry.settings['irods.path'])
     return map(format_study, collection.get_subcollections())
 
+@view_config(route_name='file', renderer='json')
+def get_collection(request):
+    if not 'path' in request.GET:
+        raise HTTPBadRequest()
+    path = request.GET['path']
+    collection = DataStoreSession.get_collection(path)
+    sub_collections = collection.get_subcollections()
+    objects = collection.get_objects()
+    print sub_collections
+
+    def format_subcoll(coll):
+        return {
+            'name': coll.name,
+            'path': coll.path
+        }
+
+    return {
+        'name': collection.name,
+        'path': collection.path,
+        'metadata': collection.metadata.items(),
+        'subcollections': map(format_subcoll, sub_collections),
+        'objects': map(format_subcoll, objects),
+    }
+    
 @view_config(route_name='file_tree')
 def file_tree(request):
     from os.path import splitext
