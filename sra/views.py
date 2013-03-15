@@ -10,6 +10,7 @@ from .models import (
     MyModel,
     DataStoreSession,
 )
+from datastore.DSFile import DSCollection
 
 #@view_config(route_name='home', renderer='templates/mytemplate.pt')
 #def my_view(request):
@@ -23,7 +24,7 @@ from .models import (
 def home(request):
     return {
         'base_url' : '123', 
-        'root': '/',
+        'root': request.registry.settings['irods.path'],
         'dir': 'hello',
         'year': '2013'
     }
@@ -49,6 +50,20 @@ def get_collection(request):
         raise HTTPBadRequest()
     path = request.GET['path']
     collection = DataStoreSession.get_collection(path)
+
+    return {
+        'name': collection.name,
+        'path': collection.path,
+        'metadata': collection.metadata.items(),
+    }
+
+@view_config(route_name='children', renderer='json')
+def get_children(request):
+    if not 'path' in request.GET:
+        raise HTTPBadRequest()
+    path = request.GET['path']
+
+    collection = DataStoreSession.get_collection(path)
     sub_collections = collection.get_subcollections()
     objects = collection.get_objects()
     print sub_collections
@@ -56,16 +71,11 @@ def get_collection(request):
     def format_subcoll(coll):
         return {
             'name': coll.name,
-            'path': coll.path
+            'path': coll.path,
+            'is_dir': isinstance(coll, DSCollection)
         }
 
-    return {
-        'name': collection.name,
-        'path': collection.path,
-        'metadata': collection.metadata.items(),
-        'subcollections': map(format_subcoll, sub_collections),
-        'objects': map(format_subcoll, objects),
-    }
+    return map(format_subcoll, sub_collections + objects)
     
 @view_config(route_name='file_tree')
 def file_tree(request):

@@ -37,10 +37,6 @@
             <h1><a href="/">Sequence DB</a></h1>
         </div>
         <div id="bd" class="row">
-            <div id="sidebar" class="span4">
-            </div>
-            <div id="main" class="span8">
-            </div>
         </div>
         <div id="footer">
             <p>

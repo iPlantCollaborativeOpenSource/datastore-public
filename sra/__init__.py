@@ -28,5 +28,6 @@ def main(global_config, **settings):
     config.add_route('file_tree', '/api/ls')
     config.add_route('download_file', '/download')
     config.add_route('file', '/api/file')
+    config.add_route('children', '/api/collection')
     config.scan()
     return config.make_wsgi_app()
