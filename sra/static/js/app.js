@@ -84,6 +84,7 @@ $(document).ready(function() {
     var BreadcrumbView = Backbone.View.extend({
         el: $("#breadcrumbs"),
         events: {
+            'click a': 'open_dir'
         },
         initialize: function() {
             Breadcrumbs.on('push', _.bind(this.push_dir, this));
@@ -99,10 +100,17 @@ $(document).ready(function() {
         push_dir: function(model) {
             this.nodes.push(model);
             $("<li>")
+                .data('model', model)
                 .append($('<a>').append(model.get('name')))
                 .appendTo(this.$list);
         },
         pop_dir: function() {
+            this.$list.children().last().remove();
+        },
+        open_dir: function(e) {
+            model = $(e.currentTarget).closest('li').data('model');
+            console.log(model);
+            Breadcrumbs.trigger('pop');
         }
     });
 
@@ -118,6 +126,7 @@ $(document).ready(function() {
 			//this.render();
             console.log('init data app');
             Breadcrumbs.on('push', _.bind(this.push_dir, this));
+            Breadcrumbs.on('pop', _.bind(this.pop_dir, this));
 		},
         push_dir: function(model) {
             console.log('pushdir data app');
@@ -134,6 +143,19 @@ $(document).ready(function() {
             this.$el.parent().animate({
                 scrollLeft: new_view.$el.position().left
             }, 'fast');
+        },
+        pop_dir: function() {
+            var self = this;
+            this.$el.parent().animate(
+                {scrollLeft: this.$el.children().last().prev().position().left}, 
+                'slow', 
+                function() {
+                    console.log('pop finished'); 
+                    self.$el.children().last().remove();
+                    var new_width = (self.$el.children().length) * 940;
+                    self.$el.width(new_width);
+                }
+            );
         },
 		render: function() {
             console.log('render data app');
