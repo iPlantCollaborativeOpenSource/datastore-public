@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>iPlant Sequence DB</title>
+    <title>iPlant Datastore</title>
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="static/favicon.ico" />
@@ -34,7 +34,7 @@
 <div class="content">
         <div id="header">
             <a href="/"><img src="static/imgs/logo.jpg" alt="iPlant Collaborative" width="252" height="67" /></a>
-            <h1><a href="/">Sequence DB</a></h1>
+            <h1><a href="/">Datastore</a></h1>
         </div>
         <div id="file-scroller">
             <div id="file-scroller-inner" class="clearfix">
