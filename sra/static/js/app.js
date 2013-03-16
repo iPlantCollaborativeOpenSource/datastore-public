@@ -84,13 +84,6 @@ $(document).ready(function() {
 	var DataApp = Backbone.View.extend({
 		el: $('#file-scroller-inner'),
 		events: {
-			'click a.filename': 'file',
-			'click #new-directory': 'newDirectory',
-			'click #upload-file': 'uploadFileDialogue',
-			'click #copy': 'copyNode',
-			'click #paste': 'pasteNode',
-			'click button#delete': 'deleteNode',
-			'click button#metadata': 'metadata'
 		},
 		initialize: function() {
 			//_.bindAll(this, 'render');
@@ -119,110 +112,8 @@ $(document).ready(function() {
         },
 		render: function() {
             console.log('render data app');
-			//this.baseTreeView = new NodeListView({collection: this.model.get('children')});
-			//this.$el.append(this.baseTreeView.render().el);
             return this;
 		},
-		file: function(e) {
-			this.selectedModel = Nodes.get($(e.currentTarget).attr('data-node'));
-			if (this.selectedModel.get('type') == 'dir') 
-				this.destinationDir = this.selectedModel;
-			else 
-				this.destinationDir = this.selectedModel.get('parent');
-			this.controls.setModel(this.selectedModel);
-		},
-		newDirectory: function(e) {
-			console.log(this.model, this.selectedModel);
-			console.log('create new directory in: ' + this.destinationDir.get('name'));	
-
-			var newDir = new Node();
-			var self = this;
-			newDir.save(
-				{
-					type: 'dir', 
-					name: 'New Directory', 
-					parent_path: this.destinationDir.get('path')
-				},
-				{
-					success: function() {
-						Nodes.add(newDir);
-						self.destinationDir.children.add(newDir);
-					}
-				}
-			);
-		},
-		uploadFileDialogue: function() {
-			modal = new Modal();	
-			modal.title = 'Upload Files';
-			modal.content = $('#UploadForm').html();
-			modal.render();
-			var self = this;
-			$('#fileupload').fileupload({
-				dataType: 'json',
-				url: '/trellis-data/index.php/irods/nodes',
-				formData: {
-					parent_path: this.destinationDir.get('path')
-				},
-				done: function (e, data) {
-					var file = data.result;
-					$('<li/>')
-						.text(file.name + ' (' + file.size + 'B)')
-						.appendTo($('#uploaded-files'));
-					var model = new Node(file);
-					self.destinationDir.children.add(model);
-					Nodes.add(model);
-				}
-			});
-		},
-		copyNode: function() {
-			this.clipboard = this.selectedModel;
-			$('#paste').removeAttr('disabled');
-			console.log('save ' + this.selectedModel.get('name') + ' to the clipboard');
-		},
-		pasteNode: function() {
-			console.log('put ' + this.clipboard.get('name') + ' into ' + this.destinationDir.get('name'));
-			var newFile = new Node();
-			var self = this;
-			newFile.save(
-				{
-					type: 'file',
-					name: this.clipboard.get('name'),
-					parent_path: this.destinationDir.get('path'),
-					copy_of: this.clipboard.id
-				},
-				{
-					success: function() {
-						Nodes.add(newFile);
-						self.destinationDir.children.add(newFile);
-					}
-				}
-			);
-		},
-		deleteNode: function() {
-			var self = this;
-			if (confirm('Delete node?')) {
-				this.selectedModel.destroy({
-					wait: true,
-					error: function(model, response) {
-						alert('File could not be deleted');
-					},
-					success: function(model, response) {
-						self.selectedModel = model.get('parent');
-						self.controls.setModel(self.selectedModel);
-					}
-				});
-			}
-		},
-		metadata: function() {
-			modal = new Modal();	
-			modal.title = 'Metadata';
-			modal.width = 800;
-			modal.render();
-
-			var metadataControl = new MetadataControl({model: this.selectedModel, collection: this.selectedModel.get('meta')});
-			modal.$el.append(metadataControl.render().$el);
-
-		}
 	});
 
 	Nodes = new NodeCollection();
