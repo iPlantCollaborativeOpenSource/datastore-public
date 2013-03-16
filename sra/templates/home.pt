@@ -36,7 +36,9 @@
             <a href="/"><img src="static/imgs/logo.jpg" alt="iPlant Collaborative" width="252" height="67" /></a>
             <h1><a href="/">Sequence DB</a></h1>
         </div>
-        <div id="bd" class="row">
+        <div id="file-scroller">
+            <div id="file-scroller-inner" class="clearfix">
+            </div>
         </div>
         <div id="footer">
             <p>

@@ -82,7 +82,7 @@ $(document).ready(function() {
     _.extend(Breadcrumbs, Backbone.Events);
 
 	var DataApp = Backbone.View.extend({
-		el: $('#bd'),
+		el: $('#file-scroller-inner'),
 		events: {
 			'click a.filename': 'file',
 			'click #new-directory': 'newDirectory',
@@ -104,8 +104,18 @@ $(document).ready(function() {
         push_dir: function(model) {
             console.log('pushdir data app');
             console.log(model, this);
-            new NodeListView({collection: model.get('children')}).render().$el.appendTo(this.$el);
+
+            var new_width = (this.$el.children().length + 1) * 940;
+            this.$el.width(new_width);
+
+            var new_view  = new NodeListView({collection: model.get('children')})
+            new_view.render().$el.appendTo(this.$el);
+
             model.get('children').fetch();
+            console.log(new_view.$el.position().left);
+            this.$el.parent().animate({
+                scrollLeft: new_view.$el.position().left
+            }, 'fast');
         },
 		render: function() {
             console.log('render data app');

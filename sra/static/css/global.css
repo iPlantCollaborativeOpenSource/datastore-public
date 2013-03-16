@@ -170,3 +170,17 @@ ul.jqueryFileTree li {
     display: block;
     margin-left: 6em;
 }
+
+#file-scroller {
+    overflow-y: hidden;
+}
+
+#file-scroller-inner {
+    position: relative;
+    overflow-y: hidden;
+}
+
+#file-scroller-inner > div {
+    width: 940px;
+    float: left;
+}
