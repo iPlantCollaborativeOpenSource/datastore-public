@@ -81,6 +81,31 @@ $(document).ready(function() {
     var Breadcrumbs = {};
     _.extend(Breadcrumbs, Backbone.Events);
 
+    var BreadcrumbView = Backbone.View.extend({
+        el: $("#breadcrumbs"),
+        events: {
+        },
+        initialize: function() {
+            Breadcrumbs.on('push', _.bind(this.push_dir, this));
+            Breadcrumbs.on('pop', _.bind(this.pop_dir, this));
+            this.nodes = []
+            this.$list = null;
+        },
+        render: function() {
+            this.$list = $("<ul>", {'class': 'clearfix'});
+            this.$el.append(this.$list);
+            return this;
+        },
+        push_dir: function(model) {
+            this.nodes.push(model);
+            $("<li>")
+                .append($('<a>').append(model.get('name')))
+                .appendTo(this.$list);
+        },
+        pop_dir: function() {
+        }
+    });
+
 	var DataApp = Backbone.View.extend({
 		el: $('#file-scroller-inner'),
 		events: {
@@ -125,8 +150,8 @@ $(document).ready(function() {
 		index: function() {
 			this.baseNode = new Node({path: root});
 			Nodes.add(this.baseNode);
-			this.dataApp = new DataApp();
-            this.dataApp.render();
+			this.dataApp = new DataApp().render();
+            this.breadcrumb_view = new BreadcrumbView().render();
 			var self = this;
 			this.baseNode.fetch({
 				success: function() {

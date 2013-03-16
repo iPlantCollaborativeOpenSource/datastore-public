@@ -184,3 +184,16 @@ ul.jqueryFileTree li {
     width: 940px;
     float: left;
 }
+
+#breadcrumbs ul {
+    list-style: none;
+}
+#breadcrumbs li {
+    float: left;
+}
+#breadcrumbs li::after {
+    content: '/';
+}
+#breadcrumbs li:last-child::after {
+    content: '';
+}
