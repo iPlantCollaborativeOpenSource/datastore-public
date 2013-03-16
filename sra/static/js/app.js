@@ -89,7 +89,7 @@ $(document).ready(function() {
         initialize: function() {
             Breadcrumbs.on('push', _.bind(this.push_dir, this));
             Breadcrumbs.on('pop', _.bind(this.pop_dir, this));
-            this.nodes = []
+            //this.nodes = []
             this.$list = null;
         },
         render: function() {
@@ -98,7 +98,7 @@ $(document).ready(function() {
             return this;
         },
         push_dir: function(model) {
-            this.nodes.push(model);
+            //this.nodes.push(model);
             $("<li>")
                 .data('model', model)
                 .append($('<a>').append(model.get('name')))
@@ -108,9 +108,12 @@ $(document).ready(function() {
             this.$list.children().last().remove();
         },
         open_dir: function(e) {
-            model = $(e.currentTarget).closest('li').data('model');
-            console.log(model);
-            Breadcrumbs.trigger('pop');
+            li = $(e.currentTarget).closest('li');
+            var index = this.$list.children().index(li);
+            var len = this.$list.children().length;
+            var pops = len - index - 1;
+            for (i = 0; i < pops; i++)
+                Breadcrumbs.trigger('pop');
         }
     });
 
