@@ -126,7 +126,9 @@ $(document).ready(function() {
 			//this.render();
             console.log('init data app');
             Breadcrumbs.on('push', _.bind(this.push_dir, this));
-            Breadcrumbs.on('pop', _.bind(this.pop_dir, this));
+            Breadcrumbs.on('pop', _.bind(this.add_to_pop_queue, this));
+            this.pop_queue = 0;
+            this.popping = false;
 		},
         push_dir: function(model) {
             console.log('pushdir data app');
@@ -144,7 +146,13 @@ $(document).ready(function() {
                 scrollLeft: new_view.$el.position().left
             }, 'fast');
         },
+        add_to_pop_queue: function() {
+            this.pop_queue++; 
+            if (!this.popping)
+                this.pop_dir();
+        },
         pop_dir: function() {
+            this.popping = true;
             var self = this;
             this.$el.parent().animate(
                 {scrollLeft: this.$el.children().last().prev().position().left}, 
@@ -154,6 +162,11 @@ $(document).ready(function() {
                     self.$el.children().last().remove();
                     var new_width = (self.$el.children().length) * 940;
                     self.$el.width(new_width);
+                    self.pop_queue--;
+                    if (self.pop_queue > 0)
+                       self.pop_dir(); 
+                    else
+                        self.popping = false;
                 }
             );
         },
