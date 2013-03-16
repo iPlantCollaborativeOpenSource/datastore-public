@@ -190,9 +190,13 @@ ul.jqueryFileTree li {
 }
 #breadcrumbs li {
     float: left;
+    padding-right: 7px;
+}
+#breadcrumbs li a {
+    padding-right: 7px
 }
 #breadcrumbs li::after {
-    content: '/';
+    content: '\00BB';
 }
 #breadcrumbs li:last-child::after {
     content: '';
