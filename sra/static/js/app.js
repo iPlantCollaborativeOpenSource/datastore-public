@@ -47,7 +47,8 @@ $(document).ready(function() {
     var NodeListView = Backbone.View.extend({
         tagName: 'div',
         events: {
-            'click li.dir a': 'open_dir'
+            'click li.dir a': 'open_dir',
+            'click li.file a': 'download_file'
         },
         initialize: function(options) {
             this.collection.bind('reset', _.bind(this.append_children, this));
@@ -75,6 +76,10 @@ $(document).ready(function() {
             node = $(e.currentTarget).closest('li').data('model'); 
             console.log(node);
             Breadcrumbs.trigger('push', node);
+        },
+        download_file: function(e) {
+            node = $(e.currentTarget).closest('li').data('model'); 
+            window.location.replace('/download?path=' + node.get('path'));
         }
     });
 
