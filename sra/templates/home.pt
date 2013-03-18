@@ -13,6 +13,7 @@
     <script src="static/js/lib/underscore-min.js"></script>
     <script src="static/js/lib/backbone-min.js"></script>
     <script src="static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="static/js/lib/require.min.js"></script>
     <!-- jqueryFileTree -->
     <link type="text/css" rel="stylesheet" href="static/jqueryFileTree/jqueryFileTree.css" />
     <script src="static/jqueryFileTree/jqueryFileTree.js"></script>

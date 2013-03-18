@@ -66,16 +66,6 @@ Datastore.Views.NodeListView = Backbone.View.extend({
     }
 });
 
-Datastore.Views.Contexts['sra'] = Backbone.View.extend({
-    tagName: 'div',    
-    initialize: function() {
-    },
-    render: function() {
-        this.$el.append('yoyoyo');
-        return this;
-    }
-});
-
 Datastore.Events.Breadcrumbs = _.extend({}, Backbone.Events);
 
 Datastore.Views.BreadcrumbView = Backbone.View.extend({
@@ -138,16 +128,29 @@ Datastore.Views.DataApp = Backbone.View.extend({
                     return meta[0] == 'template';
                 });
                 console.log(template);
-                var view = template ? Datastore.Views.Contexts[template[1]] : Datastore.Views.NodeListView;
-                console.log(view);
-                var new_view  = new view({model: model, collection: model.get('children')})
-                new_view.render().$el.appendTo(self.$el);
 
-                model.get('children').fetch();
-                console.log(new_view.$el.position().left);
-                self.$el.parent().animate({
-                    scrollLeft: new_view.$el.position().left
-                }, 'fast');
+                var append_view = function(view) {
+                    console.log(view);
+                    var new_view  = new view({model: model, collection: model.get('children')})
+                    new_view.render().$el.appendTo(self.$el);
+
+                    model.get('children').fetch();
+                    console.log(new_view.$el.position().left);
+                    self.$el.parent().animate({
+                        scrollLeft: new_view.$el.position().left
+                    }, 'fast');
+                };
+
+                var view;
+                if (template) {
+                    require(['/static/js/contexts/' + template[1] + '.js'], function() {
+                        view = Datastore.Views.Contexts[template[1]];   
+                        append_view(view);
+                    });
+                } else {
+                    view = Datastore.Views.NodeListView;
+                    append_view(view);
+                }
             }
         });
     },
