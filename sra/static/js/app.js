@@ -1,4 +1,5 @@
 $(document).ready(function() {
+
 	var Node = Backbone.Model.extend({  
         urlRoot: '/api/file',
 		url: function() {
@@ -11,19 +12,6 @@ $(document).ready(function() {
             r.children.url = '/api/collection?path=' + encodeURIComponent(obj.path);
             return _.extend(obj, r);
         },
-            /*
-		initialize: function(){  
-			//this.children = new NodeCollection();
-			//this.children.url = '/trellis-data/index.php/irods/node_collections/' + this.id;
-			//this.set('download_url', '/trellis-data/index.php/irods/download/' + this.id);
-			//console.log(this.id);
-			//this.set('meta', new MetaCollection(this.get('meta')));
-			var self = this;
-			_.each(this.get('meta').models, function(model) {
-				model.node = self;
-			});
-		},  
-        */
 		defaults: { 
 			parent:	null
 		},
@@ -83,8 +71,17 @@ $(document).ready(function() {
         }
     });
 
-    var Breadcrumbs = {};
-    _.extend(Breadcrumbs, Backbone.Events);
+    var SRAView = Backbone.View.extend({
+        tagName: 'div',    
+        initialize: function() {
+        },
+        render: function() {
+            this.$el.append('yoyoyo');
+            return this;
+        }
+    });
+
+    var Breadcrumbs = _.extend({}, Backbone.Events);
 
     var BreadcrumbView = Backbone.View.extend({
         el: $("#breadcrumbs"),
@@ -140,19 +137,32 @@ $(document).ready(function() {
 		},
         push_dir: function(model) {
             console.log('pushdir data app');
-            console.log(model, this);
+            console.log(model);
 
-            var new_width = (this.$el.children().length + 1) * 940;
-            this.$el.width(new_width);
+            var self = this;
+            model.fetch({
+                success: function() {
+                    var new_width = (self.$el.children().length + 1) * 940;
+                    self.$el.width(new_width);
 
-            var new_view  = new NodeListView({collection: model.get('children')})
-            new_view.render().$el.appendTo(this.$el);
+                    console.log(model.get('metadata'));
+                    var template = _.find(model.get('metadata'), function(meta) {
+                        return meta[0] == 'template';
+                    });
+                    console.log(template);
+                    console.log(templateViews);
+                    var view = template ? templateViews[template[1]] : NodeListView;
+                    console.log(view);
+                    var new_view  = new view({model: model, collection: model.get('children')})
+                    new_view.render().$el.appendTo(self.$el);
 
-            model.get('children').fetch();
-            console.log(new_view.$el.position().left);
-            this.$el.parent().animate({
-                scrollLeft: new_view.$el.position().left
-            }, 'fast');
+                    model.get('children').fetch();
+                    console.log(new_view.$el.position().left);
+                    self.$el.parent().animate({
+                        scrollLeft: new_view.$el.position().left
+                    }, 'fast');
+                }
+            });
         },
         add_to_pop_queue: function() {
             this.pop_queue++; 
@@ -191,19 +201,19 @@ $(document).ready(function() {
 			"": "index"
 		},
 		index: function() {
-			this.baseNode = new Node({path: root});
+			this.baseNode = new Node({path: root, name: root_name});
 			Nodes.add(this.baseNode);
 			this.dataApp = new DataApp().render();
             this.breadcrumb_view = new BreadcrumbView().render();
 			var self = this;
-			this.baseNode.fetch({
-				success: function() {
-                    Breadcrumbs.trigger('push', self.baseNode);
-				}
-			});
+            Breadcrumbs.trigger('push', self.baseNode);
 		}
 	});
 	
+    var templateViews = {
+        'sra': SRAView
+    };
+
 	var app = new App();
 	Backbone.history.start();
 

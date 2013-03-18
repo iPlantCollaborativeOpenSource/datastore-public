@@ -11,6 +11,7 @@ from .models import (
     DataStoreSession,
 )
 from datastore.DSFile import DSCollection
+from os.path import basename
 
 #@view_config(route_name='home', renderer='templates/mytemplate.pt')
 #def my_view(request):
@@ -25,6 +26,7 @@ def home(request):
     return {
         'base_url' : '123', 
         'root': request.registry.settings['irods.path'],
+        'root_name': basename(request.registry.settings['irods.path']),
         'dir': 'hello',
         'year': '2013'
     }

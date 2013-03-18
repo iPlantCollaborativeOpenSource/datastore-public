@@ -22,6 +22,7 @@
         return "${base_url}" + path;
         }
         var root = "${root}";
+        var root_name = "${root_name}";
         var dir = "${dir}";
     </script>
     <script src="static/js/app.js"></script>
