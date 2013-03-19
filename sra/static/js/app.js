@@ -88,7 +88,7 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
         //this.nodes.push(model);
         $("<li>")
             .data('model', model)
-            .append($('<a>').append(model.get('name')))
+            .append($('<a>', {href: '#'}).append(model.get('name')))
             .appendTo(this.$list);
     },
     pop_dir: function() {
