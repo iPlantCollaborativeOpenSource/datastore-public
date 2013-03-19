@@ -1,6 +1,7 @@
 from irods import *
 from os.path import basename
 from DSMetadata import DSMetadata
+from exception import FileDoesNotExist
 
 class DSFile(object):
     def __init__(self, conn, path):
@@ -17,6 +18,8 @@ class DSDataObject(DSFile):
     def __init__(self, conn, path):
         DSFile.__init__(self, conn, path)
         self._file = iRodsOpen(conn, path, 'r')
+        if not self._file:
+            raise FileDoesNotExist("File does not exist") 
         self.name = self._file.getDataName()
         self.path = self._file.getPath() + "/" + self.name
 
