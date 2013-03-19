@@ -1,8 +1,9 @@
 Datastore = {
     Models: {},
     Collections: {},
-    Views: {Contexts: {}},
-    Events: {}
+    Views: {},
+    Events: {},
+    Contexts: {}
 };
 
 Datastore.Models.Node = Backbone.Model.extend({  
@@ -144,7 +145,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 var view;
                 if (template) {
                     require(['/static/js/contexts/' + template[1] + '.js'], function() {
-                        view = Datastore.Views.Contexts[template[1]];   
+                        view = Datastore.Contexts[template[1]].Views.MainView;   
                         append_view(view);
                     });
                 } else {

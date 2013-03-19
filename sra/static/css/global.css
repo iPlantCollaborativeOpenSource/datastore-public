@@ -172,12 +172,12 @@ ul.jqueryFileTree li {
 }
 
 #file-scroller {
-    overflow-y: hidden;
+    overflow: hidden;
 }
 
 #file-scroller-inner {
     position: relative;
-    overflow-y: hidden;
+    overflow: hidden;
 }
 
 #file-scroller-inner > div {

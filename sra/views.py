@@ -43,7 +43,7 @@ def show_studies(request):
             'description': study.metadata.getone('description')[0] if 'description' in study.metadata else None,
         }
 
-    collection = DataStoreSession.get_collection(request.registry.settings['irods.path'])
+    collection = DataStoreSession.get_collection(request.registry.settings['irods.path'] + '/sra')
     return map(format_study, collection.get_subcollections())
 
 @view_config(route_name='file', renderer='json')
