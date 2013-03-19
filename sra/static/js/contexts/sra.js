@@ -5,7 +5,24 @@ Datastore.Contexts['sra'] = {
     Events: {},
 };
 
-Datastore.Contexts['sra'].Models.Study = Backbone.Model.extend();
+Datastore.Contexts['sra'].Models.Study = Backbone.Model.extend({
+    url: function() {
+        return '/api/file?path=' + this.get('path');
+    },
+    parse: function(data) {
+        metadata = {};
+        _.each(data.metadata, function(arr) {
+            metadata[arr[0]] = arr[1];
+        });
+        return {
+            id: data.name,
+            path: data.path,
+            'abstract': metadata['abstract'],
+            title: metadata['title'],
+            description: metadata['description']
+        };
+    }
+});
 
 Datastore.Contexts['sra'].Collections.StudyCollection = Backbone.Collection.extend({
     model: Datastore.Contexts['sra'].Models.Study
@@ -31,15 +48,8 @@ Datastore.Contexts['sra'].Views.StudyList = Backbone.View.extend({
         var $list = $('<ul>', {id: 'study-list'});
         console.log(this.collection);
         this.collection.each(function(model) {
-            $('<li>')
-                .append(
-                    $('<a>', {href: '#study/' + model.id})
-                        .append($('<span>', {'class': 'study-id'}).append(model.id))
-                        .append($('<span>', {'class': 'study-title'}).append(model.get('title') || '&nbsp;'))
-                )
-                .data('model', model)
-                .attr('data-model_id', model.id)
-                .appendTo($list); 
+            new Datastore.Contexts['sra'].Views.StudyListItem({model: model}).render().$el.appendTo($list);
+            model.fetch();
         });
         this.$el.append($list);
     },
@@ -52,6 +62,25 @@ Datastore.Contexts['sra'].Views.StudyList = Backbone.View.extend({
         var $children = this.$el.find('ul').children().removeClass('active');
         if (model)
             $children.filter('li[data-model_id="' + model.id + '"]').addClass('active');
+    }
+});
+
+Datastore.Contexts['sra'].Views.StudyListItem = Backbone.View.extend({
+    tagName: 'li',
+    initialize: function() {
+        this.model.bind('sync', this.render, this);
+    },
+    render: function() {
+        this.$el
+            .empty()
+            .append(
+                $('<a>', {href: '#'/*'#study/' + model.id*/})
+                    .append($('<span>', {'class': 'study-id'}).append(this.model.id))
+                    .append($('<span>', {'class': 'study-title'}).append(this.model.get('title') || '&nbsp;'))
+            )
+            .data('model', this.model)
+            .attr('data-model_id', this.model.id);
+        return this;
     }
 });
 
