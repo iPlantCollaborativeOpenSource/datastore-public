@@ -1,6 +1,6 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound, HTTPNotImplemented
 import logging
 
 from sqlalchemy.exc import DBAPIError
@@ -11,7 +11,8 @@ from .models import (
     DataStoreSession,
 )
 from datastore.DSFile import DSCollection
-from os.path import basename
+from datastore.exception import FileDoesNotExist
+from os.path import basename, splitext
 
 #@view_config(route_name='home', renderer='templates/mytemplate.pt')
 #def my_view(request):
@@ -104,10 +105,33 @@ def download_file(request):
     if not 'path' in request.GET:
         raise HTTPBadRequest()
     path = request.GET['path']
-    file = DataStoreSession.get_file(path)
+    try:
+        file = DataStoreSession.get_file(path)
+    except FileDoesNotExist:
+        raise HTTPNotFound()
     return Response(
         content_disposition='attachment; filename="%s"' % file.name,
         content_type='application/octet-stream', 
+        app_iter=file
+    )
+
+@view_config(route_name='serve_file')
+def serve_file(request):
+    from .content_types import content_types
+    path = request.matchdict['path']
+    path = request.registry.settings['irods.path'] + "/" +  "/".join(path)
+    try:
+        file = DataStoreSession.get_file(path)
+    except FileDoesNotExist:
+        raise HTTPNotFound()
+
+    ext = splitext(file.name)[1][1:]
+
+    if ext not in content_types:
+        raise HTTPNotImplemented()
+    
+    return Response(
+        content_type=content_types[ext],
         app_iter=file
     )
 
