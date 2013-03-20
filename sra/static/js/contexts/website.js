@@ -10,7 +10,7 @@ Datastore.Contexts['website'].Views.MainView = Backbone.View.extend({
     render: function() {
         $("<iframe>", {
             src: "/serve" + this.model.get('root_relative_path') + "/index.html",
-            width: 940,
+            width: 936,
             height: 600
         }).appendTo(this.$el);
         return this;
