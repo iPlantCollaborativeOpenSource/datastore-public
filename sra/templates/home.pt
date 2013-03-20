@@ -31,44 +31,51 @@
 
 <body>
 
-<div class="container">
+	<header class="row-fluid" id="header_container">
+		<div id="header">
+			<div class="span12" id="logo_container">
+				<div>
+					<a href="/"><img src="static/img/mini_logo.png" alt="iPlant Datastore"></a>
+					<em>iPlant Datastore</em>
+				</div>
+			</div>
+		</div>
+	</header>
 
-<div class="content">
-        <div id="header">
-            <a href="/"><img src="static/img/logo.jpg" alt="iPlant Collaborative" width="252" height="67" /></a>
-            <h1><a href="/">Datastore</a></h1>
-        </div>
-        <div id="breadcrumbs">
-        </div>
-        <div id="file-scroller">
-            <div id="file-scroller-inner" class="clearfix">
-            </div>
-        </div>
-        <div id="footer">
-            <p>
-                <strong>iPlant Collaborative ${year}</strong>
-                <br />
-                <a href="http://www.iplantcollaborative.org" target="_blank">iPlant Collaborative's Website</a> &nbsp; &nbsp; &nbsp; <a href="http://preview.iplantcollaborative.org/de" target="_blank">Discovery Environment</a> &nbsp; &nbsp; &nbsp; <a href="http://atmo-beta.iplantcollaborative.org" target="_blank">Atmosphere</a>
-                <br />
-                Silk Icons by <a href="http://www.famfamfam.com/">Mark James</a>
-            </p>
-        </div>
-</div>
+	<div class="container">
 
-</div> <!-- /container -->
+		<div class="content">
+			<div id="breadcrumbs">
+			</div>
+			<div id="file-scroller">
+			    <div id="file-scroller-inner" class="clearfix">
+			    </div>
+			</div>
+			<div id="footer">
+			    <p>
+				<strong>iPlant Collaborative ${year}</strong>
+				<br />
+				<a href="http://www.iplantcollaborative.org" target="_blank">iPlant Collaborative's Website</a> &nbsp; &nbsp; &nbsp; <a href="http://preview.iplantcollaborative.org/de" target="_blank">Discovery Environment</a> &nbsp; &nbsp; &nbsp; <a href="http://atmo-beta.iplantcollaborative.org" target="_blank">Atmosphere</a>
+				<br />
+				Silk Icons by <a href="http://www.famfamfam.com/">Mark James</a>
+			    </p>
+			</div>
+		</div>
 
-<div class="modal hide fade" id="file-modal">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Modal header</h3>
-  </div>
-  <div class="modal-body">
-    <p>One fine body…</p>
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn btn-primary download-file">Download</a>
-  </div>
-</div>
+	</div> <!-- /container -->
+
+	<div class="modal hide fade" id="file-modal">
+	  <div class="modal-header">
+	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	    <h3>Modal header</h3>
+	  </div>
+	  <div class="modal-body">
+	    <p>One fine body…</p>
+	  </div>
+	  <div class="modal-footer">
+	    <a href="#" class="btn btn-primary download-file">Download</a>
+	  </div>
+	</div>
 
 </body>
 </html>
