@@ -6,6 +6,10 @@ Datastore = {
     Contexts: {}
 };
 
+function urlencode_path(path) {
+    return _.map(path.split('/'), encodeURIComponent).join('/');
+}
+
 Datastore.Models.Node = Backbone.Model.extend({  
     urlRoot: '/api/file',
     url: function() {
@@ -17,6 +21,10 @@ Datastore.Models.Node = Backbone.Model.extend({
         r.children = new Datastore.Collections.NodeCollection();
         r.children.url = '/api/collection?path=' + encodeURIComponent(obj.path);
         r.root_relative_path = obj.path.replace(root, '');
+        console.log(obj.path);
+        console.log(r.is_dir);
+        if (obj.is_dir != undefined && obj.is_dir == false)
+            r.download_url = '/download' + r.root_relative_path
         return _.extend(obj, r);
     },
     defaults: { 
@@ -64,7 +72,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
     },
     download_file: function(e) {
         node = $(e.currentTarget).closest('li').data('model'); 
-        window.location.replace('/download?path=' + node.get('path'));
+        window.location.replace(node.get('download_url'));
     }
 });
 

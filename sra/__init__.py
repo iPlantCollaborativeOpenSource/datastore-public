@@ -26,7 +26,7 @@ def main(global_config, **settings):
     config.add_route('studies', '/api/study')
     config.add_route('study', '/api/study/{study_id}')
     config.add_route('file_tree', '/api/ls')
-    config.add_route('download_file', '/download')
+    config.add_route('download_file', '/download/*path')
     config.add_route('serve_file', '/serve/*path')
     config.add_route('file', '/api/file')
     config.add_route('children', '/api/collection')

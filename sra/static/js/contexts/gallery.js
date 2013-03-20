@@ -48,10 +48,6 @@ Datastore.Contexts['gallery'].Views.Thumbnail = Backbone.View.extend({
     }
 });
 
-function urlencode_path(path) {
-    return _.map(path.split('/'), encodeURIComponent).join('/');
-}
-
 function get_thumb(path) {
     arr = path.split("/");
     name = arr.pop();
@@ -81,7 +77,7 @@ Datastore.Contexts['gallery'].Views.MainView = Backbone.View.extend({
                     path: model.get('path'),
                     src: "/serve" + urlencode_path(model.get('root_relative_path')),
                     thumbnail_src: "/serve" + urlencode_path(get_thumb(model.get('root_relative_path'))),
-                    download_url: "/download?path=" + urlencode_path(model.get('path'))
+                    download_url: model.get('download_url')
                 });
             });
             photo_collection.reset(models);

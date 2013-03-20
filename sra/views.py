@@ -102,9 +102,8 @@ def file_tree(request):
 
 @view_config(route_name='download_file')
 def download_file(request):
-    if not 'path' in request.GET:
-        raise HTTPBadRequest()
-    path = request.GET['path']
+    path = request.matchdict['path']
+    path = request.registry.settings['irods.path'] + "/" +  "/".join(path)
     try:
         file = DataStoreSession.get_file(path)
     except FileDoesNotExist:
