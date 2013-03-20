@@ -9,7 +9,7 @@ body {
 }
 .container {
 	width: 940px;
-	margin: 0 auto;
+	margin: 80px auto 120px;
 }
 .container > .content {
 	background-color: white;
@@ -113,10 +113,13 @@ ul.jqueryFileTree li {
 
 #header_container {
 	background-color: #0098aa;
-	margin-bottom: 40px;
+	/*margin-bottom: 40px;*/
 	height: 39px;
 	box-shadow: 0 2px 10px #333;
 	background: url(../img/header_bg.png) no-repeat, url(../img/header_bg_bg.png);
+    position: fixed;
+    top: 0;
+    z-index: 1;
 }
 #header {
 	margin: 0 auto;
@@ -158,9 +161,14 @@ ul.jqueryFileTree li {
  */
 #footer {
 	border-top: #CCC solid 1px;
-	padding-top: 10px;
+	padding-top: .75em;
 	text-align: center;
 	font-size: 14px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1;
+    background: #fff;
 }
 #footer a:link, #footer a:visited, #footer a:active {
 	color: #0298AA;

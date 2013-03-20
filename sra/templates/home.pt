@@ -51,18 +51,19 @@
 			    <div id="file-scroller-inner" class="clearfix">
 			    </div>
 			</div>
-			<div id="footer">
-			    <p>
-				<strong>iPlant Collaborative ${year}</strong>
-				<br />
-				<a href="http://www.iplantcollaborative.org" target="_blank">iPlant Collaborative's Website</a> &nbsp; &nbsp; &nbsp; <a href="http://preview.iplantcollaborative.org/de" target="_blank">Discovery Environment</a> &nbsp; &nbsp; &nbsp; <a href="http://atmo-beta.iplantcollaborative.org" target="_blank">Atmosphere</a>
-				<br />
-				Silk Icons by <a href="http://www.famfamfam.com/">Mark James</a>
-			    </p>
-			</div>
 		</div>
 
 	</div> <!-- /container -->
+
+    <div id="footer">
+        <p>
+        <strong>iPlant Collaborative ${year}</strong>
+        <br />
+        <a href="http://www.iplantcollaborative.org" target="_blank">iPlant Collaborative's Website</a> &nbsp; &nbsp; &nbsp; <a href="http://preview.iplantcollaborative.org/de" target="_blank">Discovery Environment</a> &nbsp; &nbsp; &nbsp; <a href="http://atmo-beta.iplantcollaborative.org" target="_blank">Atmosphere</a>
+        <br />
+        Silk Icons by <a href="http://www.famfamfam.com/">Mark James</a>
+        </p>
+    </div>
 
 	<div class="modal hide fade" id="file-modal">
 	  <div class="modal-header">
