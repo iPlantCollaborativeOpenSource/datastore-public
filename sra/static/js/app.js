@@ -16,6 +16,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         r = {}
         r.children = new Datastore.Collections.NodeCollection();
         r.children.url = '/api/collection?path=' + encodeURIComponent(obj.path);
+        r.root_relative_path = obj.path.replace(root, '');
         return _.extend(obj, r);
     },
     defaults: { 
