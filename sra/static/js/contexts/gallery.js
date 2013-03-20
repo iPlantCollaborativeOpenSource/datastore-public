@@ -35,18 +35,30 @@ Datastore.Contexts['gallery'].Views.Thumbnail = Backbone.View.extend({
     render: function() {
         $thumb = $("<div>", {'class': 'thumbnail'})
             .append($("<img>", {
-                'data-src': this.model.get('src'),
-                src: 'test.jpg'
+                src: this.model.get('thumbnail_src')
             }))
             .append(
                 $("<div>", {'class': 'caption'})
-                    .append($("<h3>").append('title'))
-                    .append($("<p>").append('caption'))
+                    .append($("<h3>").append(this.model.get('name')))
+                    //.append($("<p>").append('caption'))
+                    .append($("<p>").append($("<a>", {href: this.model.get('download_url'), 'class': 'btn btn-primary'}).append('Download')))
             )
             .appendTo(this.$el);
         return this;
     }
 });
+
+function urlencode_path(path) {
+    return _.map(path.split('/'), encodeURIComponent).join('/');
+}
+
+function get_thumb(path) {
+    arr = path.split("/");
+    name = arr.pop();
+    arr.push(".thumbnails")
+    arr.push(name);
+    return arr.join("/");
+}
 
 Datastore.Contexts['gallery'].Views.MainView = Backbone.View.extend({
     initialize: function() {
@@ -63,10 +75,13 @@ Datastore.Contexts['gallery'].Views.MainView = Backbone.View.extend({
 
         var self = this;
         this.collection.bind('reset', function() {
-            var models = _.map(self.collection.models, function(model) {
+            var models = _.map(self.collection.models.filter(function(model) {return model.get('name') != ".thumbnails"}), function(model) {
                 return new Datastore.Contexts['gallery'].Models.Photo({
                     name: model.get('name'),
-                    path: model.get('path')
+                    path: model.get('path'),
+                    src: "/serve" + urlencode_path(model.get('root_relative_path')),
+                    thumbnail_src: "/serve" + urlencode_path(get_thumb(model.get('root_relative_path'))),
+                    download_url: "/download?path=" + urlencode_path(model.get('path'))
                 });
             });
             photo_collection.reset(models);
