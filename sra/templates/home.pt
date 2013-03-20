@@ -33,7 +33,7 @@
 
 	<header class="row-fluid" id="header_container">
 		<div id="header">
-			<div class="span12" id="logo_container">
+			<div id="logo_container">
 				<div>
 					<a href="/"><img src="static/img/mini_logo.png" alt="iPlant Datastore"></a>
 					<em>iPlant Datastore</em>

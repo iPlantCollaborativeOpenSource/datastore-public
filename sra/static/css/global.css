@@ -123,6 +123,7 @@ ul.jqueryFileTree li {
 }
 #header {
 	margin: 0 auto;
+    width: 980px;
 }
 #header a {
 	cursor: pointer;
