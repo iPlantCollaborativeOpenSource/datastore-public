@@ -143,7 +143,7 @@ ul.jqueryFileTree li {
 	height: 28px;
 	overflow: hidden;
 }
-#logo_container em {
+#logo_container #site-title {
 	color: #EEE;
 	margin-left: 10px;
 	text-align: right;

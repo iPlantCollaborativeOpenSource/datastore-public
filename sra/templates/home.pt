@@ -36,7 +36,7 @@
 			<div id="logo_container">
 				<div>
 					<a href="/"><img src="static/img/mini_logo.png" alt="iPlant Datastore"></a>
-					<em>iPlant Datastore</em>
+					<a id="site-title" href="/">iPlant Datastore</a>
 				</div>
 			</div>
 		</div>
