@@ -1,8 +1,8 @@
 sra README
 ==================
 
-Installation
-------------
+Environment Configuration (CentOS 5)
+-----------------------
 
 ### Python
     yum install python26 python26-devel
@@ -26,6 +26,21 @@ Make sure to create your virtualenv as a non-root user
     cd ~/env
     virtualenv-2.6 --no-site-packages sra
     . sra/bin/activate
+
+Environment Configuration (Ubuntu 12.04)
+---------------------------
+
+### Packages
+    sudo apt-get install python-dev python-pip python-virtualenv
+
+### Virtualenv
+    mkdir ~/env
+    cd ~/env
+    virtualenv --no-site-packages sra
+    . sra/bin/activate
+
+Installation
+------------
 
 ### pycommands
     pip install git+git://github.com/cjlarose/pycommands.git
