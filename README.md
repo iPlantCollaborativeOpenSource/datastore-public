@@ -21,6 +21,7 @@ Environment Configuration (CentOS 5)
 
 ### Virtualenv
 Make sure to create your virtualenv as a non-root user
+
     pip-2.6 install virtualenv
     mkdir ~/env
     cd ~/env
@@ -47,6 +48,7 @@ Installation
 
 ### SRA
 Clone as a non-root user
+
     cd ~
     git clone git@github.com:cjlarose/sra.git
     sudo mv sra /opt
