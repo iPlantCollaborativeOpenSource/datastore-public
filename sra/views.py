@@ -57,12 +57,20 @@ def get_collection(request):
         raise HTTPBadRequest()
     path = request.GET['path']
     logging.debug(path)
-    collection = DataStoreSession.get_collection(str(path))
+
+    try:
+        obj = DataStoreSession.get_collection(str(path))
+    except CollectionDoesNotExist:
+        try: 
+            obj = DataStoreSession.get_data_object(str(path))
+        except DataObjectDoesNotExist:
+            raise HTTPNotFound()
 
     return {
-        'name': collection.name,
-        'path': collection.path,
-        'metadata': [m.__dict__ for m in collection.metadata.items()],
+        'name': obj.name,
+        'path': obj.path,
+        'metadata': [m.__dict__ for m in obj.metadata.items()],
+        'is_dir': isinstance(obj, iRODSCollection),
     }
 
 @view_config(route_name='children', renderer='json')

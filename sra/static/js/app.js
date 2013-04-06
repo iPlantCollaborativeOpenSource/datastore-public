@@ -18,8 +18,10 @@ Datastore.Models.Node = Backbone.Model.extend({
     },
     parse: function(obj) {
         r = {}
-        r.children = new Datastore.Collections.NodeCollection();
-        r.children.url = '/api/collection?path=' + encodeURIComponent(obj.path);
+        if (obj.is_dir) {
+            r.children = new Datastore.Collections.NodeCollection();
+            r.children.url = '/api/collection?path=' + encodeURIComponent(obj.path);
+        }
         //r.root_relative_path = obj.path.replace(root, '');
         console.log(obj.path);
         console.log(r.is_dir);
@@ -40,8 +42,8 @@ Datastore.Collections.NodeCollection = Backbone.Collection.extend({
 Datastore.Views.NodeListView = Backbone.View.extend({
     tagName: 'div',
     events: {
-        'click li.dir a': 'open_dir',
-        'click li.file a': 'download_file'
+        'click li.dir a': 'open_file',
+        'click li.file a': 'open_file'
     },
     initialize: function(options) {
         this.collection.bind('reset', _.bind(this.append_children, this));
@@ -65,14 +67,34 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         this.$el.append($list);
         return this;
     },
-    open_dir: function(e) {
+    open_file: function(e) {
         node = $(e.currentTarget).closest('li').data('model'); 
         console.log(node);
         Datastore.Events.Breadcrumbs.trigger('push', node);
-    },
-    download_file: function(e) {
-        node = $(e.currentTarget).closest('li').data('model'); 
-        window.location.replace(node.get('download_url'));
+    }
+});
+
+Datastore.Views.FileView = Backbone.View.extend({
+    tagName: 'div',
+    events: {},
+    initialize: function(options) {
+    }, 
+    render: function() {
+        this.$el
+        .append(
+            $('<h2>').append(this.model.get('name'))
+        )
+        .append(
+            $('<a>', {
+                'class': 'btn btn-primary', 
+                'type': 'button',
+                'href': this.model.get('download_url')
+            })
+                .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
+                .append(' ')
+                .append("Download " + this.model.get('name'))
+        );
+        return this;
     }
 });
 
@@ -141,10 +163,14 @@ Datastore.Views.DataApp = Backbone.View.extend({
 
                 var append_view = function(view) {
                     console.log(view);
-                    var new_view  = new view({model: model, collection: model.get('children')})
-                    new_view.render().$el.appendTo(self.$el);
-
-                    model.get('children').fetch();
+                    if (model.get('is_dir')) {
+                        var new_view  = new view({model: model, collection: model.get('children')})
+                        new_view.render().$el.appendTo(self.$el);
+                        model.get('children').fetch();
+                    } else {
+                        var new_view  = new view({model: model})
+                        new_view.render().$el.appendTo(self.$el);
+                    }
                     console.log(new_view.$el.position().left);
                     self.$el.parent().animate({
                         scrollLeft: new_view.$el.position().left
@@ -152,13 +178,17 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 };
 
                 var view;
+                console.log(model.get('is_dir'));
                 if (template) {
                     require(['/static/js/contexts/' + template.value + '.js'], function() {
                         view = Datastore.Contexts[template.value].Views.MainView;   
                         append_view(view);
                     });
-                } else {
+                } else if (model.get('is_dir')) {
                     view = Datastore.Views.NodeListView;
+                    append_view(view);
+                } else {
+                    view = Datastore.Views.FileView;
                     append_view(view);
                 }
             }
