@@ -89,8 +89,14 @@ def get_children(request):
 def file_tree(request):
     if not 'dir' in request.POST:
         raise HTTPBadRequest()
-    dir_name = request.POST['dir']
-    coll = DataStoreSession.get_collection(dir_name)
+    dir_name = str(request.POST['dir'])
+    if dir_name[-1] == '/':
+        dir_name = dir_name[:-1]
+
+    try:
+        coll = DataStoreSession.get_collection(dir_name)
+    except CollectionDoesNotExist:
+        raise HTTPNotFound()
 
     def coll_to_li(coll):
         return '<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (coll.path, coll.name)
@@ -99,7 +105,7 @@ def file_tree(request):
         ext = splitext(f.name)[1][1:]
         return '<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (ext, f.path, f.name)
 
-    resp = "\n".join(map(coll_to_li, coll.get_subcollections()) + map(file_obj_to_li, coll.get_objects()))
+    resp = "\n".join(map(coll_to_li, coll.subcollections) + map(file_obj_to_li, coll.data_objects))
     
     resp = '<ul class="jqueryFileTree" style="display: none;">' + resp + '</ul>'
     return Response(resp)
