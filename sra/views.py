@@ -131,7 +131,7 @@ def download_file(request):
 @view_config(route_name='serve_file')
 def serve_file(request):
     path = request.matchdict['path']
-    path = request.registry.settings['irods.path'] + "/" +  "/".join(path)
+    path = "/" +  "/".join(path)
     try:
         obj = DataStoreSession.get_data_object(str(path))
     except DataObjectDoesNotExist:

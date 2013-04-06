@@ -75,8 +75,8 @@ Datastore.Contexts['gallery'].Views.MainView = Backbone.View.extend({
                 return new Datastore.Contexts['gallery'].Models.Photo({
                     name: model.get('name'),
                     path: model.get('path'),
-                    src: "/serve" + urlencode_path(model.get('root_relative_path')),
-                    thumbnail_src: "/serve" + urlencode_path(get_thumb(model.get('root_relative_path'))),
+                    src: "/serve" + urlencode_path(model.get('path')),
+                    thumbnail_src: "/serve" + urlencode_path(get_thumb(model.get('path'))),
                     download_url: model.get('download_url')
                 });
             });
