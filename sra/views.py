@@ -125,18 +125,19 @@ def serve_file(request):
     path = request.matchdict['path']
     path = request.registry.settings['irods.path'] + "/" +  "/".join(path)
     try:
-        file = DataStoreSession.get_file(path)
-    except FileDoesNotExist:
+        obj = DataStoreSession.get_data_object(str(path))
+    except DataObjectDoesNotExist:
         raise HTTPNotFound()
 
-    ext = splitext(file.name)[1][1:]
+    ext = splitext(obj.name)[1][1:]
 
     if ext not in content_types:
         raise HTTPNotImplemented()
-    
+
+    f = obj.open('r')
     return Response(
         content_type=content_types[ext],
-        app_iter=file
+        app_iter=f.read_gen(4096)()
     )
 
 conn_err_msg = """\
