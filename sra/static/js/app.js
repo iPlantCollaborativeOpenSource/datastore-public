@@ -135,7 +135,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
 
                 console.log(model.get('metadata'));
                 var template = _.find(model.get('metadata'), function(meta) {
-                    return meta[0] == 'template';
+                    return meta.name == 'template';
                 });
                 console.log(template);
 
@@ -153,8 +153,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
 
                 var view;
                 if (template) {
-                    require(['/static/js/contexts/' + template[1] + '.js'], function() {
-                        view = Datastore.Contexts[template[1]].Views.MainView;   
+                    require(['/static/js/contexts/' + template.value + '.js'], function() {
+                        view = Datastore.Contexts[template.value].Views.MainView;   
                         append_view(view);
                     });
                 } else {
