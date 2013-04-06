@@ -1,18 +1,21 @@
+from os.path import basename, splitext
+import logging
+
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound, HTTPNotImplemented
-import logging
 
 from sqlalchemy.exc import DBAPIError
+
+from irods.collection import iRODSCollection
+from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 
 from .models import (
     DBSession,
     MyModel,
     DataStoreSession,
 )
-from datastore.DSFile import DSCollection
-from datastore.exception import FileDoesNotExist
-from os.path import basename, splitext
+from .content_types import content_types
 
 #@view_config(route_name='home', renderer='templates/mytemplate.pt')
 #def my_view(request):
@@ -52,12 +55,13 @@ def get_collection(request):
     if not 'path' in request.GET:
         raise HTTPBadRequest()
     path = request.GET['path']
-    collection = DataStoreSession.get_collection(path)
+    logging.debug(path)
+    collection = DataStoreSession.get_collection(str(path))
 
     return {
         'name': collection.name,
         'path': collection.path,
-        'metadata': collection.metadata.items(),
+        'metadata': [m.__dict__ for m in collection.metadata.items()],
     }
 
 @view_config(route_name='children', renderer='json')
@@ -66,23 +70,23 @@ def get_children(request):
         raise HTTPBadRequest()
     path = request.GET['path']
 
-    collection = DataStoreSession.get_collection(path)
-    sub_collections = collection.get_subcollections()
-    objects = collection.get_objects()
+    collection = DataStoreSession.get_collection(str(path))
+    sub_collections = collection.subcollections
+    objects = collection.data_objects
     print sub_collections
+    print objects
 
     def format_subcoll(coll):
         return {
             'name': coll.name,
             'path': coll.path,
-            'is_dir': isinstance(coll, DSCollection)
+            'is_dir': isinstance(coll, iRODSCollection)
         }
 
     return map(format_subcoll, sub_collections + objects)
     
 @view_config(route_name='file_tree')
 def file_tree(request):
-    from os.path import splitext
     if not 'dir' in request.POST:
         raise HTTPBadRequest()
     dir_name = request.POST['dir']
@@ -105,18 +109,19 @@ def download_file(request):
     path = request.matchdict['path']
     path = request.registry.settings['irods.path'] + "/" +  "/".join(path)
     try:
-        file = DataStoreSession.get_file(path)
-    except FileDoesNotExist:
+        obj = DataStoreSession.get_data_object(str(path))
+    except DataObjectDoesNotExist:
         raise HTTPNotFound()
+
+    f = obj.open('r')
     return Response(
-        content_disposition='attachment; filename="%s"' % file.name,
+        content_disposition='attachment; filename="%s"' % obj.name,
         content_type='application/octet-stream', 
-        app_iter=file
+        app_iter=f.read_gen(4096)()
     )
 
 @view_config(route_name='serve_file')
 def serve_file(request):
-    from .content_types import content_types
     path = request.matchdict['path']
     path = request.registry.settings['irods.path'] + "/" +  "/".join(path)
     try:
