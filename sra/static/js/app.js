@@ -24,7 +24,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         console.log(obj.path);
         console.log(r.is_dir);
         if (obj.is_dir != undefined && obj.is_dir == false)
-            r.download_url = '/download' + r.root_relative_path
+            r.download_url = '/download' + obj.path;
         return _.extend(obj, r);
     },
     defaults: { 

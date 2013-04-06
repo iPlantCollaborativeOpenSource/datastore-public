@@ -35,6 +35,7 @@ def home(request):
         'year': '2013'
     }
 
+# deprecated
 @view_config(route_name='studies', renderer='json')
 def show_studies(request):
     def format_study(study):
@@ -113,7 +114,7 @@ def file_tree(request):
 @view_config(route_name='download_file')
 def download_file(request):
     path = request.matchdict['path']
-    path = request.registry.settings['irods.path'] + "/" +  "/".join(path)
+    path = "/" +  "/".join(path)
     try:
         obj = DataStoreSession.get_data_object(str(path))
     except DataObjectDoesNotExist:
@@ -123,6 +124,7 @@ def download_file(request):
     return Response(
         content_disposition='attachment; filename="%s"' % obj.name,
         content_type='application/octet-stream', 
+        content_length=obj.size,
         app_iter=f.read_gen(4096)()
     )
 
@@ -143,6 +145,7 @@ def serve_file(request):
     f = obj.open('r')
     return Response(
         content_type=content_types[ext],
+        content_length=obj.size,
         app_iter=f.read_gen(4096)()
     )
 
