@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound, HTTPNotImplemen
 
 from sqlalchemy.exc import DBAPIError
 
-from irods.collection import iRODSCollection
+from irods.collection import iRODSCollection, iRODSDataObject
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 
 from .models import (
@@ -66,12 +66,15 @@ def get_collection(request):
         except DataObjectDoesNotExist:
             raise HTTPNotFound()
 
-    return {
+    response = {
         'name': obj.name,
         'path': obj.path,
         'metadata': [m.__dict__ for m in obj.metadata.items()],
         'is_dir': isinstance(obj, iRODSCollection),
     }
+    if isinstance(obj, iRODSDataObject):
+        response['size'] = obj.size
+    return response
 
 @view_config(route_name='children', renderer='json')
 def get_children(request):

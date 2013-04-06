@@ -10,6 +10,12 @@ function urlencode_path(path) {
     return _.map(path.split('/'), encodeURIComponent).join('/');
 }
 
+function bytes_to_human(bytes) {
+    var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+};
+
 Datastore.Models.Node = Backbone.Model.extend({  
     urlRoot: '/api/file',
     url: function() {
@@ -92,7 +98,7 @@ Datastore.Views.FileView = Backbone.View.extend({
             })
                 .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
                 .append(' ')
-                .append("Download " + this.model.get('name'))
+                .append("Download " + this.model.get('name') + " (" + bytes_to_human(this.model.get('size')) + ")")
         );
         return this;
     }
