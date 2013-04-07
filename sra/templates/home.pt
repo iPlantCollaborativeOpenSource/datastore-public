@@ -16,6 +16,7 @@
     <script src="static/js/lib/require.min.js"></script>
     <!-- SyntaxHighlighter -->
     <script src="static/syntaxhighlighter/scripts/shCore.js"></script>
+    <script src="static/syntaxhighlighter/scripts/shAutoloader.js"></script>
     <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shCore.css" />
     <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shThemeDefault.css" />
     <!-- jqueryFileTree -->

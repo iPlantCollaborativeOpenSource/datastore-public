@@ -191,4 +191,5 @@ content_types = {
     'xwd': 'image/x-xwindowdump',
     'z': 'application/x-compress',
     'zip': 'application/zip',
+    'php': 'text/plain',
 }
