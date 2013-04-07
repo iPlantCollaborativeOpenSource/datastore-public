@@ -30,6 +30,7 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
         },
         render: function() {
             console.log(this.options.brush);
+            this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
             var self = this;
             $.get('serve' + this.model.get('path'), function(data, text_status, jqXHR) {
                 var $pre = $("<pre>", {'class' : 'brush: ' + self.options.brush}).append(_.escape(data));

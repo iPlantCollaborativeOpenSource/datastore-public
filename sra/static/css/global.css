@@ -284,3 +284,35 @@ ul.jqueryFileTree li {
 .node-list .dir {
     background-image: url('../img/icons/folder.png');
 }
+
+.data-object-header {
+    padding: .5em;
+    border-radius: 6px;
+    background-color: #e6e6e6;
+}
+.data-object-header > div {
+}
+.data-object-header .file-properties {
+    float: left;
+    width: 600px;
+    list-style: none;
+    margin: 0 0 0 .25em;
+}
+.data-object-header .file-properties li {
+    float: left;
+    line-height: 30px;
+    font-size: 16px;
+    margin-left: 6px;    
+    padding-left: 6px;
+    border-left: 1px solid #ccc;
+}
+.data-object-header .file-properties li:first-child {
+    margin-left: 0;
+    padding-left: 0;
+    border-left-width: 0;
+}
+.data-object-header .file-action {
+    width: 200px;
+    float: right;
+    text-align: right;
+}

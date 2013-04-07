@@ -5,25 +5,9 @@ var Datastore = {
     Collections: {},
     Views: {},
     Events: {},
-    Contexts: {},
-    ExtensionsBrushMap: {}
+    Contexts: {}
 };
 
-
-/*
-Datastore.ExtensionBrushMap = {
-    'js': 'js',
-    'css': 'css',
-    'php': 'php',
-    'txt': 'text',
-    'markdown': 'text',
-    'md': 'text',
-    'ini': 'text',
-    'py': 'python',
-    'rb': 'ruby',
-    'html': 'html'
-};
-*/
 
 Datastore.Models.Node = Backbone.Model.extend({  
     urlRoot: '/api/file',
@@ -99,20 +83,7 @@ Datastore.Views.FileView = Backbone.View.extend({
     initialize: function(options) {
     }, 
     render: function() {
-        this.$el
-        .append(
-            $('<h2>').append(this.model.get('name'))
-        )
-        .append(
-            $('<a>', {
-                'class': 'btn btn-primary', 
-                'type': 'button',
-                'href': this.model.get('download_url')
-            })
-                .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
-                .append(' ')
-                .append("Download " + this.model.get('name') + " (" + Utils.bytes_to_human(this.model.get('size')) + ")")
-        );
+        this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
         return this;
     }
 });
@@ -244,6 +215,33 @@ Datastore.Views.DataApp = Backbone.View.extend({
     },
 });
 
+Datastore.Views.DataObjectHeader = Backbone.View.extend({
+    tagName: 'div',
+    className: 'data-object-header clearfix',
+    initialize: function() {
+    },
+    render: function() {
+        this.$el
+            .append($("<ul>", {'class': 'file-properties'})
+                .append($("<li>").append(this.model.get('name')))
+                .append($("<li>").append(Utils.bytes_to_human(this.model.get('size'))))
+            )
+            .append($('<div>', {'class': 'file-action'})
+                .append($("<div>", {'class': 'btn-group'})
+                    .append(
+                        $('<a>', {
+                            'class': 'btn btn-primary', 
+                            'type': 'button',
+                            'href': this.model.get('download_url')
+                        })
+                            .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
+                            .append(' Download')
+                    )
+                )
+            );
+        return this;
+    }
+});
 
 Datastore.Router = Backbone.Router.extend({
     routes: {

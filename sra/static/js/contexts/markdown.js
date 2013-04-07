@@ -8,6 +8,7 @@ define(['datastore', 'backbone', 'jquery'], function(Datastore, Backbone, $) {
             console.log(this.model);
         },
         render: function() {
+            this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
             var self = this;
             $.get('markdown' + this.model.get('path'), function(data, text_status, jqXHR) {
                 self.$el.append(data);
