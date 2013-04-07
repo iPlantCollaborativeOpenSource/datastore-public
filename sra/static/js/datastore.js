@@ -1,4 +1,6 @@
-Datastore = {
+define(['jquery', 'underscore', 'backbone', 'utils'], function($, _, Backbone, Utils) {
+
+var Datastore = {
     Models: {},
     Collections: {},
     Views: {},
@@ -7,63 +9,8 @@ Datastore = {
     ExtensionsBrushMap: {}
 };
 
-function urlencode_path(path) {
-    return _.map(path.split('/'), encodeURIComponent).join('/');
-}
-
-function bytes_to_human(bytes) {
-    var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-}
 
 /*
- * Given a list of metadata objects like
- * [{name: 'p1.k1', value: 'v1'},
- *  {name: 'p2.k1', value: 'v1'},
- *  {name: 'p1.k2', value: 'v2'},
- *  {name: 'p1.k3.k1, value: 'v3'},
- *  {name: 'p1.k3.k2, value: 'v4'},
- *  {name: 'p1.k3.k3, value: 'v5'},
- *  {name: 'p3', value: 'v6'} ]
- * return an object formatted like
- * { 
-     p1: {
-         k1: 'v1',
-         k2: 'v2',
-         k3: { k1: 'v3', k2: 'v4', k3: 'v5'}
-     },
-     p2: {
-         k1: 'v1'
-     },
-     p3: 'v6'
- * }
- */
-function metadata_to_object(metadata) {
-    var obj = {};
-    _.each(metadata, function(datum) {
-        var parts = datum.name.split('.');
-        if (parts.length == 1)
-            obj[datum.name] = datum.value;
-        else {
-            var ns = obj;
-            for (i = 0; i < parts.length - 1; i++) {
-                var part = parts[i];
-                if (!_.has(ns, part))
-                    ns[part] = {}
-                ns = ns[part];
-            }
-            ns[parts.pop()] = datum.value;
-        }
-    });
-    return obj;
-}
-
-/*
-function get_extension(path) {
-    return path.split('.').pop();    
-}
-
 Datastore.ExtensionBrushMap = {
     'js': 'js',
     'css': 'css',
@@ -96,7 +43,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         if (obj.is_dir != undefined && obj.is_dir == false)
             r.download_url = '/download' + obj.path;
 
-        r.metadata = metadata_to_object(obj.metadata);
+        r.metadata = Utils.metadata_to_object(obj.metadata);
         if (r.metadata[metadata_prefix])
             r.template_metadata = r.metadata[metadata_prefix];
         return _.extend(obj, r);
@@ -164,7 +111,7 @@ Datastore.Views.FileView = Backbone.View.extend({
             })
                 .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
                 .append(' ')
-                .append("Download " + this.model.get('name') + " (" + bytes_to_human(this.model.get('size')) + ")")
+                .append("Download " + this.model.get('name') + " (" + Utils.bytes_to_human(this.model.get('size')) + ")")
         );
         return this;
     }
@@ -250,8 +197,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 var view;
                 console.log(model.get('is_dir'));
                 if (template) {
-                    require(['/static/js/contexts/' + template + '.js'], function() {
-                        view = Datastore.Contexts[template].Views.MainView;   
+                    require(['static/js/contexts/' + template + '.js'], function(Context) {
+                        view = Context.Views.MainView;   
                         view_options = model.get('template_metadata')['template_options'] || {};
                         append_view(view, view_options);
                     });
@@ -308,7 +255,6 @@ Datastore.Router = Backbone.Router.extend({
     }
 });
 
-$(document).ready(function() {
-	var app = new Datastore.Router();
-	Backbone.history.start();
+return Datastore;
+
 });

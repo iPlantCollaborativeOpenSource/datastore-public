@@ -8,27 +8,27 @@
     <link rel="shortcut icon" href="static/favicon.ico" />
     <link type="text/css" rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="static/css/global.css" />
+    <script data-main="static/js/main" src="static/js/lib/require.min.js"></script>
     <!-- library deps -->
-    <script src="static/js/lib/jquery-1.9.1.min.js"></script>
-    <script src="static/js/lib/underscore-min.js"></script>
-    <script src="static/js/lib/backbone-min.js"></script>
-    <script src="static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="static/js/lib/require.min.js"></script>
+    <!-- <script src="static/js/lib/jquery-1.9.1.min.js"></script> -->
+    <!-- <script src="static/js/lib/underscore-min.js"></script> -->
+    <!-- <script src="static/js/lib/backbone-min.js"></script> -->
+    <!-- <script src="static/bootstrap/js/bootstrap.min.js"></script> -->
     <!-- SyntaxHighlighter -->
-    <script src="static/syntaxhighlighter/scripts/shCore.js"></script>
-    <script src="static/syntaxhighlighter/scripts/shAutoloader.js"></script>
-    <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shCore.css" />
-    <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shThemeDefault.css" />
+    <!-- <script src="static/syntaxhighlighter/scripts/shCore.js"></script> -->
+    <!-- <script src="static/syntaxhighlighter/scripts/shAutoloader.js"></script> -->
+    <!-- <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shCore.css" /> -->
+    <!-- <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shThemeDefault.css" /> -->
     <!-- jqueryFileTree -->
-    <link type="text/css" rel="stylesheet" href="static/jqueryFileTree/jqueryFileTree.css" />
-    <script src="static/jqueryFileTree/jqueryFileTree.js"></script>
+    <!-- <link type="text/css" rel="stylesheet" href="static/jqueryFileTree/jqueryFileTree.css" /> -->
+    <!-- <script src="static/jqueryFileTree/jqueryFileTree.js"></script> -->
     <!-- application code -->
     <script type="text/javascript">
         var root = "${root}";
         var root_name = "${root_name}";
         var metadata_prefix = "${metadata_prefix}";
     </script>
-    <script src="static/js/app.js"></script>
+    <!-- <script src="static/js/app.js"></script> -->
 </head>
 
 <body>

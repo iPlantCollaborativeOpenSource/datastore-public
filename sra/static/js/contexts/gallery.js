@@ -1,14 +1,16 @@
-Datastore.Contexts['gallery'] = {
+define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbone, $, Utils) {
+
+var Gallery = {
     Models: {},
     Collections: {},
     Views: {}
 };
 
-Datastore.Contexts['gallery'].Models.Photo = Backbone.Model.extend();
+Gallery.Models.Photo = Backbone.Model.extend();
 
-Datastore.Contexts['gallery'].Collections.PhotoCollection = Backbone.Collection.extend();
+Gallery.Collections.PhotoCollection = Backbone.Collection.extend();
 
-Datastore.Contexts['gallery'].Views.Gallery = Backbone.View.extend({
+Gallery.Views.Gallery = Backbone.View.extend({
     tagName: "ul",
     className: "thumbnails",
     initialize: function() {
@@ -21,13 +23,13 @@ Datastore.Contexts['gallery'].Views.Gallery = Backbone.View.extend({
         var self = this;
         console.log(this.collection);
         this.collection.each(function(model) {
-            new Datastore.Contexts['gallery'].Views.Thumbnail({model: model})
+            new Gallery.Views.Thumbnail({model: model})
                 .render().$el.appendTo(self.$el); 
         });
     }
 });
 
-Datastore.Contexts['gallery'].Views.Thumbnail = Backbone.View.extend({
+Gallery.Views.Thumbnail = Backbone.View.extend({
     tagName: "li",
     className: "span4",
     initialize: function() {
@@ -56,13 +58,13 @@ function get_thumb(path) {
     return arr.join("/");
 }
 
-Datastore.Contexts['gallery'].Views.MainView = Backbone.View.extend({
+Gallery.Views.MainView = Backbone.View.extend({
     initialize: function() {
     },
     render: function() {
         var $container = $('<div>', {'class': 'row'});
-        var photo_collection = new Datastore.Contexts['gallery'].Collections.PhotoCollection();
-        var gallery = new Datastore.Contexts['gallery'].Views.Gallery({
+        var photo_collection = new Gallery.Collections.PhotoCollection();
+        var gallery = new Gallery.Views.Gallery({
             collection: photo_collection
         }).render();
         $container
@@ -72,11 +74,11 @@ Datastore.Contexts['gallery'].Views.MainView = Backbone.View.extend({
         var self = this;
         this.collection.bind('reset', function() {
             var models = _.map(self.collection.models.filter(function(model) {return model.get('name') != ".thumbnails"}), function(model) {
-                return new Datastore.Contexts['gallery'].Models.Photo({
+                return new Gallery.Models.Photo({
                     name: model.get('name'),
                     path: model.get('path'),
-                    src: "/serve" + urlencode_path(model.get('path')),
-                    thumbnail_src: "/serve" + urlencode_path(get_thumb(model.get('path'))),
+                    src: "/serve" + Utils.urlencode_path(model.get('path')),
+                    thumbnail_src: "/serve" + Utils.urlencode_path(get_thumb(model.get('path'))),
                     download_url: model.get('download_url')
                 });
             });
@@ -84,4 +86,7 @@ Datastore.Contexts['gallery'].Views.MainView = Backbone.View.extend({
         });
         return this;
     }
+});
+
+return Gallery;
 });
