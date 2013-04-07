@@ -1,6 +1,7 @@
 from os.path import basename, splitext
 import logging
 from datetime import date
+from calendar import timegm
 
 from pyramid.response import Response
 from pyramid.view import view_config
@@ -76,6 +77,9 @@ def get_collection(request):
     }
     if isinstance(obj, iRODSDataObject):
         response['size'] = obj.size
+        response['create_time'] = timegm(obj.create_time.utctimetuple())
+        response['modify_time'] = timegm(obj.modify_time.utctimetuple())
+        response['checksum'] = obj.checksum
     return response
 
 @view_config(route_name='children', renderer='json')
