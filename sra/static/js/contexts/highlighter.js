@@ -1,5 +1,5 @@
-define(['datastore', 'backbone', 'jquery', 'utils', 'shCore'], function(Datastore, Backbone, $, Utils, SyntaxHighlighter) {
-    console.log(SyntaxHighlighter);
+define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require, Datastore, Backbone, $, Utils) {
+    //console.log(SyntaxHighlighter);
     var Highlighter = {
         Views: {},
         BrushSources: {}
@@ -32,9 +32,10 @@ define(['datastore', 'backbone', 'jquery', 'utils', 'shCore'], function(Datastor
             var self = this;
             $.get('serve' + this.model.get('path'), function(data, text_status, jqXHR) {
                 var $pre = $("<pre>", {'class' : 'brush: ' + self.options.brush}).append(_.escape(data));
-                require([self.brush_source], function(brush) {
-                    SyntaxHighlighter.highlight($pre);
+                require(['shCore', self.brush_source], function(SyntaxHighlighter) {
+                    console.log(SyntaxHighlighter.brushes);
                     $pre.appendTo(self.$el);
+                    SyntaxHighlighter.highlight($pre[0]);
                 });
             });
             return this;

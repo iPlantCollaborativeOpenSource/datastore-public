@@ -34,7 +34,8 @@ require.config({
         shBrushPlain: {deps: ['shCore']},
         shBrushPython: {deps: ['shCore']},
         shBrushRuby: {deps: ['shCore']},
-        shBrushXml: {deps: ['shCore']}
+        shBrushXml: {deps: ['shCore']},
+        shBrushFasta: {deps: ['shCore']}
     }
 });
 
