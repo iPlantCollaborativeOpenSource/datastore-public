@@ -2,7 +2,16 @@ require.config({
     paths: {
         'jquery': 'lib/jquery-1.9.1.min',
         'backbone': 'lib/backbone-min',
-        'underscore': 'lib/underscore-min'
+        'underscore': 'lib/underscore-min',
+        'shCore': '../syntaxhighlighter/scripts/shCore',
+        'shBrushCss': '../syntaxhighlighter/scripts/shBrushCss',
+        'shBrushJava': '../syntaxhighlighter/scripts/shBrushJava',
+        'shBrushPerl': '../syntaxhighlighter/scripts/shBrushPerl',
+        'shBrushPhp': '../syntaxhighlighter/scripts/shBrushPhp',
+        'shBrushPlain': '../syntaxhighlighter/scripts/shBrushPlain',
+        'shBrushPython': '../syntaxhighlighter/scripts/shBrushPython',
+        'shBrushRuby': '../syntaxhighlighter/scripts/shBrushRuby',
+        'shBrushXml': '../syntaxhighlighter/scripts/shBrushXml'
     },
     shim: {
         backbone: {
@@ -11,7 +20,18 @@ require.config({
         },
         underscore: {
             exports: '_'
-        }
+        },
+        shCore: {
+            exports: 'SyntaxHighlighter'
+        },
+        shBrushCss: {deps: ['shCore']},
+        shBrushJava: {deps: ['shCore']},
+        shBrushPerl: {deps: ['shCore']},
+        shBrushPhp: {deps: ['shCore']},
+        shBrushPlain: {deps: ['shCore']},
+        shBrushPython: {deps: ['shCore']},
+        shBrushRuby: {deps: ['shCore']},
+        shBrushXml: {deps: ['shCore']}
     }
 });
 
