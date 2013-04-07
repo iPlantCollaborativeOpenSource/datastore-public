@@ -1,5 +1,6 @@
 from os.path import basename, splitext
 import logging
+from datetime import date
 
 from pyramid.response import Response
 from pyramid.view import view_config
@@ -28,11 +29,10 @@ from .content_types import content_types
 @view_config(route_name='home', renderer='templates/home.pt')
 def home(request):
     return {
-        'base_url' : '123', 
         'root': request.registry.settings['irods.path'],
         'root_name': basename(request.registry.settings['irods.path']),
-        'dir': 'hello',
-        'year': '2013'
+        'metadata_prefix': request.registry.settings['datastore.metadata_prefix'],
+        'year': date.today().year,
     }
 
 # deprecated

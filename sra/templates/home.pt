@@ -23,12 +23,9 @@
     <script src="static/jqueryFileTree/jqueryFileTree.js"></script>
     <!-- application code -->
     <script type="text/javascript">
-        function base_url(path) {
-        return "${base_url}" + path;
-        }
         var root = "${root}";
         var root_name = "${root_name}";
-        var dir = "${dir}";
+        var metadata_prefix = "${metadata_prefix}";
     </script>
     <script src="static/js/app.js"></script>
 </head>
