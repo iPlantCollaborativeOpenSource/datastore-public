@@ -13,6 +13,7 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
         'js': 'shBrushJScript',
         'css': 'shBrushCss',
         'py': 'shBrushPython',
+        'plain': 'shBrushPlain',
         'fasta': 'shBrushFasta'
     };
 
