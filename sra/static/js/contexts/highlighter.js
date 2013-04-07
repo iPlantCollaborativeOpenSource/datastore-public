@@ -31,9 +31,10 @@ define(['datastore', 'backbone', 'jquery', 'utils', 'shCore'], function(Datastor
             console.log(this.options.brush);
             var self = this;
             $.get('serve' + this.model.get('path'), function(data, text_status, jqXHR) {
-                self.$el.append($("<pre>", {'class' : 'brush: ' + self.options.brush}).append(_.escape(data)));
-                require([self.brush_source], function() {
-                    SyntaxHighlighter.highlight(self.$el.find('pre')[0]);
+                var $pre = $("<pre>", {'class' : 'brush: ' + self.options.brush}).append(_.escape(data));
+                require([self.brush_source], function(brush) {
+                    SyntaxHighlighter.highlight($pre);
+                    $pre.appendTo(self.$el);
                 });
             });
             return this;
