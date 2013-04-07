@@ -33,9 +33,11 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
             $.get('serve' + this.model.get('path'), function(data, text_status, jqXHR) {
                 var $pre = $("<pre>", {'class' : 'brush: ' + self.options.brush}).append(_.escape(data));
                 require(['shCore', self.brush_source], function(SyntaxHighlighter) {
+                    // Set discoveredBrushes to null because this library sucks
+                    SyntaxHighlighter.vars.discoveredBrushes = null;
                     console.log(SyntaxHighlighter.brushes);
                     $pre.appendTo(self.$el);
-                    SyntaxHighlighter.highlight($pre[0]);
+                    SyntaxHighlighter.highlight({}, $pre[0]);
                 });
             });
             return this;
