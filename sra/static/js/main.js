@@ -4,6 +4,7 @@ require.config({
         'backbone': 'lib/backbone-min',
         'underscore': 'lib/underscore-min',
         'shCore': '../syntaxhighlighter/scripts/shCore',
+        // default brushes
         'shBrushCss': '../syntaxhighlighter/scripts/shBrushCss',
         'shBrushJava': '../syntaxhighlighter/scripts/shBrushJava',
         'shBrushPerl': '../syntaxhighlighter/scripts/shBrushPerl',
@@ -11,7 +12,9 @@ require.config({
         'shBrushPlain': '../syntaxhighlighter/scripts/shBrushPlain',
         'shBrushPython': '../syntaxhighlighter/scripts/shBrushPython',
         'shBrushRuby': '../syntaxhighlighter/scripts/shBrushRuby',
-        'shBrushXml': '../syntaxhighlighter/scripts/shBrushXml'
+        'shBrushXml': '../syntaxhighlighter/scripts/shBrushXml',
+        // custom brushes
+        'shBrushFasta': 'brushes/shBrushFasta',
     },
     shim: {
         backbone: {

@@ -192,4 +192,5 @@ content_types = {
     'z': 'application/x-compress',
     'zip': 'application/zip',
     'php': 'text/plain',
+    'fasta': 'text/plain',
 }
