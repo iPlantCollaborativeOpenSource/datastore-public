@@ -6,6 +6,8 @@ from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound, HTTPNotImplemented
 
+import markdown
+
 from sqlalchemy.exc import DBAPIError
 
 from irods.collection import iRODSCollection, iRODSDataObject
@@ -36,20 +38,20 @@ def home(request):
     }
 
 # deprecated
-@view_config(route_name='studies', renderer='json')
-def show_studies(request):
-    def format_study(study):
-        return {
-            'id': study.name,
-            'path': study.path,
-            'url': request.route_path('study', study_id=study.name),
-            'title': study.metadata.getone('title')[0],
-            'abstract': study.metadata.getone('abstract')[0],
-            'description': study.metadata.getone('description')[0] if 'description' in study.metadata else None,
-        }
-
-    collection = DataStoreSession.get_collection(request.registry.settings['irods.path'] + '/sra')
-    return map(format_study, collection.get_subcollections())
+#@view_config(route_name='studies', renderer='json')
+#def show_studies(request):
+#    def format_study(study):
+#        return {
+#            'id': study.name,
+#            'path': study.path,
+#            'url': request.route_path('study', study_id=study.name),
+#            'title': study.metadata.getone('title')[0],
+#            'abstract': study.metadata.getone('abstract')[0],
+#            'description': study.metadata.getone('description')[0] if 'description' in study.metadata else None,
+#        }
+#
+#    collection = DataStoreSession.get_collection(request.registry.settings['irods.path'] + '/sra')
+#    return map(format_study, collection.get_subcollections())
 
 @view_config(route_name='file', renderer='json')
 def get_collection(request):
@@ -158,6 +160,28 @@ def serve_file(request):
         content_type=content_types[ext],
         content_length=obj.size,
         app_iter=f.read_gen(4096)()
+    )
+
+@view_config(route_name='markdown')
+def as_markdown(request):
+    path = request.matchdict['path']
+    path = "/" +  "/".join(path)
+    try:
+        obj = DataStoreSession.get_data_object(str(path))
+    except DataObjectDoesNotExist:
+        raise HTTPNotFound()
+
+    ext = splitext(obj.name)[1][1:]
+
+    if ext not in ['md', 'markdown']:
+        raise HTTPBadRequest()
+
+    f = obj.open('r')
+    html = markdown.markdown(f.read())
+    return Response(
+        html,
+        content_type='text/html',
+        content_length=len(html)
     )
 
 conn_err_msg = """\
