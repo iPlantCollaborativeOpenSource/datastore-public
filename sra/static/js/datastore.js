@@ -136,7 +136,9 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
     },
     push_dir: function(model) {
         //this.nodes.push(model);
+        console.error(model.get('is_dir'));
         $("<li>")
+            .addClass(model.get('is_dir') ? 'dir' : 'file')
             .data('model', model)
             .append($('<a>', {href: '#'}).append(model.get('name')))
             .appendTo(this.$list);
@@ -248,7 +250,7 @@ Datastore.Router = Backbone.Router.extend({
         "": "index"
     },
     index: function() {
-        this.baseNode = new Datastore.Models.Node({path: root, name: root_name});
+        this.baseNode = new Datastore.Models.Node({path: root, name: root_name, is_dir: true});
         this.dataApp = new Datastore.Views.DataApp({el: $('#file-scroller-inner')}).render();
         this.breadcrumb_view = new Datastore.Views.BreadcrumbView({el: $('#breadcrumbs')}).render();
         Datastore.Events.Breadcrumbs.trigger('push', this.baseNode);

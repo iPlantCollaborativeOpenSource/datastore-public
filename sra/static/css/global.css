@@ -251,6 +251,9 @@ ul.jqueryFileTree li {
     background-attachment: scroll;
     background-position: 0px center;
 }
+#breadcrumbs li.file {
+    background-image: url('../img/icons/page_white.png');
+}
 #breadcrumbs li a {
     padding-right: 7px;
     color: #0098aa;
