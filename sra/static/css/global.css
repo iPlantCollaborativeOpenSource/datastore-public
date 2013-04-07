@@ -166,10 +166,10 @@ ul.jqueryFileTree li {
 	padding-top: .75em;
 	text-align: center;
 	font-size: 14px;
-    position: fixed;
+    /*position: fixed;
     bottom: 0;
     width: 100%;
-    z-index: 1;
+    z-index: 1;*/
     background: #fff;
 }
 #footer a:link, #footer a:visited, #footer a:active {
