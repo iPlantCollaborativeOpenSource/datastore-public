@@ -170,6 +170,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                         var new_view  = new view(_.extend({model: model}, options))
                         new_view.render().$el.appendTo(self.$el);
                     }
+                    if (template)
+                        new_view.$el.addClass('template-' + template);
                     console.log(new_view.$el.position().left);
                     self.$el.parent().animate({
                         scrollLeft: new_view.$el.position().left
