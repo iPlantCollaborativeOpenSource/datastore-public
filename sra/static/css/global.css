@@ -316,3 +316,8 @@ ul.jqueryFileTree li {
     float: right;
     text-align: right;
 }
+
+.template-image .img-polaroid {
+    margin-top: 1.5em;
+    max-width: 930px; 
+}
