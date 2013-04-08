@@ -142,7 +142,7 @@ def download_file(request):
         content_disposition='attachment; filename="%s"' % obj.name,
         content_type='application/octet-stream', 
         content_length=obj.size,
-        app_iter=f.read_gen(4096)()
+        app_iter=f.read_gen(4096, close=True)()
     )
 
 @view_config(route_name='serve_file')
@@ -163,7 +163,7 @@ def serve_file(request):
     return Response(
         content_type=content_types[ext],
         content_length=obj.size,
-        app_iter=f.read_gen(4096)()
+        app_iter=f.read_gen(4096, close=True)()
     )
 
 @view_config(route_name='markdown')
@@ -180,8 +180,8 @@ def as_markdown(request):
     if ext not in ['md', 'markdown']:
         raise HTTPBadRequest()
 
-    f = obj.open('r')
-    html = markdown.markdown(f.read())
+    with obj.open('r') as f:
+        html = markdown.markdown(f.read())
     return Response(
         html,
         content_type='text/html',
