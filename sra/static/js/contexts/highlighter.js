@@ -32,7 +32,7 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
             console.log(this.options.brush);
             this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
             var self = this;
-            $.get('serve' + this.model.get('path'), function(data, text_status, jqXHR) {
+            $.get(this.model.get('serve_url'), function(data, text_status, jqXHR) {
                 var $pre = $("<pre>", {'class' : 'brush: ' + self.options.brush}).append(_.escape(data));
                 require(['shCore', self.brush_source], function(SyntaxHighlighter) {
                     // Set discoveredBrushes to null because this library sucks

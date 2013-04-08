@@ -1,4 +1,4 @@
-define(['datastore', 'backbone', 'jquery'], function(Datastore, Backbone, $) {
+define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbone, $, Utils) {
     var Website = {
         Views: {}
     };
@@ -10,7 +10,7 @@ define(['datastore', 'backbone', 'jquery'], function(Datastore, Backbone, $) {
         },
         render: function() {
             $("<iframe>", {
-                src: "/serve" + this.model.get('path') + "/index.html",
+                src: "/serve" + Utils.urlencode_path(this.model.get('path')) + "/index.html",
                 width: 936,
                 height: 600
             }).appendTo(this.$el);

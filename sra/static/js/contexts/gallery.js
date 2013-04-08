@@ -32,13 +32,20 @@ Gallery.Views.Gallery = Backbone.View.extend({
 Gallery.Views.Thumbnail = Backbone.View.extend({
     tagName: "li",
     className: "span4",
+    events: {
+        'click .thumbnail-link': 'open_image'
+    },
     initialize: function() {
     },
     render: function() {
-        $thumb = $("<div>", {'class': 'thumbnail'})
-            .append($("<img>", {
-                src: this.model.get('thumbnail_src')
-            }))
+        $("<div>", {'class': 'thumbnail'})
+            .data('model', this.model)
+            .append(
+                $('<a>', {href: '#', 'class': 'thumbnail-link'})
+                    .append($("<img>", {
+                        src: this.model.get('thumbnail_src')
+                    }))
+            )
             .append(
                 $("<div>", {'class': 'caption'})
                     .append($("<h3>").append(this.model.get('name')))
@@ -47,6 +54,12 @@ Gallery.Views.Thumbnail = Backbone.View.extend({
             )
             .appendTo(this.$el);
         return this;
+    },
+    open_image: function(e) {
+        e.preventDefault();
+        var node = $(e.currentTarget).closest('.thumbnail').data('model'); 
+        Datastore.Events.Breadcrumbs.trigger('push', node.get('file'));
+        return false;
     }
 });
 
@@ -79,7 +92,8 @@ Gallery.Views.MainView = Backbone.View.extend({
                     path: model.get('path'),
                     src: "/serve" + Utils.urlencode_path(model.get('path')),
                     thumbnail_src: "/serve" + Utils.urlencode_path(get_thumb(model.get('path'))),
-                    download_url: model.get('download_url')
+                    download_url: model.get('download_url'),
+                    file: model
                 });
             });
             photo_collection.reset(models);

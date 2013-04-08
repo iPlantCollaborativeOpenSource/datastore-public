@@ -25,7 +25,8 @@ Datastore.Models.Node = Backbone.Model.extend({
         console.log(obj.path);
         console.log(r.is_dir);
         if (obj.is_dir != undefined && obj.is_dir == false)
-            r.download_url = '/download' + obj.path;
+            r.download_url = '/download' + Utils.urlencode_path(obj.path);
+            r.serve_url = '/serve' + Utils.urlencode_path(obj.path);
 
         r.metadata = Utils.metadata_to_object(obj.metadata);
         if (r.metadata[metadata_prefix])
@@ -71,7 +72,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         return this;
     },
     open_file: function(e) {
-        node = $(e.currentTarget).closest('li').data('model'); 
+        var node = $(e.currentTarget).closest('li').data('model'); 
         console.log(node);
         Datastore.Events.Breadcrumbs.trigger('push', node);
     }
@@ -116,7 +117,6 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
     },
     push_dir: function(model) {
         //this.nodes.push(model);
-        console.error(model.get('is_dir'));
         $("<li>")
             .addClass(model.get('is_dir') ? 'dir' : 'file')
             .data('model', model)
