@@ -54,7 +54,6 @@ Clone as a non-root user
     sudo mv sra /opt
     cd /opt/sra
     python setup.py develop
-    initialize_sra_db development.ini
 
 ### Fire it up
-    pserve development.ini 
+    sudo ~/env/sra/bin/pserve production.ini --log-file=sra.log --daemon
