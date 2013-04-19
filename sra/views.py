@@ -62,10 +62,10 @@ def get_collection(request):
     logging.debug(path)
 
     try:
-        obj = DataStoreSession.get_collection(str(path))
+        obj = DataStoreSession.collections.get(str(path))
     except CollectionDoesNotExist:
         try: 
-            obj = DataStoreSession.get_data_object(str(path))
+            obj = DataStoreSession.data_objects.get(str(path))
         except DataObjectDoesNotExist:
             raise HTTPNotFound()
 
@@ -88,7 +88,7 @@ def get_children(request):
         raise HTTPBadRequest()
     path = request.GET['path']
 
-    collection = DataStoreSession.get_collection(str(path))
+    collection = DataStoreSession.collections.get(str(path))
     sub_collections = collection.subcollections
     objects = collection.data_objects
     print sub_collections
@@ -112,7 +112,7 @@ def file_tree(request):
         dir_name = dir_name[:-1]
 
     try:
-        coll = DataStoreSession.get_collection(dir_name)
+        coll = DataStoreSession.collections.get(dir_name)
     except CollectionDoesNotExist:
         raise HTTPNotFound()
 
@@ -133,7 +133,7 @@ def download_file(request):
     path = request.matchdict['path']
     path = "/" +  "/".join(path)
     try:
-        obj = DataStoreSession.get_data_object(str(path))
+        obj = DataStoreSession.data_objects.get(str(path))
     except DataObjectDoesNotExist:
         raise HTTPNotFound()
 
@@ -150,7 +150,7 @@ def serve_file(request):
     path = request.matchdict['path']
     path = "/" +  "/".join(path)
     try:
-        obj = DataStoreSession.get_data_object(str(path))
+        obj = DataStoreSession.data_objects.get(str(path))
     except DataObjectDoesNotExist:
         raise HTTPNotFound()
 
@@ -171,7 +171,7 @@ def as_markdown(request):
     path = request.matchdict['path']
     path = "/" +  "/".join(path)
     try:
-        obj = DataStoreSession.get_data_object(str(path))
+        obj = DataStoreSession.data_objects.get(str(path))
     except DataObjectDoesNotExist:
         raise HTTPNotFound()
 
