@@ -1,17 +1,17 @@
 sra README
 ==================
 
-Environment Configuration (CentOS 5)
------------------------
+Prerequisites
+-------------------------
+
+### CentOS 5
 
 This project requires Python 2.7, which is a pain to set up on CentOS 5. 
 [Do that first](http://toomuchdata.com/2012/06/25/how-to-install-python-2-7-3-on-centos-6-2/).
 Install Python 2.7, setuptools, pip, and virtualenv.
 
-Environment Configuration (Ubuntu 12.04)
----------------------------
+### Ubuntu 12.04
 
-### Packages
     sudo apt-get install python-dev python-pip python-virtualenv
 
 Installation
