@@ -4,29 +4,9 @@ sra README
 Environment Configuration (CentOS 5)
 -----------------------
 
-### Python
-    yum install python26 python26-devel
-
-### Setuptools
-    cd /tmp
-    curl -O https://pypi.python.org/packages/2.6/s/setuptools/setuptools-0.6c11-py2.6.egg
-    chmod 775 setuptools-0.6c11-py2.6.egg
-    sh setuptools-0.6c11-py2.6.egg
-
-### Pip
-    curl -O https://pypi.python.org/packages/source/p/pip/pip-1.2.1.tar.gz
-    tar zxvf pip-1.2.1.tar.gz 
-    cd pip-1.2.1
-    python26 setup.py install
-
-### Virtualenv
-Make sure to create your virtualenv as a non-root user
-
-    pip-2.6 install virtualenv
-    mkdir ~/env
-    cd ~/env
-    virtualenv-2.6 --no-site-packages sra
-    . sra/bin/activate
+This project requires Python 2.7, which is a pain to set up on CentOS 5. 
+[Do that first](http://toomuchdata.com/2012/06/25/how-to-install-python-2-7-3-on-centos-6-2/).
+Install Python 2.7, setuptools, pip, and virtualenv.
 
 Environment Configuration (Ubuntu 12.04)
 ---------------------------
@@ -34,25 +14,23 @@ Environment Configuration (Ubuntu 12.04)
 ### Packages
     sudo apt-get install python-dev python-pip python-virtualenv
 
-### Virtualenv
-    mkdir ~/env
-    cd ~/env
-    virtualenv --no-site-packages sra
-    . sra/bin/activate
-
 Installation
 ------------
 
+### Virtualenv
+    useradd -m datastore
+    su - datastore
+    virtualenv --no-site-packages ~/env
+    echo "source ~/env/bin/activate" >> ~/.bash_profile
+    . ~/.bash_profile
+
 ### pycommands
-    pip install git+git://github.com/cjlarose/pycommands.git
+    git clone git://github.com/cjlarose/pycommands.git
+    pip install -e pycommands
 
-### SRA
-Clone as a non-root user
-
+### Datastore 
     cd ~
-    git clone git@github.com:cjlarose/sra.git
-    sudo mv sra /opt
-    cd /opt/sra
+    git clone git://github.com/iPlantCollaborativeOpenSource/sra.git
     python setup.py develop
 
 ### Fire it up
