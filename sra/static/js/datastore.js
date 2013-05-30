@@ -93,9 +93,11 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         return this;
     },
     open_file: function(e) {
+        e.preventDefault();
         var node = $(e.currentTarget).closest('li').data('model'); 
         //console.log(node);
         Datastore.Events.Traversal.trigger('navigate', node);
+        return false;
     }
 });
 
@@ -155,8 +157,10 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
             .append(_.map(model.get_ancestors(), this.breadcrumb));
     },
     open_dir: function(e) {
+        e.preventDefault();
         var model = $(e.currentTarget).closest('li').data('model');
         Datastore.Events.Traversal.trigger('navigate', model);
+        return false;
     }
 });
 
@@ -256,13 +260,24 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
 
 Datastore.Router = Backbone.Router.extend({
     routes: {
-        "": "index"
+        "": "index",
+        "*path": "navigate"
     },
-    index: function() {
+    initialize: function() {
         this.baseNode = new Datastore.Models.Node({path: root, name: root_name, is_dir: true});
         this.dataApp = new Datastore.Views.DataApp({el: $('#file-scroller-inner')}).render();
         this.breadcrumb_view = new Datastore.Views.BreadcrumbView({el: $('#breadcrumbs'), base_node: this.baseNode}).render();
+    },
+    index: function() {
         Datastore.Events.Traversal.trigger('navigate', this.baseNode);
+    },
+    navigate: function(path) {
+        var node = new Datastore.Models.Node({path: root + '/' + path});
+        node.fetch({
+            success: function(model) {
+                Datastore.Events.Traversal.trigger('navigate', model);
+            }
+        });
     }
 });
 
