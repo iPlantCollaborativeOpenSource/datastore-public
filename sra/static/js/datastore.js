@@ -126,6 +126,13 @@ Datastore.Views.FileView = Backbone.View.extend({
 // "navigate", that is triggered upon the selection of a new folder or file
 Datastore.Events.Traversal = _.extend({}, Backbone.Events);
 
+Datastore.Events.Traversal.on('navigate', function(model) {
+    if (model.get('root_relative_path'))
+        Backbone.history.navigate(model.get('root_relative_path').slice(1));
+    else
+        Backbone.history.navigate("");
+});
+
 // The breadcrumbs across the top of the app
 Datastore.Views.BreadcrumbView = Backbone.View.extend({
     events: {
@@ -261,7 +268,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
 Datastore.Router = Backbone.Router.extend({
     routes: {
         "": "index",
-        "*path": "navigate"
+        "*path": "expand"
     },
     initialize: function() {
         this.baseNode = new Datastore.Models.Node({path: root, name: root_name, is_dir: true});
@@ -271,7 +278,7 @@ Datastore.Router = Backbone.Router.extend({
     index: function() {
         Datastore.Events.Traversal.trigger('navigate', this.baseNode);
     },
-    navigate: function(path) {
+    expand: function(path) {
         var node = new Datastore.Models.Node({path: root + '/' + path});
         node.fetch({
             success: function(model) {
