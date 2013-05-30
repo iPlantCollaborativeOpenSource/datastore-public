@@ -5,7 +5,6 @@ define(['datastore', 'backbone', 'jquery', 'underscore'], function(Datastore, Ba
 
     Image.Views.MainView = Backbone.View.extend({
         initialize: function() {
-            console.log(this.model);
         },
         render: function() {
             this.$el

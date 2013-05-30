@@ -5,8 +5,6 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
 
     Website.Views.MainView = Backbone.View.extend({
         initialize: function() {
-            console.log(this.model);
-            console.log(this.collection);
         },
         render: function() {
             $("<iframe>", {

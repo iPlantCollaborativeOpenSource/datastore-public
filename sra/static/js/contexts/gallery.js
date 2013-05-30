@@ -21,7 +21,6 @@ Gallery.Views.Gallery = Backbone.View.extend({
     },
     append_photos: function() {
         var self = this;
-        console.log(this.collection);
         this.collection.each(function(model) {
             new Gallery.Views.Thumbnail({model: model})
                 .render().$el.appendTo(self.$el); 

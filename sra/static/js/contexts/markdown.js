@@ -5,7 +5,6 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
 
     Markdown.Views.MainView = Backbone.View.extend({
         initialize: function() {
-            console.log(this.model);
         },
         render: function() {
             this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);

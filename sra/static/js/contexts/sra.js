@@ -32,7 +32,6 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             'click li a': 'select_study'
         },
         initialize: function(options) {
-            console.log(options);
             this.collection.bind('reset', this.add_studies, this);
         },
         render: function() {
@@ -41,7 +40,6 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
         add_studies: function() {
             this.$el.empty();
             var $list = $('<ul>', {id: 'study-list'});
-            console.log(this.collection);
             this.collection.each(function(model) {
                 new SRA.Views.StudyListItem({model: model}).render().$el.appendTo($list);
                 model.fetch();
@@ -51,7 +49,6 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
         select_study: function(e) {
             e.preventDefault();
             var model = $(e.currentTarget).closest('li').data('model');
-            console.log(model);
             Datastore.Events.Traversal.trigger('navigate', model.get('file'));
             return false;
         }
@@ -79,8 +76,6 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
     SRA.Views.MainView = Backbone.View.extend({
         tagName: 'div',    
         initialize: function() {
-            console.log(this.model);
-            console.log(this.collection);
         },
         render: function() {
             var study_collection = new SRA.Collections.StudyCollection();

@@ -5,7 +5,6 @@ define(['datastore', 'backbone', 'jquery'], function(Datastore, Backbone, $) {
 
     Image.Views.MainView = Backbone.View.extend({
         initialize: function() {
-            console.log(this.model);
         },
         render: function() {
             $('<h2>')
