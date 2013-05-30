@@ -20,14 +20,13 @@ Datastore.Models.Node = Backbone.Model.extend({
     },
     parse: function(obj) {
         r = {}
-        if (obj.is_dir) {
-            r.children = new Datastore.Collections.NodeCollection();
-            r.children.url = '/api/collection?path=' + encodeURIComponent(obj.path);
-        }
-        r.root_relative_path = obj.path.replace(root, '');
+        if (obj.is_dir)
+            r.children = new Datastore.Collections.NodeCollection([], {path: obj.path});
         if (obj.is_dir != undefined && obj.is_dir == false)
             r.download_url = '/download' + Utils.urlencode_path(obj.path);
             r.serve_url = '/serve' + Utils.urlencode_path(obj.path);
+
+        r.root_relative_path = obj.path.replace(root, '');
 
         r.metadata = Utils.metadata_to_object(obj.metadata);
         if (r.metadata[metadata_prefix])
@@ -37,10 +36,8 @@ Datastore.Models.Node = Backbone.Model.extend({
     get_ancestors: function() {
         if (!this.get('root_relative_path')) 
             return [];
-        //console.log(this.get('root_relative_path'));
         var dirs = this.get('root_relative_path').split('/').splice(1)
         dirs.pop();
-        console.log(dirs);
         var ancestors = _.map(dirs, function(name, i) {
             var rel = '/' + dirs.slice(0, i+1).join('/');
             return new Datastore.Models.Node({
@@ -51,14 +48,18 @@ Datastore.Models.Node = Backbone.Model.extend({
             });
         })
         ancestors.push(this);
-        console.log(ancestors);
         return ancestors;
     }
 }); 
 
 Datastore.Collections.NodeCollection = Backbone.Collection.extend({
     model: Datastore.Models.Node,
-    url: '/trellis-data/index.php/irods/nodes'
+    url: function() {
+        return '/api/collection?path=' + encodeURIComponent(this.path);
+    },
+    initialize: function(models, options) {
+        this.path = options.path;
+    }
 });
 
 
