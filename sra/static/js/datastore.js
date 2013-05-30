@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'backbone', 'utils'], function($, _, Backbone, Utils) {
+define(['jquery', 'underscore', 'backbone', 'utils', 'moment'], function($, _, Backbone, Utils, moment) {
 
 var Datastore = {
     Models: {},
@@ -31,6 +31,10 @@ Datastore.Models.Node = Backbone.Model.extend({
         r.metadata = Utils.metadata_to_object(obj.metadata);
         if (r.metadata[metadata_prefix])
             r.template_metadata = r.metadata[metadata_prefix];
+
+        r.create_time = moment.unix(obj.create_time);
+        r.modify_time = moment.unix(obj.modify_time);;
+
         return _.extend(obj, r);
     },
     get_ancestors: function() {
@@ -114,9 +118,9 @@ Datastore.Views.FileView = Backbone.View.extend({
                 .append($("<dt>").append("Checksum:"))
                 .append($("<dd>").append(this.model.get('checksum')))
                 .append($("<dt>").append("Created:"))
-                .append($("<dd>").append(this.model.get('create_time')))
+                .append($("<dd>").append(this.model.get('create_time').format('lll')))
                 .append($("<dt>").append("Last Modified:"))
-                .append($("<dd>").append(this.model.get('modify_time')))
+                .append($("<dd>").append(this.model.get('modify_time').format('lll')))
         );
         return this;
     }

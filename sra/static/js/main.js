@@ -3,6 +3,7 @@ require.config({
         'jquery': 'lib/jquery-1.9.1.min',
         'backbone': 'lib/backbone-min',
         'underscore': 'lib/underscore-min',
+        'moment': 'lib/moment.min',
         'shCore': '../syntaxhighlighter/scripts/shCore',
         // default brushes
         'shBrushCss': '../syntaxhighlighter/scripts/shBrushCss',
