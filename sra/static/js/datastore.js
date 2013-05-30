@@ -166,14 +166,15 @@ Datastore.Views.DataApp = Backbone.View.extend({
     },
     initialize: function() {
         Datastore.Events.Traversal.on('navigate', _.bind(this.navigate, this));
-        this.pop_queue = 0;
-        this.popping = false;
+    },
+    render: function() {
+        return this;
     },
     navigate: function(model) {
         var self = this;
         model.fetch({
             success: function() {
-                var new_width = (self.$el.children().length + 1) * 940;
+                var new_width = 2 * 940;
                 self.$el.width(new_width);
 
                 //console.log(model.get('metadata'));
@@ -195,7 +196,12 @@ Datastore.Views.DataApp = Backbone.View.extend({
                     //console.log(new_view.$el.position().left);
                     self.$el.parent().animate({
                         scrollLeft: new_view.$el.position().left
-                    }, 'fast');
+                    }, 'fast', function() {
+                        console.log(self.$el);
+                        self.$el
+                            .children(':not(:last-child)').remove().end()
+                            .parent().scrollLeft(0);
+                    });
                 };
 
                 var view;
@@ -215,34 +221,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 }
             }
         });
-    },
-    add_to_pop_queue: function() {
-        this.pop_queue++; 
-        if (!this.popping)
-            this.pop_dir();
-    },
-    pop_dir: function() {
-        this.popping = true;
-        var self = this;
-        this.$el.parent().animate(
-            {scrollLeft: this.$el.children().last().prev().position().left}, 
-            'slow', 
-            function() {
-                console.log('pop finished'); 
-                self.$el.children().last().remove();
-                var new_width = (self.$el.children().length) * 940;
-                self.$el.width(new_width);
-                self.pop_queue--;
-                if (self.pop_queue > 0)
-                   self.pop_dir(); 
-                else
-                    self.popping = false;
-            }
-        );
-    },
-    render: function() {
-        return this;
-    },
+    }
 });
 
 // Each file view is rendered with a header that contains the file's
