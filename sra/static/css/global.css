@@ -173,12 +173,10 @@ ul.jqueryFileTree li {
     background: #fff;
 }
 #footer a:link, #footer a:visited, #footer a:active {
-	color: #0298AA;
 	text-decoration: none;
 	border-bottom: #0298AA dashed 1px;
 }
 #footer a:hover {
-	color: #0298AA;
 	text-decoration: none;
 }
 
@@ -256,7 +254,6 @@ ul.jqueryFileTree li {
 }
 #breadcrumbs li a {
     padding-right: 7px;
-    color: #0098aa;
 }
 #breadcrumbs li::after {
     content: '\00BB';
