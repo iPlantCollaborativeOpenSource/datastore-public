@@ -326,3 +326,48 @@ ul.jqueryFileTree li {
     margin-top: 1.5em;
     max-width: 930px; 
 }
+
+/* File Extensions*/
+.file.ext-3gp, .file.ext-avi, .file.ext-mov, .file.ext-mp4, .file.ext-mpg, 
+.file.ext-mpeg {
+    background-image: url(../img/icons/film.png);
+}
+.file.ext-txt, .file.ext-md, .file.ext-log. .file.ext-rtf {
+    background-image: url(../img/icons/page_white_text.png);
+}
+.file.ext-afp, .file.ext-afpa, .file.ext-asp, .file.ext-aspx,
+.file.ext-c, .file.ext-cfm, .file.ext-cgi, .file.ext-h, .file.ext-cpp, 
+.file.ext-lasso {
+    background-image: url(../img/icons/page_code.png);
+}
+.file.ext-bat, .file.ext-com, .file.ext-exe {
+    background-image: url(../img/icons/application_xp_terminal.png);
+}
+.file.ext-bmp, .file.ext-gif, .file.ext-jpg, .file.ext-jpeg, .file.ext-pcx, 
+.file.ext-png {
+    background-image: url(../img/icons/picture.png);
+}
+.file.ext-htm, .file.ext-html {
+    background-image: url(../img/icons/html.png);
+}
+.file.ext-m4p, .file.ext-mp3, .file.ext-ogg {
+    background-image: url(../img/icons/music.png);
+}
+.file.ext-js, .file.ext-pl, .file.ext-py {
+    background-image: url(../img/icons/script.png);
+}
+.file.ext-rb, .file.ext-rbx, .file.ext-rhtml, .file.ext-ruby {
+    background-image: url(../img/icons/ruby.png);
+}
+.file.ext-fla, file.ext-swf {
+    background-image: url(../img/icons/page_white_flash.png);
+}
+.file.ext-css { background-image: url(../img/icons/css.png); }
+.file.ext-doc { background-image: url(../img/icons/page_white_word.png); }
+.file.ext-php { background-image: url(../img/icons/page_white_php.png); }
+.file.ext-jar { background-image: url(../img/icons/page_white_cup.png); }
+.file.ext-pdf { background-image: url(../img/icons/page_white_acrobat.png); }
+.file.ext-ppt { background-image: url(../img/icons/page_white_powerpoint.png); }
+.file.ext-psd { background-image: url(../img/icons/paintbrush.png); }
+.file.ext-rpm { background-image: url(../img/icons/page_white_linux.png); }
+.file.ext-sql { background-image: url(../img/icons/database.png); }

@@ -89,7 +89,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         this.collection.each(function(node) {
             $("<li>")
                 .data('model', node)
-                .addClass(node.get('is_dir') ? 'dir' : 'file')
+                .addClass(node.get('is_dir') ? 'dir' : 'file ext-' + Utils.file_ext(node.get('name')))
                 .append($('<a>', {href: '#'}).append(node.get('name')))
                 .appendTo($list);
         });

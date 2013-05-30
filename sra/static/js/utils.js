@@ -55,6 +55,9 @@ define(function() {
             link.rel = "stylesheet";
             link.href = url;
             document.getElementsByTagName("head")[0].appendChild(link);
+        },
+        file_ext: function(path) {
+            return path.split('.').pop();
         }
     };
 });
