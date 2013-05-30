@@ -9,26 +9,11 @@
     <link type="text/css" rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="static/css/global.css" />
     <script data-main="static/js/main" src="static/js/lib/require.min.js"></script>
-    <!-- library deps -->
-    <!-- <script src="static/js/lib/jquery-1.9.1.min.js"></script> -->
-    <!-- <script src="static/js/lib/underscore-min.js"></script> -->
-    <!-- <script src="static/js/lib/backbone-min.js"></script> -->
-    <!-- <script src="static/bootstrap/js/bootstrap.min.js"></script> -->
-    <!-- SyntaxHighlighter -->
-    <!-- <script src="static/syntaxhighlighter/scripts/shCore.js"></script> -->
-    <!-- <script src="static/syntaxhighlighter/scripts/shAutoloader.js"></script> -->
-    <!-- <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shCore.css" /> -->
-    <!-- <link type="text/css" rel="stylesheet" href="static/syntaxhighlighter/styles/shThemeDefault.css" /> -->
-    <!-- jqueryFileTree -->
-    <!-- <link type="text/css" rel="stylesheet" href="static/jqueryFileTree/jqueryFileTree.css" /> -->
-    <!-- <script src="static/jqueryFileTree/jqueryFileTree.js"></script> -->
-    <!-- application code -->
     <script type="text/javascript">
         var root = "${root}";
         var root_name = "${root_name}";
         var metadata_prefix = "${metadata_prefix}";
     </script>
-    <!-- <script src="static/js/app.js"></script> -->
 </head>
 
 <body>
@@ -39,6 +24,7 @@
 				<div>
 					<a href="/"><img src="static/img/mini_logo.png" alt="iPlant Datastore"></a>
 					<a id="site-title" href="/">iPlant Datastore</a>
+                    <a id="wiki-link" href="https://pods.iplantcollaborative.org/wiki/x/EQ_Z">How does it work?</a>
 				</div>
 			</div>
 		</div>
@@ -66,19 +52,6 @@
         Silk Icons by <a href="http://www.famfamfam.com/">Mark James</a>
         </p>
     </div>
-
-	<div class="modal hide fade" id="file-modal">
-	  <div class="modal-header">
-	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	    <h3>Modal header</h3>
-	  </div>
-	  <div class="modal-body">
-	    <p>One fine body…</p>
-	  </div>
-	  <div class="modal-footer">
-	    <a href="#" class="btn btn-primary download-file">Download</a>
-	  </div>
-	</div>
 
 </body>
 </html>

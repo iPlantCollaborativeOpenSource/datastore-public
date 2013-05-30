@@ -126,8 +126,7 @@ ul.jqueryFileTree li {
 	margin: 0 auto;
     width: 980px;
 }
-#header a {
-	cursor: pointer;
+#site-title {
 	color: #0098aa;
 	font-weight: normal;
 }
@@ -155,6 +154,15 @@ ul.jqueryFileTree li {
 	max-width: 100%;
 	max-height: 100px;
 	height: 28px;
+}
+
+#wiki-link {
+    float: right;
+    line-height: 28px;
+    color: #eee;
+}
+#wiki-link:hover {
+    color: #fff;
 }
 
 
