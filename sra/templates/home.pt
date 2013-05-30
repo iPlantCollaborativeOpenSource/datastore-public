@@ -24,7 +24,7 @@
 				<div>
 					<a href="/"><img src="static/img/mini_logo.png" alt="iPlant Datastore"></a>
 					<a id="site-title" href="/">iPlant Datastore</a>
-                    <a id="wiki-link" href="https://pods.iplantcollaborative.org/wiki/x/EQ_Z">How does it work?</a>
+                    <!--<a id="wiki-link" href="https://pods.iplantcollaborative.org/wiki/x/EQ_Z">How does it work?</a>-->
 				</div>
 			</div>
 		</div>
