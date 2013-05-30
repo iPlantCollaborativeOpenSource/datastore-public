@@ -112,13 +112,9 @@ Datastore.Views.FileView = Backbone.View.extend({
     render: function() {
         this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
         this.$el.append(
-            $("<dl>")
-                .append($("<dt>").append("Checksum:"))
-                .append($("<dd>").append(this.model.get('checksum')))
-                .append($("<dt>").append("Created:"))
-                .append($("<dd>").append(this.model.get('create_time').format('lll')))
-                .append($("<dt>").append("Last Modified:"))
-                .append($("<dd>").append(this.model.get('modify_time').format('lll')))
+            $("<div>")
+                .addClass('no-preview')
+                .append("No preview available")
         );
         return this;
     }
