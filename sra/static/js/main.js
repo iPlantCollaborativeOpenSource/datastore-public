@@ -5,6 +5,7 @@ require.config({
         'underscore': 'lib/underscore-min',
         'moment': 'lib/moment.min',
         'shCore': '../syntaxhighlighter/scripts/shCore',
+        'bootstrap': '../bootstrap/js/bootstrap.min',
         // default brushes
         'shBrushCss': '../syntaxhighlighter/scripts/shBrushCss',
         'shBrushJava': '../syntaxhighlighter/scripts/shBrushJava',
@@ -24,6 +25,9 @@ require.config({
         },
         underscore: {
             exports: '_'
+        },
+        bootstrap: {
+            deps: ['jquery']
         },
         shCore: {
             exports: 'SyntaxHighlighter'

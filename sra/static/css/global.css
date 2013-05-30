@@ -236,6 +236,7 @@ ul.jqueryFileTree li {
 #file-scroller-inner > div {
     width: 940px;
     float: left;
+    min-height: 400px;
 }
 
 #breadcrumbs {

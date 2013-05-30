@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'backbone', 'utils', 'moment'], function($, _, Backbone, Utils, moment) {
+define(['jquery', 'underscore', 'backbone', 'utils', 'moment', 'bootstrap'], function($, _, Backbone, Utils, moment, _bootstrap) {
 
 var Datastore = {
     Models: {},
@@ -7,7 +7,6 @@ var Datastore = {
     Events: {},
     Contexts: {}
 };
-
 
 // A Node is a filesystem node--a file or directory
 Datastore.Models.Node = Backbone.Model.extend({  
@@ -65,7 +64,6 @@ Datastore.Collections.NodeCollection = Backbone.Collection.extend({
         this.path = options.path;
     }
 });
-
 
 // The default view for a directory if no template is associated with it
 Datastore.Views.NodeListView = Backbone.View.extend({
@@ -255,8 +253,21 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                 .append($("<div>", {'class': 'btn-group'})
                     .append(
                         $('<a>', {
+                            'class': 'btn file-info-button'
+                        })
+                            .append($('<i>', {'class': 'icon-info-sign'}))
+                            .append(' Info')
+                            .popover({
+                                html: true, 
+                                placement: 'bottom', 
+                                title: this.model.get('name'),
+                                content: _.bind(this.file_info, this),
+                                afterShow: _.bind(this.highlight_link, this)
+                            })
+                    )
+                    .append(
+                        $('<a>', {
                             'class': 'btn btn-primary', 
-                            'type': 'button',
                             'href': this.model.get('download_url')
                         })
                             .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
@@ -265,6 +276,22 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                 )
             );
         return this;
+    },
+    file_info: function() {
+        //return "HELLO";
+        return $("<dl>")
+            .addClass('file-info')
+            .append($("<dt>").append("Link:"))
+            .append($("<dd>").append($("<input>", {value: Backbone.history.location.href, type: 'text'})))
+            .append($("<dt>").append("Checksum:"))
+            .append($("<dd>").append(this.model.get('checksum')))
+            .append($("<dt>").append("Created:"))
+            .append($("<dd>").append(this.model.get('create_time').format('lll')))
+            .append($("<dt>").append("Last Modified:"))
+            .append($("<dd>").append(this.model.get('modify_time').format('lll')));
+    },
+    highlight_link: function() {
+        this.$el.find('dl.file-info input').select();
     }
 });
 
@@ -290,6 +317,15 @@ Datastore.Router = Backbone.Router.extend({
         });
     }
 });
+
+// This is a hack to add a callback to bootstrap's popover
+// http://www.silviarebelo.com/2013/03/adding-callbacks-to-twitter-bootstraps-javascript-plugins/
+var pt = $.fn.popover.Constructor.prototype.show;
+$.fn.popover.Constructor.prototype.show = function(){
+    pt.call(this);
+    if (this.options.afterShow)
+        this.options.afterShow();
+}
 
 return Datastore;
 
