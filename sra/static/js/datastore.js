@@ -208,7 +208,6 @@ Datastore.Views.DataApp = Backbone.View.extend({
                     self.$el.parent().animate({
                         scrollLeft: new_view.$el.position().left
                     }, 'fast', function() {
-                        console.log(self.$el);
                         self.$el
                             .children(':not(:last-child)').remove().end()
                             .parent().scrollLeft(0);
