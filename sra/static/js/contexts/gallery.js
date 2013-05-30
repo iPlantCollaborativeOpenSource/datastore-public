@@ -58,7 +58,7 @@ Gallery.Views.Thumbnail = Backbone.View.extend({
     open_image: function(e) {
         e.preventDefault();
         var node = $(e.currentTarget).closest('.thumbnail').data('model'); 
-        Datastore.Events.Breadcrumbs.trigger('push', node.get('file'));
+        Datastore.Events.Traversal.trigger('navigate', node.get('file'));
         return false;
     }
 });
