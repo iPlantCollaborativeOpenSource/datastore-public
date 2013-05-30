@@ -25,8 +25,6 @@ Datastore.Models.Node = Backbone.Model.extend({
             r.children.url = '/api/collection?path=' + encodeURIComponent(obj.path);
         }
         r.root_relative_path = obj.path.replace(root, '');
-        //console.log(obj.path);
-        //console.log(r.is_dir);
         if (obj.is_dir != undefined && obj.is_dir == false)
             r.download_url = '/download' + Utils.urlencode_path(obj.path);
             r.serve_url = '/serve' + Utils.urlencode_path(obj.path);
@@ -42,13 +40,19 @@ Datastore.Models.Node = Backbone.Model.extend({
         //console.log(this.get('root_relative_path'));
         var dirs = this.get('root_relative_path').split('/').splice(1)
         dirs.pop();
-        return _.map(dirs, function(name, i) {
-            return Datastore.Models.Node({
+        console.log(dirs);
+        var ancestors = _.map(dirs, function(name, i) {
+            var rel = '/' + dirs.slice(0, i+1).join('/');
+            return new Datastore.Models.Node({
                 name: name,
-                path: '/' + dirs.slice(0, i+1).join('/'),
-                is_dir: true
+                path: root + rel,
+                is_dir: true,
+                root_relative_path: rel
             });
-        });
+        })
+        ancestors.push(this);
+        console.log(ancestors);
+        return ancestors;
     }
 }); 
 
@@ -126,6 +130,7 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
     },
     initialize: function() {
         Datastore.Events.Traversal.on('navigate', _.bind(this.populate_breadcrumbs, this));
+        this.base_node = this.options.base_node;
         this.$list = null;
     },
     render: function() {
@@ -141,32 +146,16 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
             .append($('<a>', {href: '#'}).append(model.get('name')));
     },
     populate_breadcrumbs: function(model) {
-        console.log(model);
-        console.log(model.get_ancestors());
+        //console.log(model);
+        //console.log(model.get_ancestors());
         this.$list
-            .find('li + li').remove().end()
-            .append(_.map(model.get_ancestors(), this.breadcrumb))
-            .append(this.breadcrumb(model));
+            .empty()
+            .append(this.breadcrumb(this.base_node))
+            .append(_.map(model.get_ancestors(), this.breadcrumb));
     },
-    /*push_dir: function(model) {
-        //this.nodes.push(model);
-        console.log(model);
-        $("<li>")
-            .addClass(model.get('is_dir') ? 'dir' : 'file')
-            .data('model', model)
-            .append($('<a>', {href: '#'}).append(model.get('name')))
-            .appendTo(this.$list);
-    },
-    pop_dir: function() {
-        this.$list.children().last().remove();
-    },*/
     open_dir: function(e) {
-        li = $(e.currentTarget).closest('li');
-        var index = this.$list.children().index(li);
-        var len = this.$list.children().length;
-        var pops = len - index - 1;
-        for (i = 0; i < pops; i++)
-            Datastore.Events.Breadcrumbs.trigger('pop');
+        var model = $(e.currentTarget).closest('li').data('model');
+        Datastore.Events.Traversal.trigger('navigate', model);
     }
 });
 
@@ -292,7 +281,7 @@ Datastore.Router = Backbone.Router.extend({
     index: function() {
         this.baseNode = new Datastore.Models.Node({path: root, name: root_name, is_dir: true});
         this.dataApp = new Datastore.Views.DataApp({el: $('#file-scroller-inner')}).render();
-        this.breadcrumb_view = new Datastore.Views.BreadcrumbView({el: $('#breadcrumbs')}).render();
+        this.breadcrumb_view = new Datastore.Views.BreadcrumbView({el: $('#breadcrumbs'), base_node: this.baseNode}).render();
         Datastore.Events.Traversal.trigger('navigate', this.baseNode);
     }
 });
