@@ -182,7 +182,7 @@ ul.jqueryFileTree li {
 }
 #footer a:link, #footer a:visited, #footer a:active {
 	text-decoration: none;
-	border-bottom: #0298AA dashed 1px;
+	/*border-bottom: #0298AA dashed 1px;*/
 }
 #footer a:hover {
 	text-decoration: none;
@@ -201,7 +201,7 @@ ul.jqueryFileTree li {
     font-style: italic;
     font-size: 2em;
     color: #999;
-    border: 3px dashed #ccc;
+    border: 2px dashed #ccc;
     border-radius: 6px;
     padding: 160px 0;
     margin-top: .5em;
