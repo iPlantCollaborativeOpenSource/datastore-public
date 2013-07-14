@@ -31,6 +31,7 @@ Installation
 ### Datastore 
     cd ~
     git clone git://github.com/iPlantCollaborativeOpenSource/sra.git
+    cd sra
     python setup.py develop
 
 ### Fire it up
