@@ -25,8 +25,8 @@ Installation
     . ~/.bash_profile
 
 ### pycommands
-    git clone git://github.com/cjlarose/pycommands.git
-    pip install -e pycommands
+    git clone https://github.com/iPlantCollaborativeOpenSource/python-irodsclient.git
+    pip install -e python-irodsclient
 
 ### Datastore 
     cd ~
