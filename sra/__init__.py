@@ -21,6 +21,7 @@ def main(global_config, **settings):
         password=settings['irods.password']
     )
     config = Configurator(settings=settings)
+    config.include('pyramid_chameleon')
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
     #config.add_route('studies', '/api/study')
