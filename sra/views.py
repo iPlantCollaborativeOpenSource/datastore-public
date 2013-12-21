@@ -20,6 +20,9 @@ from .models import (
     DataStoreSession,
 )
 from .content_types import content_types
+from sra.file_iterable import FileIterable
+
+logger = logging.getLogger(__name__)
 
 #@view_config(route_name='home', renderer='templates/mytemplate.pt')
 #def my_view(request):
@@ -138,11 +141,23 @@ def download_file(request):
         raise HTTPNotFound()
 
     f = obj.open('r')
+    iterator = FileIterable(f)
+    content_length = obj.size
+    if request.range:
+        cr = request.range.content_range(obj.size)
+        #logger.debug(cr.start)
+        #logger.debug(cr.stop)
+        #logger.debug(cr.length)
+        iterator.start = cr.start
+        iterator.stop = cr.stop
+        content_length = cr.stop - cr.start
+
     return Response(
         content_disposition='attachment; filename="%s"' % obj.name,
         content_type='application/octet-stream', 
-        content_length=obj.size,
-        app_iter=f.read_gen(4096, close=True)()
+        content_length=content_length,
+        accept_ranges='bytes',
+        app_iter=iterator
     )
 
 @view_config(route_name='serve_file')
