@@ -178,7 +178,7 @@ def serve_file(request):
     return Response(
         content_type=content_types[ext],
         content_length=obj.size,
-        app_iter=f.read_gen(4096, close=True)()
+        app_iter=FileIterable(f)
     )
 
 @view_config(route_name='markdown')
