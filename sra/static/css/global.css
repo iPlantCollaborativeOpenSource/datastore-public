@@ -329,7 +329,6 @@ ul.jqueryFileTree li {
     border-left-width: 0;
 }
 .data-object-header .file-action {
-    width: 200px;
     float: right;
     text-align: right;
 }

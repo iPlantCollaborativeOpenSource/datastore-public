@@ -27,9 +27,9 @@ Datastore.Models.Node = Backbone.Model.extend({
 
         r.root_relative_path = obj.path.replace(root, '');
 
-        r.metadata = Utils.metadata_to_object(obj.metadata);
-        if (r.metadata[metadata_prefix])
-            r.template_metadata = r.metadata[metadata_prefix];
+        var metadata = Utils.metadata_to_object(obj.metadata);
+        if (metadata[metadata_prefix])
+            r.template_metadata = metadata[metadata_prefix];
 
         r.create_time = moment.unix(obj.create_time);
         r.modify_time = moment.unix(obj.modify_time);;
@@ -261,6 +261,16 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                                 afterShow: _.bind(this.highlight_link, this)
                             })
                     )
+                    .append($('<a>', {'class': 'btn file-info-button'})
+                            .append($('<i>', {'class': 'icon-list'}))
+                            .append(' Metadata')
+                            .popover({
+                                html: true, 
+                                placement: 'bottom', 
+                                title: this.model.get('name'),
+                                content: _.bind(this.metadata, this)
+                            })
+                    )
                     .append(
                         $('<a>', {
                             'class': 'btn btn-primary', 
@@ -274,7 +284,6 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
         return this;
     },
     file_info: function() {
-        //return "HELLO";
         return $("<dl>")
             .addClass('file-info')
             .append($("<dt>").append("Download Link:"))
@@ -291,6 +300,21 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
     },
     highlight_link: function() {
         this.$el.find('dl.file-info input').select();
+    },
+    metadata: function() {
+        var metadata = this.model.get('metadata');
+        if (metadata.length > 0) {
+            var dl = $("<dl>").addClass('file-info');
+            _.each(metadata, function(m) {
+                dl.append($("<dt>").append(m['name'] + ':'));
+                var dd_content = m['value'];
+                if (m['units'])
+                    dd_content += "<br /><em>Units: "+m['units']+"</em>";
+                dl.append($("<dd>").append(dd_content));
+            });
+            return dl;
+        } else 
+            return "No metadata.";
     }
 });
 
