@@ -21,9 +21,13 @@ Datastore.Models.Node = Backbone.Model.extend({
         r = {}
         if (obj.is_dir)
             r.children = new Datastore.Collections.NodeCollection([], {path: obj.path});
-        if (obj.is_dir != undefined && obj.is_dir == false)
-            r.download_url = '/download' + Utils.urlencode_path(obj.path);
-            r.serve_url = '/serve' + Utils.urlencode_path(obj.path);
+
+        var encoded_path = Utils.urlencode_path(obj.path);
+        if (obj.is_dir != undefined && obj.is_dir == false) {
+            r.download_url = '/download' + encoded_path;
+            r.serve_url = '/serve' + encoded_path;
+        }
+        r.browse_url = '/browse' + encoded_path;
 
         r.root_relative_path = obj.path.replace(root, '');
 
@@ -47,7 +51,8 @@ Datastore.Models.Node = Backbone.Model.extend({
                 name: name,
                 path: root + rel,
                 is_dir: true,
-                root_relative_path: rel
+                root_relative_path: rel,
+                browse_url: "/browse" + Utils.urlencode_path(root + rel)
             });
         })
         ancestors.push(this);
@@ -84,11 +89,12 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         this.$el.empty();
         $list = $("<ul>", {'class': 'node-list'});
         //console.log(this);
+        console.log(this.collection);
         this.collection.each(function(node) {
             $("<li>")
                 .data('model', node)
                 .addClass(node.get('is_dir') ? 'dir' : 'file ext-' + Utils.file_ext(node.get('name')))
-                .append($('<a>', {href: '#'}).append(node.get('name')))
+                .append($('<a>', {href: node.get('browse_url')}).append(node.get('name')))
                 .appendTo($list);
         });
         this.$el.append($list);
@@ -148,10 +154,11 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
         return this;
     },
     breadcrumb: function(model) {
+        console.log(model.browse_url);
         return $("<li>")
             .addClass(model.get('is_dir') ? 'dir' : 'file')
             .data('model', model)
-            .append($('<a>', {href: '#'}).append(model.get('name')));
+            .append($('<a>', {href: model.get('browse_url')}).append(model.get('name')));
     },
     populate_breadcrumbs: function(model) {
         //console.log(model);

@@ -63,7 +63,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             this.$el
                 .empty()
                 .append(
-                    $('<a>', {href: '#'/*'#study/' + model.id*/})
+                    $('<a>', {href: this.model.get('browse_url')})
                         .append($('<span>', {'class': 'study-id'}).append(this.model.id))
                         .append($('<span>', {'class': 'study-title'}).append(this.model.get('title') || '&nbsp;'))
                 )
@@ -92,7 +92,8 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
                     return new SRA.Models.Study({
                         id: model.get('name'),
                         path: model.get('path'),
-                        file: model
+                        file: model,
+                        browse_url: Utils.urlencode_path(model.get('browse_url'))
                     });
                 });
                 study_collection.reset(models);
