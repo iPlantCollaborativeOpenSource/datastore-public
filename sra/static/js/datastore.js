@@ -126,7 +126,7 @@ Datastore.Events.Traversal = _.extend({}, Backbone.Events);
 
 Datastore.Events.Traversal.on('navigate', function(model) {
     if (model.get('root_relative_path'))
-        Backbone.history.navigate(model.get('root_relative_path').slice(1));
+        Backbone.history.navigate('browse/' + model.get('root_relative_path').slice(1));
     else
         Backbone.history.navigate("");
 });
@@ -215,7 +215,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 var view;
                 //console.log(model.get('is_dir'));
                 if (template) {
-                    require(['static/js/contexts/' + template + '.js'], function(Context) {
+                    require(['/static/js/contexts/' + template + '.js'], function(Context) {
                         view = Context.Views.MainView;   
                         view_options = model.get('template_metadata')['template_options'] || {};
                         append_view(view, view_options);
@@ -321,7 +321,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
 Datastore.Router = Backbone.Router.extend({
     routes: {
         "": "index",
-        "*path": "expand"
+        "browse/*path": "expand"
     },
     initialize: function() {
         this.baseNode = new Datastore.Models.Node({path: root, name: root_name, is_dir: true});
