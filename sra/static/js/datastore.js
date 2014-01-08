@@ -89,7 +89,6 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         this.$el.empty();
         $list = $("<ul>", {'class': 'node-list'});
         //console.log(this);
-        console.log(this.collection);
         this.collection.each(function(node) {
             $("<li>")
                 .data('model', node)
@@ -154,7 +153,6 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
         return this;
     },
     breadcrumb: function(model) {
-        console.log(model.browse_url);
         return $("<li>")
             .addClass(model.get('is_dir') ? 'dir' : 'file')
             .data('model', model)
