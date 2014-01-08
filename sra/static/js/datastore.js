@@ -21,9 +21,13 @@ Datastore.Models.Node = Backbone.Model.extend({
         r = {}
         if (obj.is_dir)
             r.children = new Datastore.Collections.NodeCollection([], {path: obj.path});
-        if (obj.is_dir != undefined && obj.is_dir == false)
-            r.download_url = '/download' + Utils.urlencode_path(obj.path);
-            r.serve_url = '/serve' + Utils.urlencode_path(obj.path);
+
+        var encoded_path = Utils.urlencode_path(obj.path);
+        if (obj.is_dir != undefined && obj.is_dir == false) {
+            r.download_url = '/download' + encoded_path;
+            r.serve_url = '/serve' + encoded_path;
+        }
+        r.browse_url = '/browse' + encoded_path;
 
         r.root_relative_path = obj.path.replace(root, '');
 
@@ -47,7 +51,8 @@ Datastore.Models.Node = Backbone.Model.extend({
                 name: name,
                 path: root + rel,
                 is_dir: true,
-                root_relative_path: rel
+                root_relative_path: rel,
+                browse_url: "/browse" + Utils.urlencode_path(root + rel)
             });
         })
         ancestors.push(this);
@@ -88,7 +93,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
             $("<li>")
                 .data('model', node)
                 .addClass(node.get('is_dir') ? 'dir' : 'file ext-' + Utils.file_ext(node.get('name')))
-                .append($('<a>', {href: '#'}).append(node.get('name')))
+                .append($('<a>', {href: node.get('browse_url')}).append(node.get('name')))
                 .appendTo($list);
         });
         this.$el.append($list);
@@ -125,8 +130,8 @@ Datastore.Views.FileView = Backbone.View.extend({
 Datastore.Events.Traversal = _.extend({}, Backbone.Events);
 
 Datastore.Events.Traversal.on('navigate', function(model) {
-    if (model.get('root_relative_path'))
-        Backbone.history.navigate(model.get('root_relative_path').slice(1));
+    if (model.get('path'))
+        Backbone.history.navigate('browse' + model.get('path'));
     else
         Backbone.history.navigate("");
 });
@@ -151,7 +156,7 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
         return $("<li>")
             .addClass(model.get('is_dir') ? 'dir' : 'file')
             .data('model', model)
-            .append($('<a>', {href: '#'}).append(model.get('name')));
+            .append($('<a>', {href: model.get('browse_url')}).append(model.get('name')));
     },
     populate_breadcrumbs: function(model) {
         //console.log(model);
@@ -215,7 +220,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 var view;
                 //console.log(model.get('is_dir'));
                 if (template) {
-                    require(['static/js/contexts/' + template + '.js'], function(Context) {
+                    require(['/static/js/contexts/' + template + '.js'], function(Context) {
                         view = Context.Views.MainView;   
                         view_options = model.get('template_metadata')['template_options'] || {};
                         append_view(view, view_options);
@@ -321,7 +326,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
 Datastore.Router = Backbone.Router.extend({
     routes: {
         "": "index",
-        "*path": "expand"
+        "browse/*path": "expand"
     },
     initialize: function() {
         this.baseNode = new Datastore.Models.Node({path: root, name: root_name, is_dir: true});
@@ -332,7 +337,7 @@ Datastore.Router = Backbone.Router.extend({
         Datastore.Events.Traversal.trigger('navigate', this.baseNode);
     },
     expand: function(path) {
-        var node = new Datastore.Models.Node({path: root + '/' + path});
+        var node = new Datastore.Models.Node({path: '/' + decodeURIComponent(path)});
         node.fetch({
             success: function(model) {
                 Datastore.Events.Traversal.trigger('navigate', model);

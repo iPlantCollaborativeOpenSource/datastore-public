@@ -24,6 +24,7 @@ def main(global_config, **settings):
     config.include('pyramid_chameleon')
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
+    config.add_route('browse', '/browse/*path')
     #config.add_route('studies', '/api/study')
     #config.add_route('study', '/api/study/{study_id}')
     config.add_route('file_tree', '/api/ls')

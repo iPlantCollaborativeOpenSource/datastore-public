@@ -40,7 +40,7 @@ Gallery.Views.Thumbnail = Backbone.View.extend({
         $("<div>", {'class': 'thumbnail'})
             .data('model', this.model)
             .append(
-                $('<a>', {href: '#', 'class': 'thumbnail-link'})
+                $('<a>', {href: this.model.get('browse_url'), 'class': 'thumbnail-link'})
                     .append($("<img>", {
                         src: this.model.get('thumbnail_src')
                     }))
@@ -92,7 +92,8 @@ Gallery.Views.MainView = Backbone.View.extend({
                     src: "/serve" + Utils.urlencode_path(model.get('path')),
                     thumbnail_src: "/serve" + Utils.urlencode_path(get_thumb(model.get('path'))),
                     download_url: model.get('download_url'),
-                    file: model
+                    file: model,
+                    browse_url: model.get('browse_url')
                 });
             });
             photo_collection.reset(models);

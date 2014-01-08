@@ -1,22 +1,22 @@
 require.config({
     paths: {
-        'jquery': 'lib/jquery-1.9.1.min',
-        'backbone': 'lib/backbone-min',
-        'underscore': 'lib/underscore-min',
-        'moment': 'lib/moment.min',
-        'shCore': '../syntaxhighlighter/scripts/shCore',
-        'bootstrap': '../bootstrap/js/bootstrap.min',
+        'jquery': '/static/js/lib/jquery-1.9.1.min',
+        'backbone': '/static/js/lib/backbone-min',
+        'underscore': '/static/js/lib/underscore-min',
+        'moment': '/static/js/lib/moment.min',
+        'shCore': '/static/syntaxhighlighter/scripts/shCore',
+        'bootstrap': '/static//bootstrap/js/bootstrap.min',
         // default brushes
-        'shBrushCss': '../syntaxhighlighter/scripts/shBrushCss',
-        'shBrushJava': '../syntaxhighlighter/scripts/shBrushJava',
-        'shBrushPerl': '../syntaxhighlighter/scripts/shBrushPerl',
-        'shBrushPhp': '../syntaxhighlighter/scripts/shBrushPhp',
-        'shBrushPlain': '../syntaxhighlighter/scripts/shBrushPlain',
-        'shBrushPython': '../syntaxhighlighter/scripts/shBrushPython',
-        'shBrushRuby': '../syntaxhighlighter/scripts/shBrushRuby',
-        'shBrushXml': '../syntaxhighlighter/scripts/shBrushXml',
+        'shBrushCss': '/static/syntaxhighlighter/scripts/shBrushCss',
+        'shBrushJava': '/static/syntaxhighlighter/scripts/shBrushJava',
+        'shBrushPerl': '/static/syntaxhighlighter/scripts/shBrushPerl',
+        'shBrushPhp': '/static/syntaxhighlighter/scripts/shBrushPhp',
+        'shBrushPlain': '/static/syntaxhighlighter/scripts/shBrushPlain',
+        'shBrushPython': '/static/syntaxhighlighter/scripts/shBrushPython',
+        'shBrushRuby': '/static/syntaxhighlighter/scripts/shBrushRuby',
+        'shBrushXml': '/static/syntaxhighlighter/scripts/shBrushXml',
         // custom brushes
-        'shBrushFasta': 'brushes/shBrushFasta',
+        'shBrushFasta': '/static/js/brushes/shBrushFasta',
     },
     shim: {
         backbone: {
@@ -47,6 +47,6 @@ require.config({
 require(['backbone', 'jquery', 'datastore'], function(Backbone, $, Datastore) {
     $(document).ready(function() {
         var app = new Datastore.Router();
-        Backbone.history.start();
+        Backbone.history.start({pushState: true});
     });
 });
