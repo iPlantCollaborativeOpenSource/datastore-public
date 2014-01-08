@@ -1,4 +1,4 @@
-define(function() {
+define(['jquery'], function($) {
     return {
         urlencode_path: function(path) {
             return _.map(path.split('/'), encodeURIComponent).join('/');
@@ -58,6 +58,11 @@ define(function() {
         },
         file_ext: function(path) {
             return path.split('.').pop();
+        },
+        format_time: function(time) {
+            return $("<time>")
+                .attr('datetime', time.utc().format())
+                .append(time.utc().format('MMM D, YYYY HH:mm:ss UTC'));
         }
     };
 });

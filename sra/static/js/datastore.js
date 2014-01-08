@@ -299,9 +299,9 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
             .append($("<dt>").append("Checksum:"))
             .append($("<dd>").append(this.model.get('checksum')))
             .append($("<dt>").append("Created:"))
-            .append($("<dd>").append(this.model.get('create_time').format('lll')))
+            .append($("<dd>").append(Utils.format_time(this.model.get('create_time'))))
             .append($("<dt>").append("Last Modified:"))
-            .append($("<dd>").append(this.model.get('modify_time').format('lll')));
+            .append($("<dd>").append(Utils.format_time(this.model.get('modify_time'))));
     },
     highlight_link: function() {
         this.$el.find('dl.file-info input').select();
