@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 #    return {'one': one, 'project': 'sra'}
 
 @view_config(route_name='home', renderer='templates/home.pt')
+@view_config(route_name='browse', renderer='templates/home.pt')
 def home(request):
     return {
         'root': request.registry.settings['irods.path'],

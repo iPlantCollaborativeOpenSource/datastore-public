@@ -332,9 +332,7 @@ Datastore.Router = Backbone.Router.extend({
         Datastore.Events.Traversal.trigger('navigate', this.baseNode);
     },
     expand: function(path) {
-        // this should break when the this is the first page loaded
-        // remember, too, that path will be url encoded
-        var node = new Datastore.Models.Node({path: root + '/' + path});
+        var node = new Datastore.Models.Node({path: '/' + decodeURIComponent(path)});
         node.fetch({
             success: function(model) {
                 Datastore.Events.Traversal.trigger('navigate', model);

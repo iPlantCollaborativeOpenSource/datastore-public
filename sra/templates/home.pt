@@ -5,10 +5,10 @@
     <title>iPlant Datastore</title>
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="static/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
-    <link type="text/css" rel="stylesheet" href="static/css/global.css" />
-    <script data-main="static/js/main" src="static/js/lib/require.min.js"></script>
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/css/global.css" />
+    <script data-main="/static/js/main" src="/static/js/lib/require.min.js"></script>
     <script type="text/javascript">
         var root = "${root}";
         var root_name = "${root_name}";
@@ -22,7 +22,7 @@
 		<div id="header">
 			<div id="logo_container">
 				<div>
-					<a href="/"><img src="static/img/mini_logo.png" alt="iPlant Datastore"></a>
+					<a href="/"><img src="/static/img/mini_logo.png" alt="iPlant Datastore"></a>
 					<a id="site-title" href="/">iPlant Datastore</a>
                     <!--<a id="wiki-link" href="https://pods.iplantcollaborative.org/wiki/x/EQ_Z">How does it work?</a>-->
 				</div>
