@@ -62,7 +62,7 @@ def get_collection(request):
     if not 'path' in request.GET:
         raise HTTPBadRequest()
     path = request.GET['path']
-    logging.debug(path)
+    logger.debug(path)
 
     try:
         obj = DataStoreSession.collections.get(str(path))
@@ -94,8 +94,8 @@ def get_children(request):
     collection = DataStoreSession.collections.get(str(path))
     sub_collections = collection.subcollections
     objects = collection.data_objects
-    print sub_collections
-    print objects
+    logger.debug(sub_collections)
+    logger.debug(objects)
 
     def format_subcoll(coll):
         return {
