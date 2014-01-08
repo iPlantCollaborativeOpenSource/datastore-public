@@ -47,6 +47,6 @@ require.config({
 require(['backbone', 'jquery', 'datastore'], function(Backbone, $, Datastore) {
     $(document).ready(function() {
         var app = new Datastore.Router();
-        Backbone.history.start();
+        Backbone.history.start({pushState: true});
     });
 });
