@@ -125,8 +125,8 @@ Datastore.Views.FileView = Backbone.View.extend({
 Datastore.Events.Traversal = _.extend({}, Backbone.Events);
 
 Datastore.Events.Traversal.on('navigate', function(model) {
-    if (model.get('root_relative_path'))
-        Backbone.history.navigate('browse/' + model.get('root_relative_path').slice(1));
+    if (model.get('path'))
+        Backbone.history.navigate('browse' + model.get('path'));
     else
         Backbone.history.navigate("");
 });
@@ -332,6 +332,8 @@ Datastore.Router = Backbone.Router.extend({
         Datastore.Events.Traversal.trigger('navigate', this.baseNode);
     },
     expand: function(path) {
+        // this should break when the this is the first page loaded
+        // remember, too, that path will be url encoded
         var node = new Datastore.Models.Node({path: root + '/' + path});
         node.fetch({
             success: function(model) {
