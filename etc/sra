@@ -1,0 +1,14 @@
+# Use only 1 Python sub-interpreter.  Multiple sub-interpreters
+# play badly with C extensions.  See
+# http://stackoverflow.com/a/10558360/209039
+WSGIApplicationGroup %{GLOBAL}
+WSGIPassAuthorization On
+WSGIDaemonProcess pyramid user=datastore group=datastore threads=4 \
+   python-path=/home/datastore/env/lib/python2.7/site-packages
+WSGIScriptAlias / /home/datastore/env/pyramid.wsgi
+
+<Directory /home/datastore/env>
+  WSGIProcessGroup pyramid
+  Order allow,deny
+  Allow from all
+</Directory>

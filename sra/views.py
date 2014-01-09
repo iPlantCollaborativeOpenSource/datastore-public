@@ -5,7 +5,7 @@ from calendar import timegm
 
 from pyramid.response import Response
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound, HTTPNotImplemented
+from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound, HTTPNotImplemented, HTTPFound
 
 import markdown
 
@@ -203,6 +203,34 @@ def as_markdown(request):
         content_type='text/html',
         content_length=len(html)
     )
+
+@view_config(route_name='legacy')
+def redirect_legacy_urls(request):
+    """
+    The old mirror site supported URLs of the form
+    http://mirrors.iplantcollaborative.org//iplant_public_test/analyses
+    for viewing directories, and
+    http://mirrors.iplantcollaborative.org//iplant_public_test/status.php
+    for download files.
+    This redirects the former to /browse/path/to/dir and the latter to
+    /download/path/to/file. Returns 404 if it's a bad path
+    """
+    path = request.matchdict['path']
+    path = request.registry.settings['irods.path'] + '/' + path
+
+    # TODO: stop using try/except for flow control
+    try:
+        obj = DataStoreSession.collections.get(str(path))
+        logger.warn("Legacy URL for path %s satisfied from referer %s" % (path, request.referer))
+        raise HTTPFound("/browse" + path)
+    except CollectionDoesNotExist:
+        try:
+            obj = DataStoreSession.data_objects.get(str(path))
+            logger.warn("Legacy URL for path %s satisfied from referer %s" % (path, request.referer))
+            raise HTTPFound("/download" + path)
+        except DataObjectDoesNotExist:
+            logger.warn("Legacy URL for path %s not satisfied from referer %s" % (path, request.referer))
+            raise HTTPNotFound("File does not exist")
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
