@@ -216,9 +216,7 @@ def redirect_legacy_urls(request):
     /download/path/to/file. Returns 404 if it's a bad path
     """
     path = request.matchdict['path']
-    logger.debug(path)
     path = request.registry.settings['irods.path'] + '/' + path
-    logger.debug(path)
 
     # TODO: stop using try/except for flow control
     try:
