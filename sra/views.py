@@ -221,20 +221,16 @@ def redirect_legacy_urls(request):
     # TODO: stop using try/except for flow control
     try:
         obj = DataStoreSession.collections.get(str(path))
-        logger.info("Legacy URL for path %s satisfied from referer %s" % (path, request.referer))
-        logger.debug("found dir")
+        logger.warn("Legacy URL for path %s satisfied from referer %s" % (path, request.referer))
         raise HTTPFound("/browse" + path)
     except CollectionDoesNotExist:
         try:
             obj = DataStoreSession.data_objects.get(str(path))
-            logger.debug("found file")
+            logger.warn("Legacy URL for path %s satisfied from referer %s" % (path, request.referer))
             raise HTTPFound("/download" + path)
         except DataObjectDoesNotExist:
+            logger.warn("Legacy URL for path %s not satisfied from referer %s" % (path, request.referer))
             raise HTTPNotFound("File does not exist")
-
-    logger.warn("Legacy URL for path %s not satisfied from referer %s" % (path, request.referer))
-
-    raise HTTPNotFound("File does not exist")
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
