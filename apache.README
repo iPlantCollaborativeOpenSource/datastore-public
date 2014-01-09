@@ -9,5 +9,6 @@ cp /home/datastore/sra/etc/sra /etc/apache2/sites-available/sra
 
 a2dissite default
 a2ensite sra
-service apache2 reload
+a2enmod rewrite
+service apache2 restart
 ```
