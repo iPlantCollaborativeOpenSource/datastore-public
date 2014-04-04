@@ -8,7 +8,7 @@
     <link rel="shortcut icon" href="/static/favicon.ico" />
     <link type="text/css" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="/static/css/global.css" />
-    <script data-main="/static/js/main" src="/static/js/lib/require.min.js"></script>
+    <script data-main="/static/js/main" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
     <script type="text/javascript">
         var root = "${root}";
         var root_name = "${root_name}";

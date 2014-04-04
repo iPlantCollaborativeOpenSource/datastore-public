@@ -1,9 +1,9 @@
 require.config({
     paths: {
-        'jquery': '/static/js/lib/jquery-1.9.1.min',
-        'backbone': '/static/js/lib/backbone-min',
-        'underscore': '/static/js/lib/underscore-min',
-        'moment': '/static/js/lib/moment.min',
+        'jquery': '//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery',
+        'backbone': '//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min',
+        'underscore': '//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min',
+        'moment': '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min',
         'shCore': '/static/syntaxhighlighter/scripts/shCore',
         'bootstrap': '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap',
         // default brushes
