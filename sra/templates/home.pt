@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="/static/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="/static/css/global.css" />
     <script data-main="/static/js/main" src="/static/js/lib/require.min.js"></script>
     <script type="text/javascript">

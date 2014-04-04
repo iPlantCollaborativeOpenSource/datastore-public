@@ -5,7 +5,7 @@ require.config({
         'underscore': '/static/js/lib/underscore-min',
         'moment': '/static/js/lib/moment.min',
         'shCore': '/static/syntaxhighlighter/scripts/shCore',
-        'bootstrap': '/static//bootstrap/js/bootstrap.min',
+        'bootstrap': '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap',
         // default brushes
         'shBrushCss': '/static/syntaxhighlighter/scripts/shBrushCss',
         'shBrushJava': '/static/syntaxhighlighter/scripts/shBrushJava',
