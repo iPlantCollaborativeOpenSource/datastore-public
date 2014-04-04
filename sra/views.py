@@ -24,14 +24,6 @@ from sra.file_iterable import FileIterable
 
 logger = logging.getLogger(__name__)
 
-#@view_config(route_name='home', renderer='templates/mytemplate.pt')
-#def my_view(request):
-#    try:
-#        one = DBSession.query(MyModel).filter(MyModel.name == 'one').first()
-#    except DBAPIError:
-#        return Response(conn_err_msg, content_type='text/plain', status_int=500)
-#    return {'one': one, 'project': 'sra'}
-
 @view_config(route_name='home', renderer='templates/home.pt')
 @view_config(route_name='browse', renderer='templates/home.pt')
 def home(request):
@@ -41,22 +33,6 @@ def home(request):
         'metadata_prefix': request.registry.settings['datastore.metadata_prefix'],
         'year': date.today().year,
     }
-
-# deprecated
-#@view_config(route_name='studies', renderer='json')
-#def show_studies(request):
-#    def format_study(study):
-#        return {
-#            'id': study.name,
-#            'path': study.path,
-#            'url': request.route_path('study', study_id=study.name),
-#            'title': study.metadata.getone('title')[0],
-#            'abstract': study.metadata.getone('abstract')[0],
-#            'description': study.metadata.getone('description')[0] if 'description' in study.metadata else None,
-#        }
-#
-#    collection = DataStoreSession.get_collection(request.registry.settings['irods.path'] + '/sra')
-#    return map(format_study, collection.get_subcollections())
 
 @view_config(route_name='file', renderer='json')
 def get_collection(request):
@@ -72,6 +48,8 @@ def get_collection(request):
             obj = DataStoreSession.data_objects.get(str(path))
         except DataObjectDoesNotExist:
             raise HTTPNotFound()
+
+    logger.debug(obj)
 
     response = {
         'name': obj.name,
@@ -107,31 +85,6 @@ def get_children(request):
 
     return map(format_subcoll, sub_collections + objects)
     
-@view_config(route_name='file_tree')
-def file_tree(request):
-    if not 'dir' in request.POST:
-        raise HTTPBadRequest()
-    dir_name = str(request.POST['dir'])
-    if dir_name[-1] == '/':
-        dir_name = dir_name[:-1]
-
-    try:
-        coll = DataStoreSession.collections.get(dir_name)
-    except CollectionDoesNotExist:
-        raise HTTPNotFound()
-
-    def coll_to_li(coll):
-        return '<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (coll.path, coll.name)
-
-    def file_obj_to_li(f):
-        ext = splitext(f.name)[1][1:]
-        return '<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (ext, f.path, f.name)
-
-    resp = "\n".join(map(coll_to_li, coll.subcollections) + map(file_obj_to_li, coll.data_objects))
-    
-    resp = '<ul class="jqueryFileTree" style="display: none;">' + resp + '</ul>'
-    return Response(resp)
-
 @view_config(route_name='download_file')
 def download_file(request):
     path = request.matchdict['path']
@@ -231,20 +184,3 @@ def redirect_legacy_urls(request):
         except DataObjectDoesNotExist:
             logger.warn("Legacy URL for path %s not satisfied from referer %s" % (path, request.referer))
             raise HTTPNotFound("File does not exist")
-
-conn_err_msg = """\
-Pyramid is having a problem using your SQL database.  The problem
-might be caused by one of the following things:
-
-1.  You may need to run the "initialize_sra_db" script
-    to initialize your database tables.  Check your virtual 
-    environment's "bin" directory for this script and try to run it.
-
-2.  Your database server may not be running.  Check that the
-    database server referred to by the "sqlalchemy.url" setting in
-    your "development.ini" file is running.
-
-After you fix the problem, please restart the Pyramid application to
-try it again.
-"""
-
