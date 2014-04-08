@@ -31,7 +31,7 @@ Installation
 ### Datastore 
     cd ~
     git clone git://github.com/iPlantCollaborativeOpenSource/datastore-public.git
-    cd sra
+    cd datastore-public
     python setup.py develop
 
 ### Fire it up
