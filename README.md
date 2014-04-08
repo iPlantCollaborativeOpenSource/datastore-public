@@ -35,4 +35,4 @@ Installation
     python setup.py develop
 
 ### Fire it up
-    sudo ~/env/sra/bin/pserve production.ini --log-file=sra.log --daemon
+    sudo ~/env/bin/pserve production.ini --log-file=irods-public.log --daemon
