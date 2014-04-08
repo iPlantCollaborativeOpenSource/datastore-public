@@ -1,5 +1,5 @@
-sra README
-==================
+Public Datastore Interface
+==========================
 
 Prerequisites
 -------------------------
@@ -30,7 +30,7 @@ Installation
 
 ### Datastore 
     cd ~
-    git clone git://github.com/iPlantCollaborativeOpenSource/sra.git
+    git clone git://github.com/iPlantCollaborativeOpenSource/datastore-public.git
     cd sra
     python setup.py develop
 
