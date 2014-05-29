@@ -1,5 +1,5 @@
-sra README
-==================
+Public Datastore Interface
+==========================
 
 Prerequisites
 -------------------------
@@ -30,9 +30,9 @@ Installation
 
 ### Datastore 
     cd ~
-    git clone git://github.com/iPlantCollaborativeOpenSource/sra.git
-    cd sra
+    git clone git://github.com/iPlantCollaborativeOpenSource/datastore-public.git
+    cd datastore-public
     python setup.py develop
 
 ### Fire it up
-    sudo ~/env/sra/bin/pserve production.ini --log-file=sra.log --daemon
+    sudo ~/env/bin/pserve production.ini --log-file=irods-public.log --daemon

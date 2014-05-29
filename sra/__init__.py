@@ -25,7 +25,6 @@ def main(global_config, **settings):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
     config.add_route('browse', '/browse/*path')
-    config.add_route('file_tree', '/api/ls')
     config.add_route('download_file', '/download/*path')
     config.add_route('serve_file', '/serve/*path')
     config.add_route('markdown', '/markdown/*path')
