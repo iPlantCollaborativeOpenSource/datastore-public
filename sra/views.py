@@ -34,6 +34,10 @@ def home(request):
         'year': date.today().year,
     }
 
+@view_config(route_name='robots')
+def robots_view(request):
+   return FileResponse('/home/datastore/sra/sra/static/robots.txt', request=request)
+
 @view_config(route_name='file', renderer='json')
 def get_collection(request):
     if not 'path' in request.GET:
