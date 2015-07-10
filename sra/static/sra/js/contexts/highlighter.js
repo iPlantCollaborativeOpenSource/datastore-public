@@ -5,8 +5,8 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
         BrushSources: {}
     };
 
-    Utils.load_css('/static/syntaxhighlighter/styles/shCore.css');
-    Utils.load_css('/static/syntaxhighlighter/styles/shThemeDefault.css');
+    Utils.load_css('/static/sra/syntaxhighlighter/styles/shCore.css');
+    Utils.load_css('/static/sra/syntaxhighlighter/styles/shThemeDefault.css');
 
     Highlighter.BrushSources = {
         'php': 'shBrushPhp',

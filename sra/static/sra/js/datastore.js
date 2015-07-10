@@ -9,9 +9,9 @@ var Datastore = {
 };
 
 // A Node is a filesystem node--a file or directory
-Datastore.Models.Node = Backbone.Model.extend({  
+Datastore.Models.Node = Backbone.Model.extend({
     urlRoot: '/api/file',
-    defaults: { 
+    defaults: {
         parent:	null
     },
     url: function() {
@@ -41,7 +41,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         return _.extend(obj, r);
     },
     get_ancestors: function() {
-        if (!this.get('root_relative_path')) 
+        if (!this.get('root_relative_path'))
             return [];
         var dirs = this.get('root_relative_path').split('/').splice(1)
         dirs.pop();
@@ -58,7 +58,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         ancestors.push(this);
         return ancestors;
     }
-}); 
+});
 
 Datastore.Collections.NodeCollection = Backbone.Collection.extend({
     model: Datastore.Models.Node,
@@ -82,7 +82,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
     },
     render: function() {
         this.$el.append('loading');
-        //console.log(this.collection); 
+        //console.log(this.collection);
         return this;
     },
     append_children: function() {
@@ -101,7 +101,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
     },
     open_file: function(e) {
         e.preventDefault();
-        var node = $(e.currentTarget).closest('li').data('model'); 
+        var node = $(e.currentTarget).closest('li').data('model');
         //console.log(node);
         Datastore.Events.Traversal.trigger('navigate', node);
         return false;
@@ -113,7 +113,7 @@ Datastore.Views.FileView = Backbone.View.extend({
     tagName: 'div',
     events: {},
     initialize: function(options) {
-    }, 
+    },
     render: function() {
         this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
         this.$el.append(
@@ -125,7 +125,7 @@ Datastore.Views.FileView = Backbone.View.extend({
     }
 });
 
-// Event space for managing filesystem traversals. Supports a single event, 
+// Event space for managing filesystem traversals. Supports a single event,
 // "navigate", that is triggered upon the selection of a new folder or file
 Datastore.Events.Traversal = _.extend({}, Backbone.Events);
 
@@ -220,8 +220,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 var view;
                 //console.log(model.get('is_dir'));
                 if (template) {
-                    require(['/static/js/contexts/' + template + '.js'], function(Context) {
-                        view = Context.Views.MainView;   
+                    require(['/static/sra/js/contexts/' + template + '.js'], function(Context) {
+                        view = Context.Views.MainView;
                         view_options = model.get('template_metadata')['template_options'] || {};
                         append_view(view, view_options);
                     });
@@ -259,8 +259,8 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                             .append($('<i>', {'class': 'icon-info-sign'}))
                             .append(' Info')
                             .popover({
-                                html: true, 
-                                placement: 'bottom', 
+                                html: true,
+                                placement: 'bottom',
                                 title: this.model.get('name'),
                                 content: _.bind(this.file_info, this),
                                 afterShow: _.bind(this.highlight_link, this)
@@ -270,15 +270,15 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                             .append($('<i>', {'class': 'icon-list'}))
                             .append(' Metadata')
                             .popover({
-                                html: true, 
-                                placement: 'bottom', 
+                                html: true,
+                                placement: 'bottom',
                                 title: this.model.get('name'),
                                 content: _.bind(this.metadata, this)
                             })
                     )
                     .append(
                         $('<a>', {
-                            'class': 'btn btn-primary', 
+                            'class': 'btn btn-primary',
                             'href': this.model.get('download_url')
                         })
                             .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
@@ -293,7 +293,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
             .addClass('file-info')
             .append($("<dt>").append("Download Link:"))
             .append($("<dd>").append($("<input>", {
-                value: window.location.protocol + "//" + window.location.host + this.model.get('download_url'), 
+                value: window.location.protocol + "//" + window.location.host + this.model.get('download_url'),
                 type: 'text'
             })))
             .append($("<dt>").append("Checksum:"))
@@ -318,7 +318,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                 dl.append($("<dd>").append(dd_content));
             });
             return dl;
-        } else 
+        } else
             return "No metadata.";
     }
 });

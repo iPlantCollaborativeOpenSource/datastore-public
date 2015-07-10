@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block content %}
+<div class="container">
+  <div class="content">
+    <div id="breadcrumbs"></div>
+    <div id="file-scroller">
+      <div id="file-scroller-inner" class="clearfix"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script data-main="{% static 'sra/js/main' %}" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+<script type="text/javascript">
+  var root = "{{ root }}";
+  var root_name = "{{ root_name }}";
+  var metadata_prefix = "{{ metadata_prefix }}";
+</script>
+{% endblock %}
