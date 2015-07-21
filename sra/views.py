@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound
 from django.http import JsonResponse
 
 from os.path import basename, splitext
@@ -100,81 +100,70 @@ def serve_file(request, path=''):
     response['Content-Length'] = obj.size
     return response
 
-# @view_config(route_name='download_file')
-# def download_file(request):
-#     path = request.matchdict['path']
-#     path = "/" +  "/".join(path)
-#     try:
-#         obj = DataStoreSession.data_objects.get(str(path))
-#     except DataObjectDoesNotExist:
-#         raise HTTPNotFound()
 
-#     f = obj.open('r')
-#     iterator = FileIterable(f)
-#     content_length = obj.size
-#     if request.range:
-#         cr = request.range.content_range(obj.size)
-#         #logger.debug(cr.start)
-#         #logger.debug(cr.stop)
-#         #logger.debug(cr.length)
-#         iterator.start = cr.start
-#         iterator.stop = cr.stop
-#         content_length = cr.stop - cr.start
+def download_file(request, path=''):
+    try:
+        obj = DataStoreSession.data_objects.get('/' + str(path))
+    except DataObjectDoesNotExist:
+        return HttpResponseNotFound()
 
-#     return Response(
-#         content_disposition='attachment; filename="%s"' % obj.name,
-#         content_type='application/octet-stream',
-#         content_length=content_length,
-#         accept_ranges='bytes',
-#         app_iter=iterator
-#     )
+    ext = splitext(obj.name)[1][1:]
 
-# @view_config(route_name='markdown')
-# def as_markdown(request):
-#     path = request.matchdict['path']
-#     path = "/" +  "/".join(path)
-#     try:
-#         obj = DataStoreSession.data_objects.get(str(path))
-#     except DataObjectDoesNotExist:
-#         raise HTTPNotFound()
+    if ext not in content_types:
+        return HttpResponse('File type not supported', status_code=501)
 
-#     ext = splitext(obj.name)[1][1:]
+    f = obj.open('r')
 
-#     if ext not in ['md', 'markdown']:
-#         raise HTTPBadRequest()
+    response = HttpResponse(f, content_type=content_types[ext])
+    response['Content-Length'] = obj.size
+    response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
+    response['Accept-Ranges'] = 'bytes'
+    return response
 
-#     with obj.open('r') as f:
-#         html = markdown.markdown(f.read())
-#     return Response(
-#         html,
-#         content_type='text/html',
-#         content_length=len(html)
-#     )
 
-# @view_config(route_name='legacy')
-# def redirect_legacy_urls(request):
-#     """
-#     The old mirror site supported URLs of the form
-#     http://mirrors.iplantcollaborative.org//iplant_public_test/analyses
-#     for viewing directories, and
-#     http://mirrors.iplantcollaborative.org//iplant_public_test/status.php
-#     for download files.
-#     This redirects the former to /browse/path/to/dir and the latter to
-#     /download/path/to/file. Returns 404 if it's a bad path
-#     """
-#     path = request.matchdict['path']
-#     path = request.registry.settings['irods.path'] + '/' + path
+def markdown_view(request, path=''):
+    try:
+        obj = DataStoreSession.data_objects.get('/' + str(path))
+    except DataObjectDoesNotExist:
+        return HttpResponseNotFound()
 
-#     # TODO: stop using try/except for flow control
-#     try:
-#         obj = DataStoreSession.collections.get(str(path))
-#         logger.warn("Legacy URL for path %s satisfied from referer %s" % (path, request.referer))
-#         raise HTTPFound("/browse" + path)
-#     except CollectionDoesNotExist:
-#         try:
-#             obj = DataStoreSession.data_objects.get(str(path))
-#             logger.warn("Legacy URL for path %s satisfied from referer %s" % (path, request.referer))
-#             raise HTTPFound("/download" + path)
-#         except DataObjectDoesNotExist:
-#             logger.warn("Legacy URL for path %s not satisfied from referer %s" % (path, request.referer))
-#             raise HTTPNotFound("File does not exist")
+    ext = splitext(obj.name)[1][1:]
+
+
+    if ext not in ['md', 'markdown']:
+        return HttpResponseBadRequest()
+
+    with obj.open('r') as f:
+        html = markdown.markdown(f.read())
+    response = HttpResponse(html, content_type='text/html')
+    response['Content-Length'] = len(html)
+    return response
+
+
+def legacy_redirect(request, path=''):
+    """
+    The old mirror site supported URLs of the form
+    http://mirrors.iplantcollaborative.org//iplant_public_test/analyses
+    for viewing directories, and
+    http://mirrors.iplantcollaborative.org//iplant_public_test/status.php
+    for download files.
+    This redirects the former to /browse/path/to/dir and the latter to
+    /download/path/to/file. Returns 404 if it's a bad path
+    """
+    if path[0] == '/':
+        path = sra_settings.irods['path'] + path
+    else:
+        path = sra_settings.irods['path'] + '/' + path
+
+    try:
+        obj = DataStoreSession.collections.get(str(path))
+        logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+        return HttpResponseRedirect('/browse' + path)
+    except CollectionDoesNotExist:
+        try:
+            obj = DataStoreSession.data_objects.get(str(path))
+            logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+            return HttpResponseRedirect('/download' + path)
+        except DataObjectDoesNotExist:
+            logger.warn('Legacy URL for path %s not satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+            return HttpResponseNotFound('File does not exist')
