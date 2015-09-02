@@ -4,35 +4,24 @@ Public Datastore Interface
 Prerequisites
 -------------------------
 
-### CentOS 5
+### Docker and Compose
 
-This project requires Python 2.7, which is a pain to set up on CentOS 5. 
-[Do that first](http://toomuchdata.com/2012/06/25/how-to-install-python-2-7-3-on-centos-6-2/).
-Install Python 2.7, setuptools, pip, and virtualenv.
+This project is a dockerized application. You'll need [Docker][1] and [Compose][2]
+installed to run the application. If you are running on a Mac or Windows then you will
+also need [Docker Machine][3].
 
-### Ubuntu 12.04
+To start the application:
 
-    sudo apt-get install python-dev python-pip python-virtualenv
+```bash
+$> docker-compose up
+```
 
-Installation
-------------
+from the project's root directory will run the application on http://localhost:8000
+(or http://${DOCKER_MACHINE_IP}:8000 if you are running Docker Machine.)
 
-### Virtualenv
-    useradd -m datastore
-    su - datastore
-    virtualenv --no-site-packages ~/env
-    echo "source ~/env/bin/activate" >> ~/.bash_profile
-    . ~/.bash_profile
 
-### pycommands
-    git clone https://github.com/iPlantCollaborativeOpenSource/python-irodsclient.git
-    pip install -e python-irodsclient
+Environment
+-----------
 
-### Datastore 
-    cd ~
-    git clone git://github.com/iPlantCollaborativeOpenSource/datastore-public.git
-    cd datastore-public
-    python setup.py develop
-
-### Fire it up
-    sudo ~/env/bin/pserve production.ini --log-file=irods-public.log --daemon
+The `datastore.env` file has the environment configuration for the application. Customize
+as necessary, but the defaults should work for the most part.

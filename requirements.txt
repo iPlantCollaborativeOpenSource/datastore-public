@@ -1,0 +1,5 @@
+Django==1.8.3
+Markdown==2.6.2
+prettytable==0.7.2
+-e git+https://github.com/iPlantCollaborativeOpenSource/python-irodsclient.git@dcd234c166c06bdfc40fa2ef135c2511e0a4e7ac#egg=python_irodsclient-master
+wsgiref==0.1.2

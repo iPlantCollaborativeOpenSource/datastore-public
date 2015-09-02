@@ -21,5 +21,5 @@ from django.views.generic import TemplateView
 urlpatterns = [
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include('sra.urls')),
+    url(r'^', include('datastore.apps.sra.urls')),
 ]

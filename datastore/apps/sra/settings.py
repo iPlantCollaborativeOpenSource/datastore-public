@@ -1,4 +1,5 @@
 import os
+import logging
 
 irods = {
     'host': os.getenv('IRODS_HOST', 'data.iplantcollaborative.org'),
@@ -8,6 +9,8 @@ irods = {
     'user': os.getenv('IRODS_USER', 'anonymous'),
     'password': os.getenv('IRODS_PASSWORD',''),
 }
+
+logging.getLogger(__name__).debug(irods)
 
 datastore = {
     'metadata_prefix': os.getenv('METADATA_PREFIX', 'ipc_template'),

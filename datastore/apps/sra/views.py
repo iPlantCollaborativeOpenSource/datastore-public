@@ -16,7 +16,8 @@ from .content_types import content_types
 from .file_iterable import FileIterable
 from . import settings as sra_settings
 
-logger = logging.getLogger('default')
+
+logger = logging.getLogger(__name__)
 
 
 def home(request, path=''):
@@ -38,10 +39,11 @@ def get_file(request):
 
     try:
         obj = DataStoreSession.collections.get(str(path))
-    except CollectionDoesNotExist:
+    except CollectionDoesNotExist as e:
         try:
             obj = DataStoreSession.data_objects.get(str(path))
-        except DataObjectDoesNotExist:
+        except DataObjectDoesNotExist as e:
+            logger.exception(e)
             return HttpResponseNotFound()
 
     logger.debug(obj)
@@ -67,20 +69,24 @@ def get_collection(request):
 
     path = request.GET['path']
 
-    collection = DataStoreSession.collections.get(str(path))
-    sub_collections = collection.subcollections
-    objects = collection.data_objects
-    logger.debug(sub_collections)
-    logger.debug(objects)
+    try:
+        collection = DataStoreSession.collections.get(str(path))
+        sub_collections = collection.subcollections
+        objects = collection.data_objects
+        logger.debug(sub_collections)
+        logger.debug(objects)
 
-    def format_subcoll(coll):
-        return {
-            'name': coll.name,
-            'path': coll.path,
-            'is_dir': isinstance(coll, iRODSCollection)
-        }
+        def format_subcoll(coll):
+            return {
+                'name': coll.name,
+                'path': coll.path,
+                'is_dir': isinstance(coll, iRODSCollection)
+            }
 
-    return JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
+        return JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
+    except Exception as e:
+        logger.exception('FAIL: %s' % e)
+        return HttpResponse(status_code=500)
 
 
 def serve_file(request, path=''):

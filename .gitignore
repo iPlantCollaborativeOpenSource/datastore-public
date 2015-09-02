@@ -4,3 +4,4 @@ sra.egg-info
 sra.sqlite
 db.sqlite3
 *.log
+logs/
