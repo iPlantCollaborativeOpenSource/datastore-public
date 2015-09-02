@@ -25,3 +25,8 @@ Environment
 
 The `datastore.env` file has the environment configuration for the application. Customize
 as necessary, but the defaults should work for the most part.
+
+
+[1]: https://docs.docker.com/installation/
+[2]: https://docs.docker.com/compose/install/
+[3]: https://docs.docker.com/machine/install-machine/
