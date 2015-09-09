@@ -169,7 +169,7 @@ def legacy_redirect(request, path=''):
         try:
             obj = DataStoreSession.data_objects.get(str(path))
             logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
-            return HttpResponseRedirect('/download' + path)
+            return HttpResponseRedirect('/browse' + path)
         except DataObjectDoesNotExist:
             logger.warn('Legacy URL for path %s not satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
             return HttpResponseNotFound('File does not exist')

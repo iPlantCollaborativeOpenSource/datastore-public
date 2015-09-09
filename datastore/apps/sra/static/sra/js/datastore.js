@@ -12,7 +12,7 @@ var Datastore = {
 Datastore.Models.Node = Backbone.Model.extend({
     urlRoot: '/api/file',
     defaults: {
-        parent:	null
+        parent: null
     },
     url: function() {
         return '/api/file' + '?path=' + encodeURIComponent(this.get('path'));
@@ -245,6 +245,10 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
     initialize: function() {
     },
     render: function() {
+        var downloadRenderer = (this.model.get('size') > 2000000000)
+            ? _.bind(this.download_options_button, this)
+            : _.bind(this.download_button, this);
+          
         this.$el
             .append($("<ul>", {'class': 'file-properties'})
                 .append($("<li>").append(this.model.get('name')))
@@ -276,17 +280,32 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                                 content: _.bind(this.metadata, this)
                             })
                     )
-                    .append(
-                        $('<a>', {
-                            'class': 'btn btn-primary',
-                            'href': this.model.get('download_url')
-                        })
-                            .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
-                            .append(' Download')
-                    )
+                    .append(downloadRenderer())
                 )
             );
         return this;
+    },
+    download_button: function() {
+        return $('<a>', {
+            'class': 'btn btn-primary',
+            'href': this.model.get('download_url')
+        })
+            .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
+            .append(' Download')
+    },
+    download_options_button: function() {
+        return $('<a>', {
+            'class': 'btn btn-primary',
+        })
+            .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
+            .append(' Download Options')
+            .popover({
+                html: true,
+                placement: 'bottom',
+                title: this.model.get('name'),
+                content: _.bind(this.download_options, this),
+                container: '.content'
+            });
     },
     file_info: function() {
         return $("<dl>")
@@ -320,7 +339,38 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
             return dl;
         } else
             return "No metadata.";
-    }
+    },
+    download_options: function() {
+        return $("<div>")
+            .append('Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:')
+            .append($('<ul>')
+                .append($('<li>')
+                        .append($('<a>',{
+                            'TARGET':'_blank',
+                            'href': 'https://de.iplantcollaborative.org/de/'
+                        })
+                        .append("Discovery Environment (DE)"))
+                )
+                .append($('<li>').append('iCommands'))
+                .append($('<li>').append('iDrop'))
+                .append($('<li>').append('FTP/Cyberduck'))
+            )
+            .append($('<a>',{
+                        'TARGET':'_blank',
+                        'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
+                    }).append("More Information"))
+            .append($("<dl>")
+                .append($("<dt>").append("Path:"))
+                .append($("<dd>").append($("<input>", {
+                    value: this.model.get('path').replace(this.model.get('name'),''),
+                    type: 'text'
+                })))
+                .append($("<dt>").append("File Name:"))
+                .append($("<dd>").append($("<input>", {
+                    value: this.model.get('name'),
+                    type: 'text'
+                }))));
+    },
 });
 
 Datastore.Router = Backbone.Router.extend({
