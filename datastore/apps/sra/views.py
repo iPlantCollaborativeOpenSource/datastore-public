@@ -8,6 +8,9 @@ from datetime import date
 from calendar import timegm
 
 import markdown
+import urllib
+import urllib2
+import json
 
 from irods.collection import iRODSCollection, iRODSDataObject
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
@@ -18,6 +21,8 @@ from . import settings as sra_settings
 
 
 logger = logging.getLogger(__name__)
+GOOGLE_RECAPTCHA_SITE_KEY = "6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt"
+GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
 
 
 def home(request, path=''):
@@ -108,6 +113,23 @@ def serve_file(request, path=''):
 
 
 def download_file(request, path=''):
+    # verify the google recaptcha success
+    url = "https://www.google.com/recaptcha/api/siteverify"
+    values = {
+        'secret': GOOGLE_RECAPTCHA_SECRET_KEY,
+        'response': request.POST.get(u'g-recaptcha-response', None),
+        'remoteip': request.META.get("REMOTE_ADDR", None),
+    }
+    data = urllib.urlencode(values)
+    req = urllib2.Request(url, data)
+    response = urllib2.urlopen(req)
+    result = json.loads(response.read())
+
+    # result['success'] will be True on a success
+    if not result['success']:
+        return HttpResponse(result['error-codes'])
+        # return HttpResponse('Only humans are allowed to submit this form.')
+
     try:
         obj = DataStoreSession.data_objects.get('/' + str(path))
     except DataObjectDoesNotExist:

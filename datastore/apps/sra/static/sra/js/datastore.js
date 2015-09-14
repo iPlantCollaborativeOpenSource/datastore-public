@@ -245,7 +245,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
     initialize: function() {
     },
     render: function() {
-        var downloadRenderer = (this.model.get('size') > 2000000000)
+        var downloadRenderer = (this.model.get('size') > 2000000000) //greater than 2 GB
             ? _.bind(this.download_options_button, this)
             : _.bind(this.download_button, this);
           
@@ -285,17 +285,37 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
             );
         return this;
     },
+    csrf_token: function (name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    },
     download_button: function() {
-        return $('<a>', {
-            'class': 'btn btn-primary',
-            'href': this.model.get('download_url')
-        })
-            .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
-            .append(' Download')
+        return $('<form>', {'action': this.model.get('download_url'), 'method': 'POST', 'id': 'download_form'})
+            .append($('<button>', {
+                'class': 'btn btn-primary',
+                'href': this.model.get('download_url'),
+                'type': 'submit' })
+                .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
+            .append(' Download'))
+            .append($('<div>', {'class': 'g-recaptcha', 'data-sitekey': '6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt'}))
+            .append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>')
+            // .append($('<div>', {'id': 'recaptcha'}))
+            .append($('<input>', {'type': 'hidden', 'name': 'csrfmiddlewaretoken', 'value': this.csrf_token('csrftoken')}))
     },
     download_options_button: function() {
         return $('<a>', {
-            'class': 'btn btn-primary',
+            'class': 'btn btn-primary'
         })
             .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
             .append(' Download Options')
@@ -371,6 +391,24 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                     type: 'text'
                 }))));
     },
+    events: {
+        "submit": "check_recaptcha"
+    },
+    check_recaptcha: function(event) {
+        var captchaFilled = false;
+        var formValidator =  function(data){
+          if(data.length>10){
+            captchaFilled = true;
+            }
+        }
+
+        if(grecaptcha.getResponse()==false){
+          event.preventDefault();  
+          alert("Verify yourself");
+          return false;
+        }
+
+    }
 });
 
 Datastore.Router = Backbone.Router.extend({
