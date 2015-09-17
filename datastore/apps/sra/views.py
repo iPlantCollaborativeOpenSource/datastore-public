@@ -145,12 +145,14 @@ def download_file(request, path=''):
         
     ext = splitext(obj.name)[1][1:]
 
-    if ext not in content_types:
-        return HttpResponse('File type not supported', status_code=501)
+    if ext in content_types:
+        content_type = content_types[ext]
+    else:
+        content_type = 'application/octet-stream'
 
     f = obj.open('r')
 
-    response = HttpResponse(f, content_type=content_types[ext])
+    response = HttpResponse(f, content_type=content_type)
     response['Content-Length'] = obj.size
     response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
     response['Accept-Ranges'] = 'bytes'
