@@ -285,7 +285,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
             );
         return this;
     },
-    csrf_token: function (name) {
+    cookie_value: function (name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
             var cookies = document.cookie.split(';');
@@ -301,17 +301,31 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
         return cookieValue;
     },
     download_button: function() {
-        return $('<form>', {'action': this.model.get('download_url'), 'method': 'POST', 'id': 'download_form'})
-            .append($('<button>', {
+        return $('<a>', {
+                'id': 'download_button',
                 'class': 'btn btn-primary',
-                'href': this.model.get('download_url'),
-                'type': 'submit' })
+                'href': this.model.get('download_url')
+                })
                 .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
-            .append(' Download'))
-            .append($('<div>', {'class': 'g-recaptcha', 'data-sitekey': '6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt'}))
-            .append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>')
-            // .append($('<div>', {'id': 'recaptcha'}))
-            .append($('<input>', {'type': 'hidden', 'name': 'csrfmiddlewaretoken', 'value': this.csrf_token('csrftoken')}))
+                .append(' Download')
+                .popover({
+                    html: true,
+                    placement: 'bottom',
+                    title: 'Verify your humanity',
+                    content: _.bind(this.recaptcha_popover, this),                
+                    container: '.content'
+                })
+    },
+    recaptcha_popover: function() {
+        return $('<form>', {'action': this.model.get('download_url'), 'method': 'POST', 'id': 'download_form'})
+            .append($('<input>', {'type': 'hidden', 'name': 'csrfmiddlewaretoken', 'value': this.cookie_value('csrftoken')}))
+            .append($('<div>', {
+                'id': 'recaptcha', 
+                'class': 'g-recaptcha', 
+                'data-sitekey': '6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt',
+                'data-size': 'compact',
+                'data-callback': 'recaptcha_callback'
+            }))
     },
     download_options_button: function() {
         return $('<a>', {
@@ -361,13 +375,14 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
             return "No metadata.";
     },
     download_options: function() {
+        var path = this.model.get('path').replace(this.model.get('name'),'')
         return $("<div>")
             .append('Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:')
             .append($('<ul>')
                 .append($('<li>')
                         .append($('<a>',{
                             'TARGET':'_blank',
-                            'href': 'https://de.iplantcollaborative.org/de/'
+                            'href': 'https://de.iplantcollaborative.org/de/?type=data&folder=' + path
                         })
                         .append("Discovery Environment (DE)"))
                 )
@@ -382,7 +397,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
             .append($("<dl>")
                 .append($("<dt>").append("Path:"))
                 .append($("<dd>").append($("<input>", {
-                    value: this.model.get('path').replace(this.model.get('name'),''),
+                    value: path,
                     type: 'text'
                 })))
                 .append($("<dt>").append("File Name:"))
@@ -392,23 +407,21 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                 }))));
     },
     events: {
-        "submit": "check_recaptcha"
+        "click #download_button": "check_recaptcha_cookie"
     },
-    check_recaptcha: function(event) {
-        var captchaFilled = false;
-        var formValidator =  function(data){
-          if(data.length>10){
-            captchaFilled = true;
-            }
+    check_recaptcha_cookie: function(event) {
+        if (this.cookie_value('recaptcha_status') != 'verified') {
+            event.preventDefault();  
+            $('#download_form').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
+        } else {
+            $('#download_button').popover('hide');
+            return true;
         }
 
-        if(grecaptcha.getResponse()==false){
-          event.preventDefault();  
-          alert("Verify yourself");
-          return false;
+        if ($('#recaptcha').html()) {
+            grecaptcha.reset();
         }
-
-    }
+    },
 });
 
 Datastore.Router = Backbone.Router.extend({
@@ -441,6 +454,11 @@ $.fn.popover.Constructor.prototype.show = function(){
     pt.call(this);
     if (this.options.afterShow)
         this.options.afterShow();
+}
+
+window.recaptcha_callback = function recaptcha_callback(response) {
+    $('#download_form').submit();
+    $('#download_button').popover('hide');
 }
 
 return Datastore;

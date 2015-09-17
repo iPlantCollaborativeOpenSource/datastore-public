@@ -111,8 +111,7 @@ def serve_file(request, path=''):
     response['Content-Length'] = obj.size
     return response
 
-
-def download_file(request, path=''):
+def verify_recaptcha(request, path=''):
     # verify the google recaptcha success
     url = "https://www.google.com/recaptcha/api/siteverify"
     values = {
@@ -126,15 +125,24 @@ def download_file(request, path=''):
     result = json.loads(response.read())
 
     # result['success'] will be True on a success
-    if not result['success']:
-        return HttpResponse(result['error-codes'])
-        # return HttpResponse('Only humans are allowed to submit this form.')
+    if result['success']:
+        return 'verified'
+    
+    return result['error-codes']
+
+def download_file(request, path=''):
+    recaptcha_status = ''
+
+    if not request.COOKIES.has_key('recaptcha_status'):
+        recaptcha_status = verify_recaptcha(request)
+        if recaptcha_status != 'verified':
+            return HttpResponse(recaptcha_status)
 
     try:
         obj = DataStoreSession.data_objects.get('/' + str(path))
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
-
+        
     ext = splitext(obj.name)[1][1:]
 
     if ext not in content_types:
@@ -146,6 +154,11 @@ def download_file(request, path=''):
     response['Content-Length'] = obj.size
     response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
     response['Accept-Ranges'] = 'bytes'
+
+    if recaptcha_status:
+        max_age = 365*24*60*60  #one year
+        response.set_cookie('recaptcha_status', recaptcha_status, max_age=max_age )
+
     return response
 
 
