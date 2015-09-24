@@ -43,30 +43,37 @@ def get_file(request):
     path = request.GET['path']
     logger.debug(path)
 
-    try:
-        obj = DataStoreSession.collections.get(str(path))
-    except CollectionDoesNotExist as e:
+    cache_file_key = str(path) + '_file_key'
+    result = cache.get(cache_file_key)
+
+    if not result:
         try:
-            obj = DataStoreSession.data_objects.get(str(path))
-        except DataObjectDoesNotExist as e:
-            logger.exception(e)
-            return HttpResponseNotFound()
+            obj = DataStoreSession.collections.get(str(path))
+        except CollectionDoesNotExist as e:
+            try:
+                obj = DataStoreSession.data_objects.get(str(path))
+            except DataObjectDoesNotExist as e:
+                logger.exception(e)
+                return HttpResponseNotFound()
 
-    logger.debug(obj)
+        logger.debug(obj)
 
-    response = {
-        'name': obj.name,
-        'path': obj.path,
-        'metadata': [m.__dict__ for m in obj.metadata.items()],
-        'is_dir': isinstance(obj, iRODSCollection),
-    }
-    if isinstance(obj, iRODSDataObject):
-        response['size'] = obj.size
-        response['create_time'] = timegm(obj.create_time.utctimetuple())
-        response['modify_time'] = timegm(obj.modify_time.utctimetuple())
-        response['checksum'] = obj.checksum
+        response = {
+            'name': obj.name,
+            'path': obj.path,
+            'metadata': [m.__dict__ for m in obj.metadata.items()],
+            'is_dir': isinstance(obj, iRODSCollection),
+        }
+        if isinstance(obj, iRODSDataObject):
+            response['size'] = obj.size
+            response['create_time'] = timegm(obj.create_time.utctimetuple())
+            response['modify_time'] = timegm(obj.modify_time.utctimetuple())
+            response['checksum'] = obj.checksum
 
-    return JsonResponse(response)
+        result = JsonResponse(response)
+        cache.set(cache_file_key, result)
+        print('///////////////////////file/////////////////////////'+path)
+    return result
 
 
 def get_collection(request):
@@ -76,8 +83,8 @@ def get_collection(request):
     path = request.GET['path']
 
     try:
-        cache_key = path + '_collection_key'
-        result = cache.get(cache_key)
+        cache_collection_key = str(path) + '_collection_key'
+        result = cache.get(cache_collection_key)
 
         if not result:
             collection = DataStoreSession.collections.get(str(path))
@@ -93,7 +100,8 @@ def get_collection(request):
                     'is_dir': isinstance(coll, iRODSCollection)
                 }
             result = JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
-            cache.set(cache_key, result)
+            cache.set(cache_collection_key, result)
+            print('******************collection************************'+path)
         return result
 
     except Exception as e:
