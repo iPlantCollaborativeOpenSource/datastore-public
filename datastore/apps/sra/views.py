@@ -24,6 +24,7 @@ from . import settings as sra_settings
 logger = logging.getLogger(__name__)
 GOOGLE_RECAPTCHA_SITE_KEY = "6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt"
 GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
+CACHE_EXPIRATION = 900 #15 minutes
 
 
 def home(request, path=''):
@@ -71,7 +72,7 @@ def get_file(request):
             response['checksum'] = obj.checksum
 
         result = JsonResponse(response)
-        cache.set(cache_file_key, result)
+        cache.set(cache_file_key, result, CACHE_EXPIRATION)
         print('///////////////////////file/////////////////////////'+path)
     return result
 
@@ -100,7 +101,7 @@ def get_collection(request):
                     'is_dir': isinstance(coll, iRODSCollection)
                 }
             result = JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
-            cache.set(cache_collection_key, result)
+            cache.set(cache_collection_key, result, CACHE_EXPIRATION)
             print('******************collection************************'+path)
         return result
 
