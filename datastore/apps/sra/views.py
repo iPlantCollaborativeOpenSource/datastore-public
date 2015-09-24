@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound
 from django.http import JsonResponse
@@ -75,20 +76,26 @@ def get_collection(request):
     path = request.GET['path']
 
     try:
-        collection = DataStoreSession.collections.get(str(path))
-        sub_collections = collection.subcollections
-        objects = collection.data_objects
-        logger.debug(sub_collections)
-        logger.debug(objects)
+        cache_key = path + '_collection_key'
+        result = cache.get(cache_key)
 
-        def format_subcoll(coll):
-            return {
-                'name': coll.name,
-                'path': coll.path,
-                'is_dir': isinstance(coll, iRODSCollection)
-            }
+        if not result:
+            collection = DataStoreSession.collections.get(str(path))
+            sub_collections = collection.subcollections
+            objects = collection.data_objects
+            logger.debug(sub_collections)
+            logger.debug(objects)
 
-        return JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
+            def format_subcoll(coll):
+                return {
+                    'name': coll.name,
+                    'path': coll.path,
+                    'is_dir': isinstance(coll, iRODSCollection)
+                }
+            result = JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
+            cache.set(cache_key, result)
+        return result
+
     except Exception as e:
         logger.exception('FAIL: %s' % e)
         return HttpResponse(status_code=500)
@@ -127,7 +134,7 @@ def verify_recaptcha(request, path=''):
     # result['success'] will be True on a success
     if result['success']:
         return 'verified'
-    
+
     return result['error-codes']
 
 def download_file(request, path=''):
@@ -142,7 +149,7 @@ def download_file(request, path=''):
         obj = DataStoreSession.data_objects.get('/' + str(path))
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
-        
+
     ext = splitext(obj.name)[1][1:]
 
     if ext in content_types:

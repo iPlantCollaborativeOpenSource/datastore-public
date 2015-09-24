@@ -6,6 +6,8 @@ meld3==0.6.10
 mercurial==2.8.2
 prettytable==0.7.2
 -e git+https://github.com/irods/python-irodsclient.git@75138279bcaf45605d63d0f70e8a12c4ed2cae0d#egg=python_irodsclient-master
+python-memcached==1.57
+six==1.9.0
 supervisor==3.0b2
 uWSGI==2.0.11.1
 wheel==0.24.0
