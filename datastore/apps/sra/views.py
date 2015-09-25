@@ -73,7 +73,6 @@ def get_file(request):
 
         result = JsonResponse(response)
         cache.set(cache_file_key, result, CACHE_EXPIRATION)
-        print('///////////////////////file/////////////////////////'+path)
     return result
 
 
@@ -102,7 +101,6 @@ def get_collection(request):
                 }
             result = JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
             cache.set(cache_collection_key, result, CACHE_EXPIRATION)
-            print('******************collection************************'+path)
         return result
 
     except Exception as e:
