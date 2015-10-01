@@ -192,7 +192,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 self.$el.width(new_width);
 
                 //console.log(model.get('metadata'));
-                var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
+                // var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
+                var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : 'datacommons'; //for testing
                 //console.log(template);
 
                 var append_view = function(view, options) {
@@ -222,7 +223,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 if (template) {
                     require(['/static/sra/js/contexts/' + template + '.js'], function(Context) {
                         view = Context.Views.MainView;
-                        view_options = model.get('template_metadata')['template_options'] || {};
+                        // view_options = model.get('template_metadata')['template_options'] || {};
+                        view_options = model.get('template_metadata') ? model.get('template_metadata')['template_options'] || {} : 'datacommons'; //for testing
                         append_view(view, view_options);
                     });
                 } else if (model.get('is_dir')) {
@@ -248,7 +250,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
         var downloadRenderer = (this.model.get('size') > 2000000000) //greater than 2 GB
             ? _.bind(this.download_options_button, this)
             : _.bind(this.download_button, this);
-          
+
         this.$el
             .append($("<ul>", {'class': 'file-properties'})
                 .append($("<li>").append(this.model.get('name')))
@@ -312,7 +314,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                     html: true,
                     placement: 'bottom',
                     title: 'Verify your humanity',
-                    content: _.bind(this.recaptcha_popover, this),                
+                    content: _.bind(this.recaptcha_popover, this),
                     container: '.content'
                 })
     },
@@ -320,8 +322,8 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
         return $('<form>', {'action': this.model.get('download_url'), 'method': 'POST', 'id': 'download_form'})
             .append($('<input>', {'type': 'hidden', 'name': 'csrfmiddlewaretoken', 'value': this.cookie_value('csrftoken')}))
             .append($('<div>', {
-                'id': 'recaptcha', 
-                'class': 'g-recaptcha', 
+                'id': 'recaptcha',
+                'class': 'g-recaptcha',
                 'data-sitekey': '6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt',
                 'data-size': 'compact',
                 'data-callback': 'recaptcha_callback'
@@ -411,7 +413,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
     },
     check_recaptcha_cookie: function(event) {
         if (this.cookie_value('recaptcha_status') != 'verified') {
-            event.preventDefault();  
+            event.preventDefault();
             $('#download_form').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
         } else {
             $('#download_button').popover('hide');

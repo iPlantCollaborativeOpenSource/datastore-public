@@ -1,22 +1,13 @@
-define(['datastore', 'backbone', 'jquery'], function(Datastore, Backbone, $) {
+define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbone, $, Utils) {
     var Image = {
         Views: {}
     };
 
     Image.Views.MainView = Backbone.View.extend({
         initialize: function() {
-            var get_metadata = function(key) {
-                var meta = _.find(this.model.get('metadata'), function(m) {
-                    return m.name == key;
-                });
-                if (meta)
-                    return meta['value'];
-                return null;
-            };
-
-            this.title = get_metadata.bind(this)('title');
-            this.abs = get_metadata.bind(this)('abstract');
-            this.description = get_metadata.bind(this)('description');
+            this.title = Utils.get_metadata.bind(this)('title');
+            this.abs = Utils.get_metadata.bind(this)('abstract');
+            this.description = Utils.get_metadata.bind(this)('description');
         },
         render: function() {
             $('<h2>')

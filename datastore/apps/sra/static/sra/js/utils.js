@@ -18,7 +18,7 @@ define(['jquery'], function($) {
          *  {name: 'p1.k3.k3, value: 'v5'},
          *  {name: 'p3', value: 'v6'} ]
          * return an object formatted like
-         * { 
+         * {
              p1: {
                  k1: 'v1',
                  k2: 'v2',
@@ -63,6 +63,14 @@ define(['jquery'], function($) {
             return $("<time>")
                 .attr('datetime', time.utc().format())
                 .append(time.utc().format('MMM D, YYYY HH:mm:ss UTC'));
+        },
+        get_metadata: function(key) {
+                var meta = _.find(this.model.get('metadata'), function(m) {
+                    return m.name == key;
+                });
+                if (meta)
+                    return meta['value'];
+                return null;
         }
     };
 });
