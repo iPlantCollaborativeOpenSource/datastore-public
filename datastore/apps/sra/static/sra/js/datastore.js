@@ -192,8 +192,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 self.$el.width(new_width);
 
                 //console.log(model.get('metadata'));
-                // var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
-                var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : 'datacommons'; //for testing
+                var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
+                // var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : 'datacommons'; //for testing
                 //console.log(template);
 
                 var append_view = function(view, options) {
@@ -223,8 +223,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 if (template) {
                     require(['/static/sra/js/contexts/' + template + '.js'], function(Context) {
                         view = Context.Views.MainView;
-                        // view_options = model.get('template_metadata')['template_options'] || {};
-                        view_options = model.get('template_metadata') ? model.get('template_metadata')['template_options'] || {} : 'datacommons'; //for testing
+                        view_options = model.get('template_metadata')['template_options'] || {};
+                        // view_options = model.get('template_metadata') ? model.get('template_metadata')['template_options'] || {} : 'datacommons'; //for testing
                         append_view(view, view_options);
                     });
                 } else if (model.get('is_dir')) {
@@ -378,24 +378,30 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
     },
     download_options: function() {
         var path = this.model.get('path').replace(this.model.get('name'),'')
-        return $("<div>")
+        return $('<div>')
             .append('Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:')
-            .append($('<ul>')
-                .append($('<li>')
-                        .append($('<a>',{
-                            'TARGET':'_blank',
-                            'href': 'https://de.iplantcollaborative.org/de/?type=data&folder=' + path
-                        })
-                        .append("Discovery Environment (DE)"))
-                )
-                .append($('<li>').append('iCommands'))
-                .append($('<li>').append('iDrop'))
-                .append($('<li>').append('FTP/Cyberduck'))
-            )
-            .append($('<a>',{
+            .append($('<div>')
+                .append($('<a>',{
                         'TARGET':'_blank',
-                        'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
-                    }).append("More Information"))
+                        'href': 'https://de.iplantcollaborative.org/de/?type=data&folder=' + path
+                    })
+                    .append('Discovery Environment (DE)')
+                )
+                .append($('<ul>').append($('<li>').append('Requires iPlant account')))
+            )
+
+            .append($('<div>')
+                .append('Anonymous methods')
+                .append($('<a>',{
+                            'TARGET':'_blank',
+                            'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
+                        }).append(" (More Information)"))
+                .append($('<ul>')
+                    .append($('<li>').append('iCommands'))
+                    .append($('<li>').append('iDrop'))
+                    .append($('<li>').append('FTP/Cyberduck'))
+                )
+            )
             .append($("<dl>")
                 .append($("<dt>").append("Path:"))
                 .append($("<dd>").append($("<input>", {
