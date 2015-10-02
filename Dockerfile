@@ -8,7 +8,7 @@ CMD ["supervisord", "-n"]
 
 RUN apt-get update && \
     apt-get install -y python python-dev gettext supervisor && \
-    apt-get install memcached \
+    apt-get install memcached && \
     curl -SL 'https://bootstrap.pypa.io/get-pip.py' | python && \
     pip install uwsgi
 
