@@ -18,6 +18,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         return '/api/file' + '?path=' + encodeURIComponent(this.get('path'));
     },
     parse: function(obj) {
+        console.log('obj', obj)
         r = {}
         if (obj.is_dir)
             r.children = new Datastore.Collections.NodeCollection([], {path: obj.path});
@@ -191,9 +192,9 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 var new_width = 2 * 940;
                 self.$el.width(new_width);
 
-                //console.log(model.get('metadata'));
+                console.log('model', model);
                 var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
-                // var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : 'datacommons'; //for testing
+                // var template = 'datacommons' //for testing
                 //console.log(template);
 
                 var append_view = function(view, options) {
@@ -224,7 +225,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
                     require(['/static/sra/js/contexts/' + template + '.js'], function(Context) {
                         view = Context.Views.MainView;
                         view_options = model.get('template_metadata')['template_options'] || {};
-                        // view_options = model.get('template_metadata') ? model.get('template_metadata')['template_options'] || {} : 'datacommons'; //for testing
+                        // view_options = 'datacommons'; //for testing
                         append_view(view, view_options);
                     });
                 } else if (model.get('is_dir')) {

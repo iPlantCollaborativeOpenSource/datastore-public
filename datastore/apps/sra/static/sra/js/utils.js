@@ -71,6 +71,17 @@ define(['jquery'], function($) {
                 if (meta)
                     return meta['value'];
                 return null;
+        },
+        get_metadata_values: function(key, getFirst) {
+                var values = []
+                _.each(this.model.get('metadata'), function(m) {
+                    if (m.name == key) {
+                        values.push(m.value);
+                    }
+                });
+                if (values)
+                    return values;
+                return null;
         }
     };
 });
