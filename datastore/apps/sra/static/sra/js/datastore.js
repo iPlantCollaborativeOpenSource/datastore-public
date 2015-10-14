@@ -131,10 +131,12 @@ Datastore.Views.FileView = Backbone.View.extend({
 Datastore.Events.Traversal = _.extend({}, Backbone.Events);
 
 Datastore.Events.Traversal.on('navigate', function(model) {
-    if (model.get('path'))
+    if (model.get('path')) {
+        $('.content .popover').remove();
         Backbone.history.navigate('browse' + model.get('path'));
-    else
+    } else {
         Backbone.history.navigate("");
+    }
 });
 
 // The breadcrumbs across the top of the app
