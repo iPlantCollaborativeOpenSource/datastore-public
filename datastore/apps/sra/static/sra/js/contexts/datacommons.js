@@ -79,27 +79,43 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             this.title = Utils.get_metadata.bind(this)('title');
             this.abs = Utils.get_metadata.bind(this)('abstract');
             this.description = Utils.get_metadata.bind(this)('description');
+            this.subjects = Utils.get_metadata_values.bind(this)('Subject');
+            this.contributors = Utils.get_metadata_values.bind(this)('Contributor');
         },
         render: function() {
             var collections = new Datastore.Views.NodeListView({model: this.model, collection:this.model.get('children')})
 
-            console.log(this)
             this.$el
                 .append($('<h2>').append('Metadata'))
 
-            var $dl = $('<dl>')
+            var $subjects = $('<div>').append('Subject: ')
+            _.each(this.subjects, function(s){
+                $subjects.append($('<a>',{
+                            'TARGET':'_blank'
+                        }).append(s + ', ')
+                )
+            })
+            $subjects.appendTo(this.$el);
 
+            var $contributors = $('<div>').append('Contributors: ')
+            _.each(this.contributors, function(s){
+                $contributors.append($('<a>',{
+                            'TARGET':'_blank'
+                        }).append(s + ', ')
+                )
+            })
+            $contributors.appendTo(this.$el);
+
+            var $dl = $('<dl>')
             _.each(this.model.attributes.metadata, function(m) {
-              // console.log(m['name'], ': ', m['value']);
+              console.log(m['name'], ': ', m['value']);
               $dl.append($("<dt>").append(m['name']))
               .append($("<dd>").append(m['value']))
             })
-
             $dl.appendTo(this.$el);
 
             this.$el.append(collections.el);
 
-            console.log('this at end', this)
             return this;
         }
     });
