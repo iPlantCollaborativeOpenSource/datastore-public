@@ -1,9 +1,5 @@
 django:
   build: .
   env_file: datastore.env
-  volumes:
-    - .:/project
   ports:
     - 80:80
-  # command: python manage.py runserver 0.0.0.0:8000
-  # log_driver: "syslog"
