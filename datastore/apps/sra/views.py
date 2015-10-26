@@ -81,27 +81,62 @@ def get_collection(request):
         return HttpResponseBadRequest()
 
     path = request.GET['path']
+    page = int(request.GET.get('page', 1))
+
+    limit = 200
+    offset = limit * (page - 1)
+
+    def format_subcoll(coll):
+        return {
+            'name': coll.name,
+            'path': coll.path,
+            'is_dir': isinstance(coll, iRODSCollection)
+        }
 
     try:
-        cache_collection_key = str(path) + '_collection_key'
+        cache_collection_key = str(path) + '_page_' + str(page)
         result = cache.get(cache_collection_key)
-
         if not result:
             collection = DataStoreSession.collections.get(str(path))
             sub_collections = collection.subcollections
-            objects = collection.data_objects
+            # objects = collection.data_objects
+            # objects_query = DataStoreSession.query(DataObject)\
+            #                 .filter(DataObject.collection_id == '221685501')\
+            #                 .limit(5)\
+            #                 .offset(1)
+            # query_results = query.all()
+            objects = collection.data_objects_paging(limit=limit, offset=offset)
+
             logger.debug(sub_collections)
             logger.debug(objects)
 
-            def format_subcoll(coll):
-                return {
-                    'name': coll.name,
-                    'path': coll.path,
-                    'is_dir': isinstance(coll, iRODSCollection)
-                }
-            result = JsonResponse(map(format_subcoll, sub_collections + objects), safe=False)
+            result = map(format_subcoll, sub_collections + objects)
             cache.set(cache_collection_key, result, CACHE_EXPIRATION)
-        return result
+
+        next_page_cache_key = str(path) + '_page_' + str(page + 1)
+        next_page_cache_value = cache.get(next_page_cache_key)
+        next_page_result = []
+
+        if not isinstance(next_page_cache_value, list):
+            try:
+              collection
+            except NameError:
+                collection = DataStoreSession.collections.get(str(path))
+                sub_collections = collection.subcollections
+
+            next_page_objects = collection.data_objects_paging(limit, int(offset+limit))
+            next_page_result = map(format_subcoll, next_page_objects)
+            cache.set(next_page_cache_key, next_page_result, CACHE_EXPIRATION)
+
+        if next_page_result:
+            more_data = True
+        else:
+            more_data = False
+
+        json={'models': result,
+            'more_data': more_data}
+
+        return JsonResponse(json, safe=False)
 
     except Exception as e:
         logger.exception('FAIL: %s' % e)
