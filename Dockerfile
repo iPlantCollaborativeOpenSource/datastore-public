@@ -24,5 +24,7 @@ RUN ln -s /project/conf/supervisor-uwsgi.conf /etc/supervisor/conf.d/uwsgi.conf
 
 WORKDIR /project
 
+RUN python manage.py collectstatic --noinput
+
 CMD /usr/bin/supervisord -n -c /project/conf/supervisor-uwsgi.conf
 
