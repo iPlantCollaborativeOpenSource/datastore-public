@@ -82,9 +82,10 @@ def get_collection(request):
 
     path = request.GET['path']
     page = int(request.GET.get('page', 1))
+    per_page = int(request.GET.get('per_page', 5))
 
-    limit = 200
-    offset = limit * (page - 1)
+    # limit = 1
+    offset = per_page * (page - 1)
 
     def format_subcoll(coll):
         return {
@@ -105,13 +106,13 @@ def get_collection(request):
             #                 .limit(5)\
             #                 .offset(1)
             # query_results = query.all()
-            objects = collection.data_objects_paging(limit=limit, offset=offset)
+            objects = collection.data_objects_paging(per_page, offset)
 
             logger.debug(sub_collections)
             logger.debug(objects)
 
             result = map(format_subcoll, sub_collections + objects)
-            cache.set(cache_collection_key, result, CACHE_EXPIRATION)
+            # cache.set(cache_collection_key, result, CACHE_EXPIRATION)
 
         next_page_cache_key = str(path) + '_page_' + str(page + 1)
         next_page_cache_value = cache.get(next_page_cache_key)
@@ -124,9 +125,9 @@ def get_collection(request):
                 collection = DataStoreSession.collections.get(str(path))
                 sub_collections = collection.subcollections
 
-            next_page_objects = collection.data_objects_paging(limit, int(offset+limit))
+            next_page_objects = collection.data_objects_paging(per_page, int(offset+per_page))
             next_page_result = map(format_subcoll, next_page_objects)
-            cache.set(next_page_cache_key, next_page_result, CACHE_EXPIRATION)
+            # cache.set(next_page_cache_key, next_page_result, CACHE_EXPIRATION)
 
         if next_page_result:
             more_data = True
@@ -134,9 +135,12 @@ def get_collection(request):
             more_data = False
 
         json={'models': result,
-            'more_data': more_data}
+            'more_data': more_data,
+            'page': page}
 
-        return JsonResponse(json, safe=False)
+        response = JsonResponse(json, safe=False)
+        print page
+        return response
 
     except Exception as e:
         logger.exception('FAIL: %s' % e)

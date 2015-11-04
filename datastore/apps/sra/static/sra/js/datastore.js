@@ -18,7 +18,6 @@ Datastore.Models.Node = Backbone.Model.extend({
         return '/api/file' + '?path=' + encodeURIComponent(this.get('path'));
     },
     parse: function(obj) {
-        console.log('obj', obj)
         r = {}
         if (obj.is_dir)
             r.children = new Datastore.Collections.NodeCollection([], {path: obj.path});
@@ -64,11 +63,18 @@ Datastore.Models.Node = Backbone.Model.extend({
 Datastore.Collections.NodeCollection = Backbone.Collection.extend({
     model: Datastore.Models.Node,
     url: function() {
-        return '/api/collection?path=' + encodeURIComponent(this.path);
+        return '/api/collection?path=' + encodeURIComponent(this.path) + '&page=' + this.page;
     },
     initialize: function(models, options) {
         this.path = options.path;
-    }
+        this.page = 1;
+    },
+    parse: function(response){
+        console.log('response', response)
+        this.moreData = response.more_data
+        this.page =response.page
+        return response.models
+    },
 });
 
 // The default view for a directory if no template is associated with it
@@ -76,7 +82,8 @@ Datastore.Views.NodeListView = Backbone.View.extend({
     tagName: 'div',
     events: {
         'click li.dir a': 'open_file',
-        'click li.file a': 'open_file'
+        'click li.file a': 'open_file',
+        'click #load_more': 'load_more'
     },
     initialize: function(options) {
         this.collection.bind('reset', _.bind(this.append_children, this));
@@ -98,6 +105,15 @@ Datastore.Views.NodeListView = Backbone.View.extend({
                 .appendTo($list);
         });
         this.$el.append($list);
+
+        if (this.collection.moreData) {
+            this.$el.append(
+                $('<a>', {
+                    'class': 'btn file-info-button',
+                    'id': 'load_more',
+                })
+                .append('Load more'))
+        }
         return this;
     },
     open_file: function(e) {
@@ -106,6 +122,15 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         //console.log(node);
         Datastore.Events.Traversal.trigger('navigate', node);
         return false;
+    },
+    load_more: function(e) {
+        this.collection.page++
+        var self=this;
+        this.collection.fetch({update: true, remove: false})
+        .done(
+            function(){
+              self.append_children()
+            });
     }
 });
 
@@ -194,13 +219,12 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 var new_width = 2 * 940;
                 self.$el.width(new_width);
 
-                console.log('model', model);
+                // console.log('model', model);
                 var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
                 // var template = 'datacommons' //for testing
                 //console.log(template);
 
                 var append_view = function(view, options) {
-                    //console.log(view);
                     if (model.get('is_dir')) {
                         var new_view  = new view(_.extend({model: model, collection: model.get('children')}, options))
                         new_view.render().$el.appendTo(self.$el);
