@@ -139,7 +139,7 @@ def get_collection(request):
             'page': page}
 
         response = JsonResponse(json, safe=False)
-        print page
+
         return response
 
     except Exception as e:
