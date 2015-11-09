@@ -11,6 +11,8 @@ urlpatterns = patterns('datastore.apps.sra.views',
     url(r'^download/(?P<path>.*)$', 'download_file', name='download'),
     url(r'^markdown/(?P<path>.*)$', 'markdown_view', name='markdown'),
 
+    url(r'^search/?$', 'search_metadata'),
+
     # legacy support
     url(r'^(?P<path>.+)$', 'legacy_redirect'),
 )

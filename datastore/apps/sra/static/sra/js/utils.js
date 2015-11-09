@@ -72,7 +72,7 @@ define(['jquery'], function($) {
                     return meta['value'];
                 return null;
         },
-        get_metadata_values: function(key, getFirst) {
+        get_metadata_values: function(key, getFirst) {  //get all values for a given key
                 var values = []
                 _.each(this.model.get('metadata'), function(m) {
                     if (m.name == key) {

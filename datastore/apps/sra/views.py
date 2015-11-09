@@ -15,6 +15,7 @@ import json
 
 from irods.collection import iRODSCollection, iRODSDataObject
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
+from irods.models import Collection, CollectionMeta
 from .models import DataStoreSession
 from .content_types import content_types
 from .file_iterable import FileIterable
@@ -77,14 +78,15 @@ def get_file(request):
 
 
 def get_collection(request):
+    PER_PAGE = 200
+
     if not 'path' in request.GET:
         return HttpResponseBadRequest()
 
     path = request.GET['path']
     page = int(request.GET.get('page', 1))
-    per_page = 200
 
-    offset = per_page * (page - 1)
+    offset = PER_PAGE * (page - 1)
 
     def format_subcoll(coll):
         return {
@@ -99,7 +101,7 @@ def get_collection(request):
         if not cache_value:
             collection = DataStoreSession.collections.get(str(path))
             sub_collections = collection.subcollections
-            objects = collection.data_objects_paging(per_page, offset)
+            objects = collection.data_objects_paging(PER_PAGE, offset)
 
             logger.debug(sub_collections)
             logger.debug(objects)
@@ -117,7 +119,7 @@ def get_collection(request):
                 collection = DataStoreSession.collections.get(str(path))
                 sub_collections = collection.subcollections
 
-            next_page_objects = collection.data_objects_paging(per_page, int(offset+per_page))
+            next_page_objects = collection.data_objects_paging(PER_PAGE, int(offset+PER_PAGE))
             next_page_cache_value = map(format_subcoll, next_page_objects)
             cache.set(next_page_cache_key, next_page_cache_value, CACHE_EXPIRATION)
 
@@ -255,3 +257,19 @@ def legacy_redirect(request, path=''):
         except DataObjectDoesNotExist:
             logger.warn('Legacy URL for path %s not satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
             return HttpResponseNotFound('File does not exist')
+
+def search_metadata(request):
+    name = request.GET['name']
+    value = request.GET['value']
+
+    query_result = DataStoreSession.query(Collection.name).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
+
+    results_list = []
+
+    for d in query_result.rows: #query_result.rows is a list of dictionaries
+        results_list.append(d.values())
+
+    #flatten list
+    results_list = [item for sublist in results_list for item in sublist]
+
+    return JsonResponse(results_list, safe=False)
