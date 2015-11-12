@@ -197,7 +197,10 @@ def download_file(request, path=''):
     else:
         content_type = 'application/octet-stream'
 
-    f = obj.open('r')
+    try:
+        f = obj.open('r')
+    except KeyError as e:
+        return HttpResponse('Download could not be completed.',status=500)
 
     response = StreamingHttpResponse(f, content_type=content_type)
     response['Content-Length'] = obj.size
