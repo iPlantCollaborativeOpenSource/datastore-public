@@ -138,7 +138,7 @@ def get_collection(request):
 
     except Exception as e:
         logger.exception('FAIL: %s' % e)
-        return HttpResponse(status_code=500)
+        return HttpResponse(status=500)
 
 
 def serve_file(request, path=''):
@@ -150,7 +150,7 @@ def serve_file(request, path=''):
     ext = splitext(obj.name)[1][1:]
 
     if ext not in content_types:
-        return HttpResponse('File type not supported', status_code=501)
+        return HttpResponse('File type not supported', status=501)
 
     f = obj.open('r')
 
