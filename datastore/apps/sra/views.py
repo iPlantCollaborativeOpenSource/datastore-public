@@ -1,6 +1,6 @@
 from django.core.cache import cache
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, StreamingHttpResponse
 from django.http import JsonResponse
 
 from os.path import basename, splitext
@@ -15,6 +15,7 @@ import json
 
 from irods.collection import iRODSCollection, iRODSDataObject
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
+from irods.manager.collection_manager import CollectionManager
 from irods.models import Collection, CollectionMeta
 from .models import DataStoreSession
 from .content_types import content_types
@@ -76,6 +77,12 @@ def get_file(request):
         cache.set(cache_file_key, result, CACHE_EXPIRATION)
     return result
 
+def format_subcoll(coll):
+    return {
+        'name': coll.name,
+        'path': coll.path,
+        'is_dir': isinstance(coll, iRODSCollection)
+    }
 
 def get_collection(request):
     PER_PAGE = 200
@@ -87,13 +94,6 @@ def get_collection(request):
     page = int(request.GET.get('page', 1))
 
     offset = PER_PAGE * (page - 1)
-
-    def format_subcoll(coll):
-        return {
-            'name': coll.name,
-            'path': coll.path,
-            'is_dir': isinstance(coll, iRODSCollection)
-        }
 
     try:
         cache_key = str(path) + '_page_' + str(page)
@@ -199,7 +199,7 @@ def download_file(request, path=''):
 
     f = obj.open('r')
 
-    response = HttpResponse(f, content_type=content_type)
+    response = StreamingHttpResponse(f, content_type=content_type)
     response['Content-Length'] = obj.size
     response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
     response['Accept-Ranges'] = 'bytes'
@@ -262,14 +262,8 @@ def search_metadata(request):
     name = request.GET['name']
     value = request.GET['value']
 
-    query_result = DataStoreSession.query(Collection.name).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
+    query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
 
-    results_list = []
+    results = [iRODSCollection(CollectionManager, row) for row in query_result]
 
-    for d in query_result.rows: #query_result.rows is a list of dictionaries
-        results_list.append(d.values())
-
-    #flatten list
-    results_list = [item for sublist in results_list for item in sublist]
-
-    return JsonResponse(results_list, safe=False)
+    return JsonResponse(map(format_subcoll, results), safe=False)

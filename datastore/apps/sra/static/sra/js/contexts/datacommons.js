@@ -6,6 +6,28 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
         Events: {},
     };
 
+    // DataCommons.Models.MetadataMatches = Backbone.Model.extend({
+    //     // url: function() {
+    //     //     return '/search/?name=Library Number&value=' + this.libraryNumber
+    //     // },
+    //     initialize: function(models, options) {
+    //         this.name = '';
+    //         this.value = '';
+    //     },
+    // });
+
+    DataCommons.Collections.MetadataMatchesCollection = Backbone.Collection.extend({
+        // model: DataCommons.Models.MetadataMatchesDatastore.Models.Node,
+        model: Datastore.Models.Node,
+        url: function() {
+            return '/search/?name=' + this.name + '&value=' + this.value
+        },
+        initialize: function(models, options) {
+            this.name = options.name;
+            this.value = options.value;
+        }
+    });
+
     // DataCommons.Models.Study = Backbone.Model.extend({
     //     url: function() {
     //         return '/api/file?path=' + this.get('path');
@@ -75,14 +97,16 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
 
     DataCommons.Views.MainView = Backbone.View.extend({
         tagName: 'div',
+        events: {
+            'click .metadataLink': 'search_metadata'
+        },
         initialize: function() {
-            this.title = Utils.get_metadata.bind(this)('title');
-            this.abs = Utils.get_metadata.bind(this)('abstract');
-            this.description = Utils.get_metadata.bind(this)('description');
+            this.libraryNumber = Utils.get_metadata.bind(this)('Library Number');
             this.subjects = Utils.get_metadata_values.bind(this)('Subject');
             this.contributors = Utils.get_metadata_values.bind(this)('Contributor');
         },
         render: function() {
+            console.log('this', this)
             var collections = new Datastore.Views.NodeListView({model: this.model, collection:this.model.get('children')})
 
             this.$el
@@ -106,9 +130,17 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             })
             $contributors.appendTo(this.$el);
 
+            var $libraryNumber = $('<div>').append('Library Number: ')
+                        .append($('<a>',{
+                            // 'TARGET':'_blank'
+                            // href: '/search/?name=Library Number&value=' + this.libraryNumber
+                            'class': 'metadataLink',
+                        }).append(this.libraryNumber))
+            $libraryNumber.appendTo(this.$el);
+
             var $dl = $('<dl>')
             _.each(this.model.attributes.metadata, function(m) {
-              console.log(m['name'], ': ', m['value']);
+              // console.log(m['name'], ': ', m['value']);
               $dl.append($("<dt>").append(m['name']))
               .append($("<dd>").append(m['value']))
             })
@@ -117,7 +149,32 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             this.$el.append(collections.el);
 
             return this;
-        }
+        },
+        search_metadata: function(e) {
+            var results = new DataCommons.Collections.MetadataMatchesCollection([], {name: 'Library Number', value: e.currentTarget.innerHTML});
+            var self=this;
+            results.fetch({update: true, remove: false})
+            .done(
+                function(){
+                    console.log('metadata search results', results)
+                    self.append_collection(results)
+                });
+        },
+        append_collection: function(collection) {
+            this.$el.empty();
+            $list = $("<ul>", {'class': 'node-list'});
+            //console.log(this);
+            collection.each(function(node) {
+                $("<li>")
+                    .data('model', node)
+                    .addClass(node.get('is_dir') ? 'dir' : 'file ext-' + Utils.file_ext(node.get('name')))
+                    .append($('<a>', {href: node.get('browse_url')}).append(node.get('name')))
+                    .appendTo($list);
+            });
+            this.$el.append($list);
+
+            return this;
+        },
     });
     return DataCommons;
 });
