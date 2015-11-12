@@ -408,17 +408,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
         return $('<div>')
             .append('Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:')
             .append($('<div>')
-                .append($('<a>',{
-                        'TARGET':'_blank',
-                        'href': 'https://de.iplantcollaborative.org/de/?type=data&folder=' + path
-                    })
-                    .append('Discovery Environment (DE)')
-                )
-                .append($('<ul>').append($('<li>').append('Requires iPlant account')))
-            )
-
-            .append($('<div>')
-                .append('Anonymous methods')
+                .append('Public Access')
                 .append($('<a>',{
                             'TARGET':'_blank',
                             'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
@@ -428,6 +418,15 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                     .append($('<li>').append('iDrop'))
                     .append($('<li>').append('FTP/Cyberduck'))
                 )
+            )
+            .append($('<div>')
+                .append('iPlant Users')
+                .append($('<ul>')
+                    .append($('<li>')
+                        .append($('<a>',{
+                            'TARGET':'_blank',
+                            'href': 'https://de.iplantcollaborative.org/de/?type=data&folder=' + path
+                        }).append('Discovery Environment (DE)'))))
             )
             .append($("<dl>")
                 .append($("<dt>").append("Path:"))
