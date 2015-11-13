@@ -16,11 +16,15 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
     //     },
     // });
 
-    DataCommons.Collections.MetadataMatchesCollection = Backbone.Collection.extend({
+    DataCommons.Collections.MetadataMatches = Backbone.Collection.extend({
         // model: DataCommons.Models.MetadataMatchesDatastore.Models.Node,
         model: Datastore.Models.Node,
         url: function() {
-            return '/search/?name=' + this.name + '&value=' + this.value
+            if (this.value) {
+                return '/search/?name=' + this.name + '&value=' + this.value
+            } else {
+                return '/search/?name=' + this.name
+            }
         },
         initialize: function(models, options) {
             this.name = options.name;
@@ -28,27 +32,51 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
         }
     });
 
-    // DataCommons.Models.Study = Backbone.Model.extend({
+    // DataCommons.Models.Node = Backbone.Model.extend({
     //     url: function() {
     //         return '/api/file?path=' + this.get('path');
     //     },
-    //     parse: function(data) {
-    //         metadata = Utils.metadata_to_object(data.metadata);
-    //         return {
-    //             id: data.name,
-    //             path: data.path,
-    //             'abstract': metadata['abstract'],
-    //             title: metadata['title'],
-    //             description: metadata['description']
-    //         };
+    //     // parse: function(data) {
+    //     //     metadata = Utils.metadata_to_object(data.metadata);
+    //     //     return {
+    //     //         id: data.name,
+    //     //         path: data.path,
+    //     //         'abstract': metadata['abstract'],
+    //     //         title: metadata['title'],
+    //     //         description: metadata['description']
+    //     //     };
+    //     // },
+    //     parse: function(obj) {
+    //         console.log('obj', obj)
+    //         r = {}
+    //         if (obj.is_dir)
+    //             r.children = new DataCommons.Collections.NodeCollection([], {path: obj.path});
+
+    //         var encoded_path = Utils.urlencode_path(obj.path);
+    //         if (obj.is_dir != undefined && obj.is_dir == false) {
+    //             r.download_url = '/download' + encoded_path;
+    //             r.serve_url = '/serve' + encoded_path;
+    //         }
+    //         r.browse_url = '/browse' + encoded_path;
+
+    //         r.root_relative_path = obj.path.replace(root, '');
+
+    //         var metadata = Utils.metadata_to_object(obj.metadata);
+    //         if (metadata[metadata_prefix])
+    //             r.template_metadata = metadata[metadata_prefix];
+
+    //         r.create_time = moment.unix(obj.create_time);
+    //         r.modify_time = moment.unix(obj.modify_time);;
+
+    //         return _.extend(obj, r);
     //     }
     // });
 
-    // DataCommons.Collections.StudyCollection = Backbone.Collection.extend({
-    //     model: DataCommons.Models.Study
+    // DataCommons.Collections.NodeCollection = Backbone.Collection.extend({
+    //     model: DataCommons.Models.Node
     // });
 
-    // DataCommons.Views.StudyList = Backbone.View.extend({
+    // DataCommons.Views.NodeList = Backbone.View.extend({
     //     id: 'DataCommons-sidebar',
     //     events: {
     //         'click li a': 'select_study'
@@ -63,7 +91,8 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
     //         this.$el.empty();
     //         var $list = $('<ul>', {id: 'study-list'});
     //         this.collection.each(function(model) {
-    //             new DataCommons.Views.StudyListItem({model: model}).render().$el.appendTo($list);
+    //             console.log('add_studies model', model)
+    //             new DataCommons.Views.NodeListItem({model: model}).render().$el.appendTo($list);
     //             model.fetch();
     //         });
     //         this.$el.append($list);
@@ -76,7 +105,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
     //     }
     // });
 
-    // DataCommons.Views.StudyListItem = Backbone.View.extend({
+    // DataCommons.Views.NodeListItem = Backbone.View.extend({
     //     tagName: 'li',
     //     initialize: function() {
     //         this.model.bind('sync', this.render, this);
@@ -86,7 +115,10 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
     //             .empty()
     //             .append(
     //                 $('<a>', {href: this.model.get('browse_url')})
-    //                     .append($('<span>', {'class': 'study-id'}).append(this.model.id))
+    //                     .append($('<span>', {'class': 'study-id'})
+    //                         // .addClass(this.model.get('is_dir') ? 'dir' : 'file ext-' + Utils.file_ext(this.model.get('name')))
+    //                         .append(this.model.id)
+    //                     )
     //                     .append($('<span>', {'class': 'study-title'}).append(this.model.get('title') || '&nbsp;'))
     //             )
     //             .data('model', this.model)
@@ -106,8 +138,13 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             this.contributors = Utils.get_metadata_values.bind(this)('Contributor');
         },
         render: function() {
-            console.log('this', this)
-            var collections = new Datastore.Views.NodeListView({model: this.model, collection:this.model.get('children')})
+            // var study_collection = new DataCommons.Collections.NodeCollection();
+            // var study_list = new DataCommons.Views.NodeList({
+            //     collection: study_collection
+            // }).render();
+
+            console.log('MainView render this', this)
+            // var collections = new Datastore.Views.NodeListView({model: this.model, collection:this.model.get('children')})
 
             this.$el
                 .append($('<h2>').append('Metadata'))
@@ -130,7 +167,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             })
             $contributors.appendTo(this.$el);
 
-            var $libraryNumber = $('<div>').append('Library Number: ')
+            var $libraryNumber = $('<div>').append('Library Number: ').data('metadata_name', 'Library Number')
                         .append($('<a>',{
                             // 'TARGET':'_blank'
                             // href: '/search/?name=Library Number&value=' + this.libraryNumber
@@ -145,25 +182,42 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
               .append($("<dd>").append(m['value']))
             })
             $dl.appendTo(this.$el);
-
-            this.$el.append(collections.el);
+            console.log('this.model',this.model)
+            this.$el
+                // .append(study_list.el)
+                .append(new Datastore.Views.NodeListView({model: this.model, collection:this.model.get('children')}).el);
 
             return this;
         },
         search_metadata: function(e) {
-            var results = new DataCommons.Collections.MetadataMatchesCollection([], {name: 'Library Number', value: e.currentTarget.innerHTML});
+            e.preventDefault();
+            var searchParams = {}
+            searchParams['metadata_name'] = $(e.currentTarget).closest('div').data('metadata_name');
+            searchParams['metadata_value'] = e.currentTarget.innerHTML
+
+            var results = new DataCommons.Collections.MetadataMatches([], {name: searchParams['metadata_name'], value: searchParams['metadata_value']});
+
             var self=this;
             results.fetch({update: true, remove: false})
             .done(
                 function(){
                     console.log('metadata search results', results)
-                    self.append_collection(results)
+                    self.show_results(results, searchParams)
                 });
+
+            // DataCommons.Events.Traversal.trigger('search_metadata', searchParams);
+            return false;
         },
-        append_collection: function(collection) {
+        show_results: function(collection, searchParams) {
             this.$el.empty();
+            heading = this.$el.append('Collections with ' + searchParams['metadata_name'])
+
+            if (searchParams['metadata_value']) {
+                heading.append(' = ' + searchParams['metadata_value'])
+            }
+
             $list = $("<ul>", {'class': 'node-list'});
-            //console.log(this);
+
             collection.each(function(node) {
                 $("<li>")
                     .data('model', node)
@@ -175,6 +229,19 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
 
             return this;
         },
+    });
+
+    // Event space for managing metadata searches. Supports a single event,
+    // "search_metadata", that is triggered when clicking on linked metadata
+    DataCommons.Events.Traversal = _.extend({}, Backbone.Events);
+
+    DataCommons.Events.Traversal.on('search_metadata', function(searchParams) {
+        if (searchParams['metadata_value']) {
+            Backbone.history.navigate('search?name=' + searchParams['metadata_name'] + '&value=' + searchParams['metadata_value']);
+        } else {
+            Backbone.history.navigate('search?name=' + searchParams['metadata_name']);
+
+        }
     });
     return DataCommons;
 });

@@ -263,9 +263,12 @@ def legacy_redirect(request, path=''):
 
 def search_metadata(request):
     name = request.GET['name']
-    value = request.GET['value']
+    value = request.GET.get('value')
 
-    query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
+    if value:
+        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
+    else:
+        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name).all()
 
     results = [iRODSCollection(CollectionManager, row) for row in query_result]
 
