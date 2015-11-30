@@ -1,8 +1,11 @@
+cryptography==1.1
 Django==1.8.3
 Markdown==2.6.2
 prettytable==0.7.2
+PyJWT==1.4.0
 -e git+https://github.com/mrhanlon/python-irodsclient.git@bc1bc5562dcb9ef0cf968b3095ae9742c6d4093d#egg=python_irodsclient-master
 python-memcached==1.57
+requests==2.8.1
 six==1.9.0
 supervisor==3.0b2
 uWSGI==2.0.11.1

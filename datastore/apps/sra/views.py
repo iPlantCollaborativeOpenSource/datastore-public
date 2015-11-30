@@ -12,6 +12,9 @@ import markdown
 import urllib
 import urllib2
 import json
+import jwt
+import requests
+import time
 
 from irods.collection import iRODSCollection, iRODSDataObject
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
@@ -61,10 +64,19 @@ def get_file(request):
 
         logger.debug(obj)
 
+        uuid = obj.metadata.get_one('ipc_UUID').__dict__['value']
+        uuid = 'e494f3c0-e20f-11e3-b86f-6abdce5a08d5' #for testing (everdene can't see prod data)
+        de_meta = send_request('GET', str(uuid))
+        template_meta = de_meta['metadata']['templates'][0]
+        template_meta = template_meta['avus']
+
+        irods_meta = de_meta['irods-avus']
+        irods_meta = [m.__dict__ for m in obj.metadata.items()] #for testing - want to show correct irods data
+
         response = {
             'name': obj.name,
             'path': obj.path,
-            'metadata': [m.__dict__ for m in obj.metadata.items()],
+            'metadata': irods_meta + template_meta, #[m.__dict__ for m in obj.metadata.items()],
             'is_dir': isinstance(obj, iRODSCollection),
         }
         if isinstance(obj, iRODSDataObject):
@@ -74,7 +86,7 @@ def get_file(request):
             response['checksum'] = obj.checksum
 
         result = JsonResponse(response)
-        cache.set(cache_file_key, result, CACHE_EXPIRATION)
+        # cache.set(cache_file_key, result, CACHE_EXPIRATION)
     return result
 
 def format_subcoll(coll):
@@ -98,6 +110,7 @@ def get_collection(request):
     try:
         cache_key = str(path) + '_page_' + str(page)
         cache_value = cache.get(cache_key)
+
         if not cache_value:
             collection = DataStoreSession.collections.get(str(path))
             sub_collections = collection.subcollections
@@ -107,7 +120,7 @@ def get_collection(request):
             logger.debug(objects)
 
             cache_value = map(format_subcoll, sub_collections + objects)
-            cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+            # cache.set(cache_key, cache_value, CACHE_EXPIRATION)
 
         next_page_cache_key = str(path) + '_page_' + str(page + 1)
         next_page_cache_value = cache.get(next_page_cache_key)
@@ -121,7 +134,7 @@ def get_collection(request):
 
             next_page_objects = collection.data_objects_paging(PER_PAGE, int(offset+PER_PAGE))
             next_page_cache_value = map(format_subcoll, next_page_objects)
-            cache.set(next_page_cache_key, next_page_cache_value, CACHE_EXPIRATION)
+            # cache.set(next_page_cache_key, next_page_cache_value, CACHE_EXPIRATION)
 
         if next_page_cache_value:
             more_data = True
@@ -133,7 +146,7 @@ def get_collection(request):
             'page': page}
 
         response = JsonResponse(json, safe=False)
-
+        # import pdb; pdb.set_trace()
         return response
 
     except Exception as e:
@@ -261,6 +274,7 @@ def legacy_redirect(request, path=''):
             logger.warn('Legacy URL for path %s not satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
             return HttpResponseNotFound('File does not exist')
 
+
 def search_metadata(request):
     name = request.GET['name']
     value = request.GET.get('value')
@@ -273,3 +287,49 @@ def search_metadata(request):
     results = [iRODSCollection(CollectionManager, row) for row in query_result]
 
     return JsonResponse(map(format_subcoll, results), safe=False)
+
+
+def create_jwt_token():
+    payload = {
+        "iat": int(time.time()),
+        "sub": 'ipcdev',
+        "email": 'test@email.com'
+    }
+
+    with open('privkey.pem', 'r') as priv_key:
+        shared_key = priv_key.read()
+
+    from cryptography.hazmat.primitives.serialization import load_pem_private_key
+    from cryptography.hazmat.backends import default_backend
+
+    key = load_pem_private_key(shared_key, 'mirrors', default_backend())
+
+    # jwt_string = jwt.encode(payload, shared_key, algorithm='RS256')
+    jwt_string = jwt.encode(payload, key, algorithm='RS256')
+    encoded_jwt = urllib.quote_plus(jwt_string)  # url-encode the jwt string
+
+    return encoded_jwt
+
+
+def send_request(http_method, UUID=None, url=None, params=None, payload=None):
+    encoded_jwt = create_jwt_token()
+    headers = {'X-Iplant-De-Jwt': encoded_jwt}
+
+    url = 'https://everdene.iplantcollaborative.org/terrain/secured/filesystem/' + UUID + '/metadata'
+    print url
+
+    if payload:
+        headers['Content-Type'] = 'application/json'
+    if http_method.upper() == 'GET':
+        response = requests.get(url, params=params, headers=headers)
+    elif http_method.upper() == 'POST':
+        data = json.dumps(payload)
+        response = requests.post(url, data=data, params=params, headers=headers)
+    elif http_method.upper() == 'PUT':
+        data = json.dumps(payload)
+        response = requests.put(url, data=data, params=params, headers=headers)
+    elif http_method.upper() == 'DELETE':
+        response = requests.delete(url, headers=headers)
+
+    print response.json()
+    return response.json()

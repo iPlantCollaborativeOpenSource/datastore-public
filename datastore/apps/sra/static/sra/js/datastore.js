@@ -15,9 +15,11 @@ Datastore.Models.Node = Backbone.Model.extend({
         parent: null
     },
     url: function() {
+        console.log('models.node')
         return '/api/file' + '?path=' + encodeURIComponent(this.get('path'));
     },
     parse: function(obj) {
+        console.log('obj', obj)
         r = {}
         if (obj.is_dir)
             r.children = new Datastore.Collections.NodeCollection([], {path: obj.path});
@@ -32,7 +34,10 @@ Datastore.Models.Node = Backbone.Model.extend({
         r.root_relative_path = obj.path.replace(root, '');
 
         var metadata = Utils.metadata_to_object(obj.metadata);
+        console.log('obj.metadata', obj.metadata)
+        console.log('metadata', metadata)
         if (metadata[metadata_prefix])
+            console.log('metadata_prefix', metadata_prefix)
             r.template_metadata = metadata[metadata_prefix];
 
         r.create_time = moment.unix(obj.create_time);
