@@ -76,7 +76,7 @@ def get_file(request):
         response = {
             'name': obj.name,
             'path': obj.path,
-            'metadata': irods_meta + template_meta, #[m.__dict__ for m in obj.metadata.items()],
+            'metadata': irods_meta,# + template_meta, commented out for testing
             'is_dir': isinstance(obj, iRODSCollection),
         }
         if isinstance(obj, iRODSDataObject):

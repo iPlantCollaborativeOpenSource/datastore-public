@@ -40,19 +40,17 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
 
             var $subjects = $('<div>').append('Subject: ')
             _.each(this.subjects, function(s){
-                $subjects.append($('<a>',{
-                            'TARGET':'_blank'
-                        }).append(s + ', ')
-                )
+                // $subjects.append($('<a>',{
+                //             'TARGET':'_blank',
+                //             'class': 'metadataLink'
+                //         }).data('metadata_value', s).append(s + ', ')
+                $subjects.append(s + ', ')
             })
             $subjects.appendTo(this.$el);
 
             var $contributors = $('<div>').append('Contributors: ')
             _.each(this.contributors, function(s){
-                $contributors.append($('<a>',{
-                            'TARGET':'_blank'
-                        }).append(s + ', ')
-                )
+                $contributors.append(s + ', ')
             })
             $contributors.appendTo(this.$el);
 
