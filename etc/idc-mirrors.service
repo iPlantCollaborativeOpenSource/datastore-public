@@ -5,6 +5,7 @@ After=docker.service
 
 [Service]
 User=mirrors
+ExecStartPre=-/usr/bin/docker rm idc_mirrors
 ExecStart=/usr/bin/docker run -d -p 80:80 --name idc_mirrors --env-file=/usr/local/src/datastore-public/datastore.env iplantc/idc_mirrors
 ExecStart=/usr/bin/docker stop idc_mirrors
 Restart=always
