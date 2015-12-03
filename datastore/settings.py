@@ -69,6 +69,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'datastore.context_processors.google_analytics',
+                'datastore.context_processors.idc_mirrors_version',
             ],
         },
     },

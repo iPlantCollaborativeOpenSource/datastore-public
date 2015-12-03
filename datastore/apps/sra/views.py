@@ -24,6 +24,7 @@ from . import settings as sra_settings
 
 
 logger = logging.getLogger(__name__)
+
 GOOGLE_RECAPTCHA_SITE_KEY = "6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt"
 GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
 CACHE_EXPIRATION = 900 #15 minutes
