@@ -5,9 +5,8 @@ After=docker.service
 
 [Service]
 User=mirrors
-ExecStartPre=-/usr/bin/docker rm idc_mirrors
-ExecStart=/usr/bin/docker run -d -p 80:80 --name idc_mirrors --env-file=/usr/local/src/datastore-public/datastore.env iplantc/idc_mirrors
-ExecStart=/usr/bin/docker stop idc_mirrors
+ExecStart=/usr/bin/docker run -p 80:80 --name idc_mirrors --env-file=/usr/local/src/datastore-public/datastore.env --log-driver=syslog --log-opt tag="idc_mirrors" iplantc/idc_mirrors
+ExecStop=/usr/bin/docker stop idc_mirrors ; /usr/bin/docker rm -r idc_mirrors
 Restart=always
 
 [Install]
