@@ -1,0 +1,13 @@
+[Unit]
+Description=iDC Mirrors Container
+Requires=docker.service
+After=docker.service
+
+[Service]
+User=mirrors
+ExecStart=/usr/bin/docker run -d -p 80:80 --name idc_mirrors --env-file=/usr/local/src/datastore-public/datastore.env iplantc/idc_mirrors
+ExecStart=/usr/bin/docker stop idc_mirrors
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
