@@ -1,14 +1,14 @@
 define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbone, $, Utils) {
-    var DataCommons = {
+    var Datacommons = {
         Collections: {},
         Models: {},
         Views: {},
         Events: {},
     };
 
-    DataCommons.Collections.MetadataMatches = Backbone.Collection.extend({
-        // model: DataCommons.Models.MetadataMatchesDatastore.Models.Node,
-        model: Datastore.Models.Node,
+    Datacommons.Collections.MetadataMatches = Backbone.Collection.extend({
+        // model: Datacommons.Models.MetadataMatchesDatacommons.Models.Node,
+        model: Datacommons.Models.Node,
         url: function() {
             if (this.value) {
                 return '/search/?name=' + this.name + '&value=' + this.value
@@ -22,7 +22,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
         }
     });
 
-    DataCommons.Views.MainView = Backbone.View.extend({
+    Datacommons.Views.MainView = Backbone.View.extend({
         tagName: 'div',
         events: {
             'click .metadataLink': 'search_metadata'
@@ -70,7 +70,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             })
             $dl.appendTo(this.$el);
             console.log('this.model',this.model)
-            this.$el.append(new Datastore.Views.NodeListView({model: this.model, collection:this.model.get('children')}).el);
+            this.$el.append(new Datacommons.Views.NodeListView({model: this.model, collection:this.model.get('children')}).el);
 
             return this;
         },
@@ -80,7 +80,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             searchParams['metadata_name'] = $(e.currentTarget).closest('div').data('metadata_name');
             searchParams['metadata_value'] = e.currentTarget.innerHTML
 
-            var results = new DataCommons.Collections.MetadataMatches([], {name: searchParams['metadata_name'], value: searchParams['metadata_value']});
+            var results = new Datacommons.Collections.MetadataMatches([], {name: searchParams['metadata_name'], value: searchParams['metadata_value']});
 
             var self=this;
             results.fetch({update: true, remove: false})
@@ -90,7 +90,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
                     self.show_results(results, searchParams)
                 });
 
-            // DataCommons.Events.Traversal.trigger('search_metadata', searchParams);
+            // Datacommons.Events.Traversal.trigger('search_metadata', searchParams);
             return false;
         },
         show_results: function(collection, searchParams) {
@@ -118,9 +118,9 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
 
     // Event space for managing metadata searches. Supports a single event,
     // "search_metadata", that is triggered when clicking on linked metadata
-    DataCommons.Events.Traversal = _.extend({}, Backbone.Events);
+    Datacommons.Events.Traversal = _.extend({}, Backbone.Events);
 
-    DataCommons.Events.Traversal.on('search_metadata', function(searchParams) {
+    Datacommons.Events.Traversal.on('search_metadata', function(searchParams) {
         if (searchParams['metadata_value']) {
             Backbone.history.navigate('search?name=' + searchParams['metadata_name'] + '&value=' + searchParams['metadata_value']);
         } else {
@@ -128,5 +128,5 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
 
         }
     });
-    return DataCommons;
+    return Datacommons;
 });

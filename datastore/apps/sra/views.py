@@ -279,7 +279,7 @@ def search_metadata(request):
     value = request.GET.get('value')
 
     if value and name:
-        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.name == 'name', CollectionMeta.value == value).all()
+        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
     elif name:
         query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name).all()
     elif value:

@@ -66,7 +66,7 @@ define(['jquery'], function($) {
         },
         get_metadata: function(key) {
                 var meta = _.find(this.model.get('metadata'), function(m) {
-                    return m.name == key;
+                    return m.attr == key;
                 });
                 if (meta)
                     return meta['value'];

@@ -1,6 +1,6 @@
 define(['jquery', 'underscore', 'backbone', 'utils', 'moment', 'bootstrap'], function($, _, Backbone, Utils, moment, _bootstrap) {
 
-var Datastore = {
+var Datacommons = {
     Models: {},
     Collections: {},
     Views: {},
@@ -9,7 +9,7 @@ var Datastore = {
 };
 
 // A Node is a filesystem node--a file or directory
-Datastore.Models.Node = Backbone.Model.extend({
+Datacommons.Models.Node = Backbone.Model.extend({
     urlRoot: '/api/file',
     defaults: {
         parent: null
@@ -22,7 +22,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         console.log('obj', obj)
         r = {}
         if (obj.is_dir)
-            r.children = new Datastore.Collections.NodeCollection([], {path: obj.path});
+            r.children = new Datacommons.Collections.NodeCollection([], {path: obj.path});
 
         var encoded_path = Utils.urlencode_path(obj.path);
         if (obj.is_dir != undefined && obj.is_dir == false) {
@@ -52,7 +52,7 @@ Datastore.Models.Node = Backbone.Model.extend({
         dirs.pop();
         var ancestors = _.map(dirs, function(name, i) {
             var rel = '/' + dirs.slice(0, i+1).join('/');
-            return new Datastore.Models.Node({
+            return new Datacommons.Models.Node({
                 name: name,
                 path: root + rel,
                 is_dir: true,
@@ -65,8 +65,8 @@ Datastore.Models.Node = Backbone.Model.extend({
     }
 });
 
-Datastore.Collections.NodeCollection = Backbone.Collection.extend({
-    model: Datastore.Models.Node,
+Datacommons.Collections.NodeCollection = Backbone.Collection.extend({
+    model: Datacommons.Models.Node,
     url: function() {
         return '/api/collection?path=' + encodeURIComponent(this.path) + '&page=' + this.page;
     },
@@ -82,8 +82,23 @@ Datastore.Collections.NodeCollection = Backbone.Collection.extend({
     },
 });
 
+Datacommons.Collections.MetadataMatches = Backbone.Collection.extend({
+    model: Datacommons.Models.Node,
+    url: function() {
+        if (this.value) {
+            return '/search/?name=' + this.name + '&value=' + this.value
+        } else {
+            return '/search/?name=' + this.name
+        }
+    },
+    initialize: function(models, options) {
+        this.name = options.name;
+        this.value = options.value;
+    }
+});
+
 // The default view for a directory if no template is associated with it
-Datastore.Views.NodeListView = Backbone.View.extend({
+Datacommons.Views.NodeListView = Backbone.View.extend({
     tagName: 'div',
     events: {
         'click li.dir a': 'open_file',
@@ -125,7 +140,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         e.preventDefault();
         var node = $(e.currentTarget).closest('li').data('model');
         //console.log(node);
-        Datastore.Events.Traversal.trigger('navigate', node);
+        Datacommons.Events.Traversal.trigger('navigate', node);
         return false;
     },
     load_more: function(e) {
@@ -140,13 +155,13 @@ Datastore.Views.NodeListView = Backbone.View.extend({
 });
 
 // The default file view if no template is associated with it
-Datastore.Views.FileView = Backbone.View.extend({
+Datacommons.Views.FileView = Backbone.View.extend({
     tagName: 'div',
     events: {},
     initialize: function(options) {
     },
     render: function() {
-        this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
+        this.$el.append(new Datacommons.Views.DataObjectHeader({model: this.model}).render().el);
         this.$el.append(
             $("<div>")
                 .addClass('no-preview')
@@ -158,9 +173,9 @@ Datastore.Views.FileView = Backbone.View.extend({
 
 // Event space for managing filesystem traversals. Supports a single event,
 // "navigate", that is triggered upon the selection of a new folder or file
-Datastore.Events.Traversal = _.extend({}, Backbone.Events);
+Datacommons.Events.Traversal = _.extend({}, Backbone.Events);
 
-Datastore.Events.Traversal.on('navigate', function(model) {
+Datacommons.Events.Traversal.on('navigate', function(model) {
     if (model.get('path')) {
         $('.content .popover').remove();
         Backbone.history.navigate('browse' + model.get('path'));
@@ -170,12 +185,12 @@ Datastore.Events.Traversal.on('navigate', function(model) {
 });
 
 // The breadcrumbs across the top of the app
-Datastore.Views.BreadcrumbView = Backbone.View.extend({
+Datacommons.Views.BreadcrumbView = Backbone.View.extend({
     events: {
         'click a': 'open_dir'
     },
     initialize: function() {
-        Datastore.Events.Traversal.on('navigate', _.bind(this.populate_breadcrumbs, this));
+        Datacommons.Events.Traversal.on('navigate', _.bind(this.populate_breadcrumbs, this));
         this.base_node = this.options.base_node;
         this.$list = null;
     },
@@ -202,17 +217,17 @@ Datastore.Views.BreadcrumbView = Backbone.View.extend({
     open_dir: function(e) {
         e.preventDefault();
         var model = $(e.currentTarget).closest('li').data('model');
-        Datastore.Events.Traversal.trigger('navigate', model);
+        Datacommons.Events.Traversal.trigger('navigate', model);
         return false;
     }
 });
 
 // The main content area
-Datastore.Views.DataApp = Backbone.View.extend({
+Datacommons.Views.DataApp = Backbone.View.extend({
     events: {
     },
     initialize: function() {
-        Datastore.Events.Traversal.on('navigate', _.bind(this.navigate, this));
+        Datacommons.Events.Traversal.on('navigate', _.bind(this.navigate, this));
     },
     render: function() {
         return this;
@@ -225,8 +240,8 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 self.$el.width(new_width);
 
                 // console.log('model', model);
-                // var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
-                var template = 'datacommons' //for testing
+                var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
+                // var template = 'datacommons' //for testing
                 //console.log(template);
 
                 var append_view = function(view, options) {
@@ -255,15 +270,16 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 if (template) {
                     require(['/static/sra/js/contexts/' + template + '.js'], function(Context) {
                         view = Context.Views.MainView;
-                        // view_options = model.get('template_metadata')['template_options'] || {};
-                        view_options = 'datacommons'; //for testing
+                        view_options = model.get('template_metadata')['template_options'] || {};
+                        // view_options = 'datacommons'; //for testing
                         append_view(view, view_options);
                     });
                 } else if (model.get('is_dir')) {
-                    view = Datastore.Views.NodeListView;
+                    // view = Datacommons.Views.NodeListView;
+                    view = Datacommons.Views.Metadata;
                     append_view(view, {});
                 } else {
-                    view = Datastore.Views.FileView;
+                    view = Datacommons.Views.FileView;
                     append_view(view, {});
                 }
             }
@@ -273,7 +289,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
 
 // Each file view is rendered with a header that contains the file's
 // name, size, and a download link
-Datastore.Views.DataObjectHeader = Backbone.View.extend({
+Datacommons.Views.DataObjectHeader = Backbone.View.extend({
     tagName: 'div',
     className: 'data-object-header clearfix',
     initialize: function() {
@@ -463,24 +479,134 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
     },
 });
 
-Datastore.Router = Backbone.Router.extend({
+Datacommons.Views.Metadata = Backbone.View.extend({
+    tagName: 'div',
+    events: {
+        'click .metadataLink': 'search_metadata'
+    },
+    initialize: function() {
+        this.libraryNumbers = Utils.get_metadata_values.bind(this)('Library Number');
+        this.subjects = Utils.get_metadata_values.bind(this)('Subject');
+        this.contributors = Utils.get_metadata_values.bind(this)('Contributor');
+    },
+    render: function() {
+        console.log('MainView render this', this)
+
+        this.$el
+            .append($('<h2>').append('Metadata'))
+
+        var $subjects = $('<div>').append('Subject: ')
+        _.each(this.subjects, function(element, index, list){
+            $subjects.append($('<a>',{
+                        'class': 'metadataLink'
+                    }).data('search_params', {name: 'Subject', value: element}).append(element))
+            if (index != list.length - 1) {
+                $subjects.append(', ')
+            }
+        })
+        $subjects.appendTo(this.$el);
+
+        var $contributors = $('<div>').append('Contributors: ')
+        _.each(this.contributors, function(element, index, list){
+            $contributors.append($('<a>',{
+                        'class': 'metadataLink'
+                    }).data('search_params', {name: 'Contributor', value: element}).append(element))
+            if (index != list.length - 1) {
+                $contributors.append(', ')
+            }
+        })
+        $contributors.appendTo(this.$el);
+
+        var $libraryNumbers = $('<div>').append('Library Number: ')
+        _.each(this.libraryNumbers, function(element, index, list){
+            $libraryNumbers.append($('<a>',{
+                        'class': 'metadataLink'
+                    }).data('search_params', {name: 'Library Number', value: element}).append(element))
+            if (index != list.length - 1) {
+                $libraryNumbers.append(', ')
+            }
+        })
+
+        $libraryNumbers.appendTo(this.$el);
+
+        var $dl = $('<dl>')
+        _.each(this.model.attributes.metadata, function(m) {
+            metaValue = m['value']
+            metaName = m['attr']
+
+            $dl.append($("<dt>").append(metaName).data('metadata_name', metaName))
+            .append($("<dd>")//.append(m['value']))
+                .append($('<a>',{
+                    'class': 'metadataLink',
+                }).data('search_params', {name: metaName, value: metaValue}).append(metaValue + ' '))
+            )
+        })
+        $dl.appendTo(this.$el);
+        console.log('this.model',this.model)
+        this.$el.append(new Datacommons.Views.NodeListView({model: this.model, collection:this.model.get('children')}).el);
+
+        return this;
+    },
+    search_metadata: function(e) {
+        e.preventDefault();
+        var searchParams = {}
+        searchParams['metadata_name'] = $(e.currentTarget).closest('a').data('search_params').name//$(e.currentTarget).closest('div').data('metadata_name');
+        searchParams['metadata_value'] = $(e.currentTarget).closest('a').data('search_params').value;
+
+        var results = new Datacommons.Collections.MetadataMatches([], {name: searchParams['metadata_name'], value: searchParams['metadata_value']});
+
+        var self=this;
+        results.fetch({update: true, remove: false})
+        .done(
+            function(){
+                console.log('metadata search results', results)
+                self.show_results(results, searchParams)
+            });
+
+        // Datacommons.Events.Traversal.trigger('search_metadata', searchParams);
+        return false;
+    },
+    show_results: function(collection, searchParams) {
+        this.$el.empty();
+        heading = this.$el.append('Collections with ' + searchParams['metadata_name'])
+
+        if (searchParams['metadata_value']) {
+            heading.append(' = ' + searchParams['metadata_value'])
+        }
+
+        $list = $("<ul>", {'class': 'node-list'});
+
+        collection.each(function(node) {
+            $("<li>")
+                .data('model', node)
+                .addClass(node.get('is_dir') ? 'dir' : 'file ext-' + Utils.file_ext(node.get('name')))
+                .append($('<a>', {href: node.get('browse_url')}).append(node.get('name')))
+                .appendTo($list);
+        });
+        this.$el.append($list);
+
+        return this;
+    },
+});
+
+Datacommons.Router = Backbone.Router.extend({
     routes: {
         "": "index",
         "browse/*path": "expand"
     },
     initialize: function() {
-        this.baseNode = new Datastore.Models.Node({path: root, name: root_name, is_dir: true});
-        this.dataApp = new Datastore.Views.DataApp({el: $('#file-scroller-inner')}).render();
-        this.breadcrumb_view = new Datastore.Views.BreadcrumbView({el: $('#breadcrumbs'), base_node: this.baseNode}).render();
+        this.baseNode = new Datacommons.Models.Node({path: root, name: root_name, is_dir: true});
+        this.dataApp = new Datacommons.Views.DataApp({el: $('#file-scroller-inner')}).render();
+        this.breadcrumb_view = new Datacommons.Views.BreadcrumbView({el: $('#breadcrumbs'), base_node: this.baseNode}).render();
     },
     index: function() {
-        Datastore.Events.Traversal.trigger('navigate', this.baseNode);
+        Datacommons.Events.Traversal.trigger('navigate', this.baseNode);
     },
     expand: function(path) {
-        var node = new Datastore.Models.Node({path: '/' + decodeURIComponent(path)});
+        var node = new Datacommons.Models.Node({path: '/' + decodeURIComponent(path)});
         node.fetch({
             success: function(model) {
-                Datastore.Events.Traversal.trigger('navigate', model);
+                Datacommons.Events.Traversal.trigger('navigate', model);
             }
         });
     }
@@ -500,6 +626,6 @@ window.recaptcha_callback = function recaptcha_callback(response) {
     $('#download_button').popover('hide');
 }
 
-return Datastore;
+return Datacommons;
 
 });
