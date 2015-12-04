@@ -27,7 +27,6 @@ from . import settings as sra_settings
 
 
 logger = logging.getLogger(__name__)
-GOOGLE_RECAPTCHA_SITE_KEY = "6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt"
 GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
 CACHE_EXPIRATION = 900 #15 minutes
 
@@ -65,18 +64,19 @@ def get_file(request):
         logger.debug(obj)
 
         uuid = obj.metadata.get_one('ipc_UUID').__dict__['value']
-        uuid = 'e494f3c0-e20f-11e3-b86f-6abdce5a08d5' #for testing (everdene can't see prod data)
         de_meta = send_request('GET', str(uuid))
-        template_meta = de_meta['metadata']['templates'][0]
-        template_meta = template_meta['avus']
+
+        try:
+            template_meta = de_meta['metadata']['templates'][0]['avus']
+        except IndexError: #there is no template metadata
+            template_meta=[]
 
         irods_meta = de_meta['irods-avus']
-        irods_meta = [m.__dict__ for m in obj.metadata.items()] #for testing - want to show correct irods data
 
         response = {
             'name': obj.name,
             'path': obj.path,
-            'metadata': irods_meta,# + template_meta, commented out for testing
+            'metadata': irods_meta + template_meta,
             'is_dir': isinstance(obj, iRODSCollection),
         }
         if isinstance(obj, iRODSDataObject):
@@ -146,7 +146,6 @@ def get_collection(request):
             'page': page}
 
         response = JsonResponse(json, safe=False)
-        # import pdb; pdb.set_trace()
         return response
 
     except Exception as e:
@@ -279,10 +278,12 @@ def search_metadata(request):
     name = request.GET['name']
     value = request.GET.get('value')
 
-    if value:
-        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
-    else:
+    if value and name:
+        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.name == 'name', CollectionMeta.value == value).all()
+    elif name:
         query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name).all()
+    elif value:
+        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.value == value).all()
 
     results = [iRODSCollection(CollectionManager, row) for row in query_result]
 

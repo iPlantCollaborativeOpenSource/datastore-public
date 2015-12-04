@@ -65,7 +65,7 @@ define(['datastore', 'backbone', 'jquery', 'utils'], function(Datastore, Backbon
             var $dl = $('<dl>')
             _.each(this.model.attributes.metadata, function(m) {
               // console.log(m['name'], ': ', m['value']);
-              $dl.append($("<dt>").append(m['name']))
+              $dl.append($("<dt>").append(m['attr']))
               .append($("<dd>").append(m['value']))
             })
             $dl.appendTo(this.$el);

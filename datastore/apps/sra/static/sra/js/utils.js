@@ -33,9 +33,9 @@ define(['jquery'], function($) {
         metadata_to_object: function(metadata) {
             var obj = {};
             _.each(metadata, function(datum) {
-                var parts = datum.name.split('.');
+                var parts = datum.attr.split('.');
                 if (parts.length == 1)
-                    obj[datum.name] = datum.value;
+                    obj[datum.attr] = datum.value;
                 else {
                     var ns = obj;
                     for (i = 0; i < parts.length - 1; i++) {
@@ -75,7 +75,7 @@ define(['jquery'], function($) {
         get_metadata_values: function(key, getFirst) {  //get all values for a given key
                 var values = []
                 _.each(this.model.get('metadata'), function(m) {
-                    if (m.name == key) {
+                    if (m.attr == key) {
                         values.push(m.value);
                     }
                 });
