@@ -43,8 +43,8 @@ Logging
 -------
 
 Using the development `docker-compose.yml` configuration, the containers all log to
-`stdout`. The production docker compose configuration (`docker-compose-prod.yml`)
-configures the [Docker syslog driver][4] to direct all logs to the host system's syslog.
+`stdout`. The production configuration (see below) configures the [Docker syslog driver][4]
+to direct all logs to the host system's syslog.
 
 
 Production installation and configuration
