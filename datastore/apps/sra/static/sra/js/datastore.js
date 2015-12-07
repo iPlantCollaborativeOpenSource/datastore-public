@@ -420,7 +420,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                 )
             )
             .append($('<div>')
-                .append('iPlant Users')
+                .append('iPlant Users (Requires iPlant account)')
                 .append($('<ul>')
                     .append($('<li>')
                         .append($('<a>',{
