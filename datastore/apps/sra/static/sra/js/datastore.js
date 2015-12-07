@@ -485,7 +485,7 @@ Datacommons.Views.Metadata = Backbone.View.extend({
         'click .metadataLink': 'search_metadata'
     },
     initialize: function() {
-        this.libraryNumbers = Utils.get_metadata_values.bind(this)('Library Number');
+        this.biosampleNumbers = Utils.get_metadata_values.bind(this)('BioSample Number');
         this.subjects = Utils.get_metadata_values.bind(this)('Subject');
         this.contributors = Utils.get_metadata_values.bind(this)('Contributor');
     },
@@ -517,17 +517,16 @@ Datacommons.Views.Metadata = Backbone.View.extend({
         })
         $contributors.appendTo(this.$el);
 
-        var $libraryNumbers = $('<div>').append('Library Number: ')
-        _.each(this.libraryNumbers, function(element, index, list){
-            $libraryNumbers.append($('<a>',{
+        var $biosampleNumbers = $('<div>').append('BioSample Number: ')
+        _.each(this.biosampleNumbers, function(element, index, list){
+            $biosampleNumbers.append($('<a>',{
                         'class': 'metadataLink'
-                    }).data('search_params', {name: 'Library Number', value: element}).append(element))
+                    }).data('search_params', {name: 'BioSample Number', value: element}).append(element))
             if (index != list.length - 1) {
-                $libraryNumbers.append(', ')
+                $biosampleNumbers.append(', ')
             }
         })
-
-        $libraryNumbers.appendTo(this.$el);
+        $biosampleNumbers.appendTo(this.$el);
 
         var $dl = $('<dl>')
         _.each(this.model.attributes.metadata, function(m) {
