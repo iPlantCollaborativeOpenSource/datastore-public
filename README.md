@@ -47,11 +47,53 @@ Using the development `docker-compose.yml` configuration, the containers all log
 configures the [Docker syslog driver][4] to direct all logs to the host system's syslog.
 
 
-Running in Production
----------------------
+Production installation and configuration
+-----------------------------------------
 
+In production, the application is run as a systemd service.
 
+Steps for installation:
 
+1. Create an non-root user `mirrors` in the `docker` group. We will be running the
+    application as this non-root user.
+
+    ```
+    $ sudo adduser mirrors -G docker
+    ```
+
+2. Clone this repository to the production machine and build the image.
+
+    ```
+    $ git clone https://github.com/iplantopensource/datastore-public.git
+    $ cd datastore-public
+    $ docker build -t iplantc/idc_mirrors .
+    ```
+
+    Alternatively, pull the image from a docker image repository.
+
+3. Copy the application environment configuration ([`datastore.env`](datastore.env)) to
+    `/etc/idc-mirrors.conf`. Make any changes necessary, such as updating the iRODS
+    connection parameters.
+
+4. Copy the systemd service definition [`etc/idc-mirrors.service`](etc/idc-mirrors.service)
+    to `/etc/systemd/system`. This service definition is configured to run the container
+    as the `mirrors` user we created above. The container is configured to expose port 80,
+    map the environment variables defined in `/etc/idc-mirrors.conf`, and log the container
+    output to syslog. The container will be automatically removed when it is stopped.
+
+You can now start, stop, and restart the application container with systemd as necessary:
+
+```
+$ systemctl start idc-mirrors
+$ systemctl restart idc-mirrors
+$ systemctl stop idc-mirrors
+```
+
+If you want to register the container to start at boot, enable the container:
+
+```
+$ systemctl enable idc-mirrors
+```
 
 
 [1]: https://docs.docker.com/installation/
