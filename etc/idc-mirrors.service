@@ -1,0 +1,13 @@
+[Unit]
+Description=iDC Mirrors Container
+Requires=docker.service
+After=docker.service
+
+[Service]
+User=mirrors
+ExecStart=/usr/bin/docker run -p 80:80 --name idc_mirrors --env-file=/etc/idc-mirrors.conf --log-driver=syslog --log-opt syslog-tag="idc_mirrors" iplantc/idc_mirrors
+ExecStop=/usr/bin/docker stop idc_mirrors ; /usr/bin/docker rm -f idc_mirrors
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
