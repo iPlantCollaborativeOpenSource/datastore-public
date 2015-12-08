@@ -621,6 +621,11 @@ $.fn.popover.Constructor.prototype.show = function(){
 }
 
 window.recaptcha_callback = function recaptcha_callback(response) {
+    var d = new Date();
+    d.setTime(d.getTime() + (365*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = 'recaptcha_status=verified; ' + expires;
+
     $('#download_form').submit();
     $('#download_button').popover('hide');
 }
