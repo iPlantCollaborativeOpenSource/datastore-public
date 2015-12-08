@@ -413,10 +413,10 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                     .append($('<li>').append('iCommands'))
                     .append($('<li>').append('iDrop'))
                     .append($('<li>').append('Cyberduck'))
-                    .append($('<li>').append('More Information ').append($('<a>',{
+                    .append($('<li>').append($('<a>',{
                                 'TARGET':'_blank',
                                 'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
-                            }).append("(link)")))
+                            }).append("More Information")))
                 )
             )
             .append($('<div>')
