@@ -29,6 +29,11 @@ GOOGLE_RECAPTCHA_SITE_KEY = "6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt"
 GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
 CACHE_EXPIRATION = 900 #15 minutes
 
+def _check_path(path):
+    path = str(path)
+    if path[-1:] == '/':
+        path = path[:-1]
+    return path
 
 def home(request, path=''):
     context = {
@@ -44,18 +49,18 @@ def get_file(request):
     if not 'path' in request.GET:
         raise HttpResponseBadRequest()
 
-    path = request.GET['path']
+    path = _check_path(request.GET['path'])
     logger.debug(path)
 
-    cache_file_key = str(path) + '_file_key'
+    cache_file_key = path + '_file_key'
     result = cache.get(cache_file_key)
 
     if not result:
         try:
-            obj = DataStoreSession.collections.get(str(path))
+            obj = DataStoreSession.collections.get(path)
         except CollectionDoesNotExist as e:
             try:
-                obj = DataStoreSession.data_objects.get(str(path))
+                obj = DataStoreSession.data_objects.get(path)
             except DataObjectDoesNotExist as e:
                 logger.exception(e)
                 return HttpResponseNotFound()
@@ -91,16 +96,16 @@ def get_collection(request):
     if not 'path' in request.GET:
         return HttpResponseBadRequest()
 
-    path = request.GET['path']
+    path = _check_path(request.GET['path'])
     page = int(request.GET.get('page', 1))
 
     offset = PER_PAGE * (page - 1)
 
     try:
-        cache_key = str(path) + '_page_' + str(page)
+        cache_key = path + '_page_' + str(page)
         cache_value = cache.get(cache_key)
         if not cache_value:
-            collection = DataStoreSession.collections.get(str(path))
+            collection = DataStoreSession.collections.get(path)
             sub_collections = collection.subcollections
             objects = collection.data_objects_paging(PER_PAGE, offset)
 
@@ -110,14 +115,14 @@ def get_collection(request):
             cache_value = map(format_subcoll, sub_collections + objects)
             cache.set(cache_key, cache_value, CACHE_EXPIRATION)
 
-        next_page_cache_key = str(path) + '_page_' + str(page + 1)
+        next_page_cache_key = path + '_page_' + str(page + 1)
         next_page_cache_value = cache.get(next_page_cache_key)
 
         if not isinstance(next_page_cache_value, list):
             try:
               collection
             except NameError:
-                collection = DataStoreSession.collections.get(str(path))
+                collection = DataStoreSession.collections.get(path)
                 sub_collections = collection.subcollections
 
             next_page_objects = collection.data_objects_paging(PER_PAGE, int(offset+PER_PAGE))
@@ -143,8 +148,10 @@ def get_collection(request):
 
 
 def serve_file(request, path=''):
+    path =_check_path(path)
+
     try:
-        obj = DataStoreSession.data_objects.get('/' + str(path))
+        obj = DataStoreSession.data_objects.get('/' + path)
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
 
@@ -186,8 +193,10 @@ def download_file(request, path=''):
     #     if recaptcha_status != 'verified':
     #         return HttpResponse(recaptcha_status)
 
+    path = _check_path(path)
+
     try:
-        obj = DataStoreSession.data_objects.get('/' + str(path))
+        obj = DataStoreSession.data_objects.get('/' + path)
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
 
@@ -216,8 +225,10 @@ def download_file(request, path=''):
 
 
 def markdown_view(request, path=''):
+    path = _check_path(path)
+
     try:
-        obj = DataStoreSession.data_objects.get('/' + str(path))
+        obj = DataStoreSession.data_objects.get('/' + path)
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
 
@@ -249,13 +260,15 @@ def legacy_redirect(request, path=''):
     else:
         path = sra_settings.irods['path'] + '/' + path
 
+    path = _check_path(path)
+
     try:
-        obj = DataStoreSession.collections.get(str(path))
+        obj = DataStoreSession.collections.get(path)
         logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
         return HttpResponseRedirect('/browse' + path)
     except CollectionDoesNotExist:
         try:
-            obj = DataStoreSession.data_objects.get(str(path))
+            obj = DataStoreSession.data_objects.get(path)
             logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
             return HttpResponseRedirect('/download' + path)
         except DataObjectDoesNotExist:
