@@ -179,12 +179,12 @@ def verify_recaptcha(request, path=''):
     return result['error-codes']
 
 def download_file(request, path=''):
-    recaptcha_status = ''
+    # recaptcha_status = ''
 
-    if not request.COOKIES.has_key('recaptcha_status'):
-        recaptcha_status = verify_recaptcha(request)
-        if recaptcha_status != 'verified':
-            return HttpResponse(recaptcha_status)
+    # if not request.COOKIES.has_key('recaptcha_status'):
+    #     recaptcha_status = verify_recaptcha(request)
+    #     if recaptcha_status != 'verified':
+    #         return HttpResponse(recaptcha_status)
 
     try:
         obj = DataStoreSession.data_objects.get('/' + str(path))
@@ -208,9 +208,9 @@ def download_file(request, path=''):
     response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
     response['Accept-Ranges'] = 'bytes'
 
-    if recaptcha_status:
-        max_age = 365*24*60*60  #one year
-        response.set_cookie('recaptcha_status', recaptcha_status, max_age=max_age )
+    # if recaptcha_status:
+    #     max_age = 365*24*60*60  #one year
+    #     response.set_cookie('recaptcha_status', recaptcha_status, max_age=max_age )
 
     return response
 
