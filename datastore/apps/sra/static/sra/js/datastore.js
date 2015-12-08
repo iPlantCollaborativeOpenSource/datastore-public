@@ -429,19 +429,19 @@ Datacommons.Views.DataObjectHeader = Backbone.View.extend({
         return $('<div>')
             .append('Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:')
             .append($('<div>')
-                .append('Public Access')
-                .append($('<a>',{
-                            'TARGET':'_blank',
-                            'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
-                        }).append(" (More Information)"))
+                .append('Public Access (No account required)')
                 .append($('<ul>')
                     .append($('<li>').append('iCommands'))
                     .append($('<li>').append('iDrop'))
-                    .append($('<li>').append('FTP/Cyberduck'))
+                    .append($('<li>').append('Cyberduck'))
+                    .append($('<li>').append($('<a>',{
+                                'TARGET':'_blank',
+                                'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
+                            }).append("More Information")))
                 )
             )
             .append($('<div>')
-                .append('iPlant Users')
+                .append('iPlant Users (Requires iPlant account)')
                 .append($('<ul>')
                     .append($('<li>')
                         .append($('<a>',{
