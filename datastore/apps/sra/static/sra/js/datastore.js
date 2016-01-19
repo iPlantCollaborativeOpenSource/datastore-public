@@ -65,6 +65,29 @@ Datacommons.Models.Node = Backbone.Model.extend({
     }
 });
 
+Datacommons.Models.DEresults = Backbone.Model.extend({
+    parse: function(obj) {
+        console.log('deresults obj', obj)
+        matches = []
+        for (i=0; i < obj.total; i++){
+            matches.push({
+                id: obj.matches[i].entity.label,
+                path: obj.matches[i].entity.path,
+            });
+        };
+        console.log('matches', matches);
+        // return return _.extend(obj, r);
+        return matches;
+        //  return {
+        //     id: obj.matches.entity.label,
+        //     path: obj.matches.entity.path,
+        //     'abstract': metadata['abstract'],
+        //     title: metadata['title'],
+        //     description: metadata['description']
+        // };
+    }
+});
+
 Datacommons.Collections.NodeCollection = Backbone.Collection.extend({
     model: Datacommons.Models.Node,
     url: function() {
@@ -86,15 +109,50 @@ Datacommons.Collections.MetadataMatches = Backbone.Collection.extend({
     model: Datacommons.Models.Node,
     url: function() {
         if (this.value) {
-            return '/search/?name=' + this.name + '&value=' + this.value
+            return '/search/metadata/?name=' + this.name + '&value=' + this.value
         } else {
-            return '/search/?name=' + this.name
+            return '/search/metadata/?name=' + this.name
         }
     },
     initialize: function(models, options) {
         this.name = options.name;
         this.value = options.value;
     }
+});
+
+Datacommons.Collections.SearchResults = Backbone.Collection.extend({
+    model: Datacommons.Models.DEresults,
+    url: function() {
+        return '/search/?search_term=' + this.search_term
+    },
+    initialize: function(models, options) {
+        this.search_term = options.search_term;
+    },
+    // parse: function(obj) { //trying the parse on the model
+    //     console.log('deresults obj', obj)
+    //     matches = []
+    //     for (i=0; i < obj.total; i++){
+    //         console.log('matches path', obj.matches[i].entity.path)
+    //         matches.push({
+    //             id: obj.matches[i].entity.label,
+    //             path: obj.matches[i].entity.path,
+    //         });
+    //     };
+    //     // console.log('matches', matches);
+    //     // return return _.extend(obj, r);
+    //     return matches;
+    //     //  return {
+    //     //     id: obj.matches.entity.label,
+    //     //     path: obj.matches.entity.path,
+    //     //     'abstract': metadata['abstract'],
+    //     //     title: metadata['title'],
+    //     //     description: metadata['description']
+    //     // };
+    // }
+    // parse: function(obj) {
+    //     console.log('collection obj', obj)
+    //     return obj.matches
+    // }
 });
 
 // The default view for a directory if no template is associated with it
@@ -479,13 +537,21 @@ Datacommons.Views.DataObjectHeader = Backbone.View.extend({
     },
 });
 
+Datacommons.Views.Search = Backbone.View.extend({
+    render: function() {
+        this.$el
+            .append('Search').append($('<input>', {'type': 'text'})).append($('<input>', {'type': 'submit'}))
+    }
+});
+
 Datacommons.Views.Metadata = Backbone.View.extend({
     tagName: 'div',
     events: {
-        'click .metadataLink': 'search_metadata'
+        'click .metadataLink': 'search_metadata',
+        'click #submit_search' : 'search'
     },
     initialize: function() {
-        this.biosampleNumbers = Utils.get_metadata_values.bind(this)('BioSample Number');
+        this.libraryNumbers = Utils.get_metadata_values.bind(this)('Library Number');
         this.subjects = Utils.get_metadata_values.bind(this)('Subject');
         this.contributors = Utils.get_metadata_values.bind(this)('Contributor');
     },
@@ -493,6 +559,7 @@ Datacommons.Views.Metadata = Backbone.View.extend({
         console.log('MainView render this', this)
 
         this.$el
+            .append('Search').append($('<input>', {'type': 'text', 'id':'search_input'})).append($('<input>', {'type': 'submit', 'id':'submit_search'}))
             .append($('<h2>').append('Metadata'))
 
         var $subjects = $('<div>').append('Subject: ')
@@ -517,16 +584,17 @@ Datacommons.Views.Metadata = Backbone.View.extend({
         })
         $contributors.appendTo(this.$el);
 
-        var $biosampleNumbers = $('<div>').append('BioSample Number: ')
-        _.each(this.biosampleNumbers, function(element, index, list){
-            $biosampleNumbers.append($('<a>',{
+        var $libraryNumbers = $('<div>').append('Library Number: ')
+        _.each(this.libraryNumbers, function(element, index, list){
+            $libraryNumbers.append($('<a>',{
                         'class': 'metadataLink'
-                    }).data('search_params', {name: 'BioSample Number', value: element}).append(element))
+                    }).data('search_params', {name: 'Library Number', value: element}).append(element))
             if (index != list.length - 1) {
-                $biosampleNumbers.append(', ')
+                $libraryNumbers.append(', ')
             }
         })
-        $biosampleNumbers.appendTo(this.$el);
+
+        $libraryNumbers.appendTo(this.$el);
 
         var $dl = $('<dl>')
         _.each(this.model.attributes.metadata, function(m) {
@@ -534,10 +602,10 @@ Datacommons.Views.Metadata = Backbone.View.extend({
             metaName = m['attr']
 
             $dl.append($("<dt>").append(metaName).data('metadata_name', metaName))
-            .append($("<dd>")//.append(m['value']))
-                .append($('<a>',{
-                    'class': 'metadataLink',
-                }).data('search_params', {name: metaName, value: metaValue}).append(metaValue + ' '))
+            .append($("<dd>").append(m['value'])
+                // .append($('<a>',{
+                    // 'class': 'metadataLink',
+                // }).data('search_params', {name: metaName, value: metaValue}).append(metaValue + ' '))
             )
         })
         $dl.appendTo(this.$el);
@@ -558,14 +626,31 @@ Datacommons.Views.Metadata = Backbone.View.extend({
         results.fetch({update: true, remove: false})
         .done(
             function(){
+                console.log('search params', searchParams)
                 console.log('metadata search results', results)
-                self.show_results(results, searchParams)
+                self.show_metadata_results(results, searchParams)
             });
 
         // Datacommons.Events.Traversal.trigger('search_metadata', searchParams);
         return false;
     },
-    show_results: function(collection, searchParams) {
+    search: function(e) {
+        e.preventDefault();
+        var search_term = $('#search_input').val()
+
+        var results = new Datacommons.Collections.SearchResults([], {search_term: search_term});
+
+        var self=this;
+        results.fetch({update: true, remove: false})
+        .done(
+            function(){
+                console.log('search results', results.models[0].attributes)
+                self.show_search_results(results.models[0].attributes, search_term)
+            });
+
+        return false;
+    },
+    show_metadata_results: function(collection, searchParams) {
         this.$el.empty();
         heading = this.$el.append('Collections with ' + searchParams['metadata_name'])
 
@@ -586,6 +671,24 @@ Datacommons.Views.Metadata = Backbone.View.extend({
 
         return this;
     },
+    show_search_results: function(collection, searchTerm) {
+        this.$el.empty();
+        heading = this.$el.append('Collections with metadata value ' + searchTerm)
+
+
+        $list = $("<ul>", {'class': 'node-list'});
+
+
+        for(var index in collection) {
+            $("<li>")
+                // .append($('<a>', {href: '/browse' + collection[index]['path']}).append(collection[index]['id']))
+                .append($('<a>', {href: '/browse' + collection[index]['path']}).append(collection[index]['path']))
+                .appendTo($list);
+        }
+        this.$el.append($list);
+
+        return this;
+    },
 });
 
 Datacommons.Router = Backbone.Router.extend({
@@ -597,6 +700,7 @@ Datacommons.Router = Backbone.Router.extend({
         this.baseNode = new Datacommons.Models.Node({path: root, name: root_name, is_dir: true});
         this.dataApp = new Datacommons.Views.DataApp({el: $('#file-scroller-inner')}).render();
         this.breadcrumb_view = new Datacommons.Views.BreadcrumbView({el: $('#breadcrumbs'), base_node: this.baseNode}).render();
+        // this.search = new Datacommons.Views.Search({el: $('#search')}).render();
     },
     index: function() {
         Datacommons.Events.Traversal.trigger('navigate', this.baseNode);

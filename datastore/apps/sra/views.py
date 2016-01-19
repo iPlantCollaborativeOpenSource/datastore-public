@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
 CACHE_EXPIRATION = 900 #15 minutes
+DE_HOST='https://everdene.iplantcollaborative.org/'
 
 def _check_path(path):
     path = str(path)
@@ -70,14 +71,34 @@ def get_file(request):
         logger.debug(obj)
 
         uuid = obj.metadata.get_one('ipc_UUID').__dict__['value']
-        de_meta = send_request('GET', str(uuid))
 
-        try:
-            template_meta = de_meta['metadata']['templates'][0]['avus']
-        except IndexError: #there is no template metadata
+        url= DE_HOST + 'terrain/secured/filesystem/' + str(uuid) + '/metadata'
+        # import pdb; pdb.set_trace()
+        de_response = send_request('GET', url=url)
+        logger.info('DE RESPONSE: {0} {1}'.format(de_response.status_code, de_response.reason))
+        if de_response.status_code == 200:
+            de_meta = de_response.json()
+
+            # if de_meta['error_code']:
+            #     template_meta=[]
+            #     irods_meta=[{"attr": "Error", "value": de_meta['reason']}]
+            # else:
+            #     try:
+            #         template_meta = de_meta['metadata']['templates'][0]['avus']
+            #     except IndexError: #there is no template metadata
+            #         template_meta=[]
+            #     irods_meta = de_meta['irods-avus']
+
+            try:
+                template_meta = de_meta['metadata']['templates'][0]['avus']
+            except IndexError: #there is no template metadata
+                template_meta=[]
+
+            irods_meta = de_meta['irods-avus']
+
+        else: #something is wrong with DE metadata endpoint
+            irods_meta=[{"attr": "Error", "value": de_response.reason}]
             template_meta=[]
-
-        irods_meta = de_meta['irods-avus']
 
         response = {
             'name': obj.name,
@@ -187,7 +208,7 @@ def verify_recaptcha(request, path=''):
         'remoteip': request.META.get("REMOTE_ADDR", None),
     }
     data = urllib.urlencode(values)
-    req = urllib2.Request(url, data)
+    req =  urllib2.Request(url, data)
     response = urllib2.urlopen(req)
     result = json.loads(response.read())
 
@@ -292,16 +313,96 @@ def search_metadata(request):
     name = request.GET['name']
     value = request.GET.get('value')
 
-    if value and name:
-        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
-    elif name:
-        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name).all()
-    elif value:
-        query_result = DataStoreSession.query(Collection).filter(CollectionMeta.value == value).all()
+    # if value and name:
+    query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
+    # elif name:
+    #     query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name).all()
+    # elif value:
+    #     query_result = DataStoreSession.query(Collection).filter(CollectionMeta.value == value).all()
 
     results = [iRODSCollection(CollectionManager, row) for row in query_result]
+    logger.info('query result: {0}'.format(query_result))
 
     return JsonResponse(map(format_subcoll, results), safe=False)
+
+
+def search(request):
+    # name = request.GET['search_term']
+    search_term = request.GET.get('search_term', '*rice*')
+
+    #trying to use DE API -- experimental
+    # query=json.dumps(
+    #     {"wildcard":
+    #         {"label":"BioSample_1_2"}
+    #     }
+    # )
+
+    # query=json.dumps(
+    #     {"match":
+    #         {"metadata.attribute":"BioProject Number"} #doesn't work, but label:BioProject_1 does
+    #     }
+    # )
+
+    #     # {
+    #     #       "filtered": {
+    #     #          "query": {
+    #     #             "match_all": {}
+    #     #          },
+    #     #          "filter": {
+    #     #             "term": {
+    #     #                "metadata.value": "1BB8D567-43B8-4827-9016-B5767983F9EE"
+    #     #             }
+    #     #          }
+    #     #       }
+    #     # }
+    # ) #not working
+
+    # query=json.dumps(
+    #     {'query_string':
+    #         {"query": search_term,
+    #          'fields':['path', 'label', 'metadata.value']
+    #         }
+    #     }
+    # )
+
+    # query=json.dumps(
+    #     {"nested" : {
+    #         "path" : "metadata",
+    #         "query" : {
+    #             "bool" : {
+    #                 "must" : [
+    #                     {
+    #                         "match" : {"metadata.value" : "1_2"}
+    #                     },
+    #                     {
+    #                         "match" : {"metadata.attribute" : "Fasta File Number"}
+    #                     }
+    #                 ]
+    #             }
+    #         }
+    #     }}) #should we use DE api or irods?
+
+    query=json.dumps(
+        {"bool":
+            {"must":[
+                {"nested":
+                    {"path":"metadata",
+                     "query":
+                        {"query_string":
+                            {"query": "*" + search_term + "*",
+                             "fields":["metadata.value"]}
+                        }
+                    }
+                }
+            ]}
+        })
+
+    url = DE_HOST + 'terrain/secured/filesystem/index'
+    params = {'q': query}
+
+    resp = send_request('GET', url, params)
+
+    return JsonResponse(resp.json())
 
 
 def create_jwt_token():
@@ -326,12 +427,13 @@ def create_jwt_token():
     return encoded_jwt
 
 
-def send_request(http_method, UUID=None, url=None, params=None, payload=None):
+def send_request(http_method, url=None, params=None, payload=None):
     encoded_jwt = create_jwt_token()
     headers = {'X-Iplant-De-Jwt': encoded_jwt}
 
-    url = 'https://everdene.iplantcollaborative.org/terrain/secured/filesystem/' + UUID + '/metadata'
-    print url
+    # url = 'https://everdene.iplantcollaborative.org/terrain/secured/filesystem/' + UUID + '/metadata'
+    logger.info('url: {0}'.format(url))
+    logger.info('jwt: {0}'.format(encoded_jwt))
 
     if payload:
         headers['Content-Type'] = 'application/json'
@@ -346,5 +448,7 @@ def send_request(http_method, UUID=None, url=None, params=None, payload=None):
     elif http_method.upper() == 'DELETE':
         response = requests.delete(url, headers=headers)
 
-    print response.json()
-    return response.json()
+    if response.status_code == 200:
+        print response.json()
+
+    return response
