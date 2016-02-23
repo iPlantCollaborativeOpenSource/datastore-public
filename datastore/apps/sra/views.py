@@ -25,8 +25,6 @@ from . import settings as sra_settings
 
 logger = logging.getLogger(__name__)
 
-GOOGLE_RECAPTCHA_SITE_KEY = "6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt"
-GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
 CACHE_EXPIRATION = 900 #15 minutes
 
 def _check_path(path):
@@ -166,33 +164,7 @@ def serve_file(request, path=''):
     response['Content-Length'] = obj.size
     return response
 
-def verify_recaptcha(request, path=''):
-    # verify the google recaptcha success
-    url = "https://www.google.com/recaptcha/api/siteverify"
-    values = {
-        'secret': GOOGLE_RECAPTCHA_SECRET_KEY,
-        'response': request.POST.get(u'g-recaptcha-response', None),
-        'remoteip': request.META.get("REMOTE_ADDR", None),
-    }
-    data = urllib.urlencode(values)
-    req = urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
-    result = json.loads(response.read())
-
-    # result['success'] will be True on a success
-    if result['success']:
-        return 'verified'
-
-    return result['error-codes']
-
 def download_file(request, path=''):
-    # recaptcha_status = ''
-
-    # if not request.COOKIES.has_key('recaptcha_status'):
-    #     recaptcha_status = verify_recaptcha(request)
-    #     if recaptcha_status != 'verified':
-    #         return HttpResponse(recaptcha_status)
-
     path = _check_path(path)
 
     try:
