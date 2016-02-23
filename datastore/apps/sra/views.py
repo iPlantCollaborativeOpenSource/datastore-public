@@ -189,10 +189,6 @@ def download_file(request, path=''):
     response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
     response['Accept-Ranges'] = 'bytes'
 
-    # if recaptcha_status:
-    #     max_age = 365*24*60*60  #one year
-    #     response.set_cookie('recaptcha_status', recaptcha_status, max_age=max_age )
-
     return response
 
 
