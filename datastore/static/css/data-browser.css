@@ -1,198 +1,3 @@
-body {
-	background-color: #FFF;
-    /*font-family: Univers, Calibri, "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;*/
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	/*font-size: 18px;*/
-	font-size: 14px;
-	line-height: 1.5;
-	/*background-image: url("../img/bg.png");*/
-	background-repeat: repeat-x;
-	color: #404040;
-}
-.container {
-	width: 940px;
-	margin: 80px auto 120px;
-}
-.container > .content {
-	background-color: white;
-	padding: 20px;
-	margin: 0 -20px;
-	-webkit-border-radius: 3px 3px 3px 3px;
-	-moz-border-radius: 3px 3px 3px 3px;
-	border-radius: 3px 3px 3px 3px;
-	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-	box-shadow: 0 0 1px 2px rgba(0,0,0,.15);
-}
-a {
-    color: #1071AB;
-}
-h1 {
-	font-family: inherit;
-	font-size: 14pt;
-	font-style: italic;
-	color: #db6619;
-	position: relative;
-	top: 20px;
-	display: inline;
-}
-h2 {
-	margin-bottom: .75em
-}
-#headers {
-	position: relative;
-	border-bottom: #CCC solid 1px;
-	padding-bottom: 10px;
-}
-#headers span {
-	font-weight: bold;
-}
-#headers span:first-child {
-	padding-left: 22px;
-}
-#headers span + span {
-	position: absolute;
-	right: 19em;
-	width: 5em;
-}
-#headers span + span + span {
-	position: absolute;
-	right: 6em;
-	width: 12em;
-}
-#file-tree {
-	margin: .75em 0;
-}
-ul.jqueryFileTree {
-	font-family: "Helvetica Neue", Ariel, Helvetica, sans-serif !important;
-	font-size: 1em !important;
-	line-height: 2 !important;
-}
-ul.jqueryFileTree li {
-	line-height: 2;
-	background-position: left 3px !important;
-	position: relative;
-}
-
-.jqueryFileTree a:hover {
-	background: #c3f2f8 !important;
-}
-.jqueryFileTree li.file a {
-}
-.jqueryFileTree li.file span {
-}
-.jqueryFileTree li.file span.filename {
-
-}
-.jqueryFileTree li li.file span.filename {
-}
-.jqueryFileTree li.file span.filesize {
-	position: absolute;
-	right: 19em;
-	width: 5em;
-}
-.jqueryFileTree li.file span.mdate {
-	position: absolute;
-	right: 6em;
-	width: 12em;
-}
-.jqueryFileTree li button.share {
-	display: none;
-	position: absolute;
-	right: 0;
-	top: 0;
-}
-
-/**
- * Extensions!
- */
-.jqueryFileTree li.file.ext_tar-gz {background: url('../js/jqueryFileTree/images/zip.png') left top no-repeat; }
-.jqueryFileTree li.file.ext_rtf {background: url('../js/jqueryFileTree/images/page.png') left top no-repeat; }
-
-#header h1 a {
-    color: inherit;
-}
-
-
-/* Header */
-
-#header_container {
-	background-color: #142248;
-	height: 39px;
-    border-bottom: 10px solid #0971AA;
-    position: fixed;
-    top: 0;
-    z-index: 1;
-}
-#header {
-	margin: 0 auto;
-    width: 980px;
-}
-#site-title {
-	color: #0098aa;
-	font-weight: normal;
-}
-#logo_container {
-	margin-left: 0px;
-}
-#logo_container a, #logo_container a:hover {
-	text-decoration: none;
-	border: none;
-}
-#logo_container div {
-	border-radius: 3px;
-	/*padding: 5px;*/
-    /*height: 28px;*/
-	height: 42px;
-	overflow: hidden;
-}
-#logo_container #site-title {
-	color: #EEE;
-	margin-left: 10px;
-	text-align: right;
-	font-style: normal;
-	font-size: 14px;
-}
-#logo_container img {
-	max-width: 100%;
-	max-height: 100px;
-    /*height: 28px;*/
-	height: 42px;
-}
-
-#wiki-link {
-    float: right;
-    line-height: 28px;
-    color: #eee;
-}
-#wiki-link:hover {
-    color: #fff;
-}
-
-
-/**
- * Footer
- */
-#footer {
-    /*border-top: #CCC solid 1px;*/
-	border-top: #226895 solid 1px;
-	padding-top: .75em;
-	text-align: center;
-	font-size: 14px;
-    /*position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 1;*/
-    background: #fff;
-}
-#footer a:link, #footer a:visited, #footer a:active {
-	text-decoration: none;
-	/*border-bottom: #0298AA dashed 1px;*/
-}
-#footer a:hover {
-	text-decoration: none;
-}
-
 /**
  * Main content
  */
@@ -250,9 +55,9 @@ ul.jqueryFileTree li {
 }
 
 #file-scroller-inner > div {
-    width: 940px;
     float: left;
     min-height: 400px;
+    width: 50%;
 }
 
 #breadcrumbs {
@@ -263,6 +68,7 @@ ul.jqueryFileTree li {
 #breadcrumbs ul {
     list-style: none;
     margin: 0;
+    padding: 0;
 }
 #breadcrumbs li {
     float: left;
@@ -293,6 +99,7 @@ ul.jqueryFileTree li {
 .node-list {
     list-style: none;
     margin: 0;
+    padding: 0;
 }
 .node-list li {
     line-height: 2;
@@ -306,6 +113,9 @@ ul.jqueryFileTree li {
 .node-list .dir {
     background-image: url('../img/icons/folder.png');
 }
+.node-list li:nth-child(odd) {
+    background-color: #eee;
+}
 
 .data-object-header {
     padding: .5em;
@@ -318,7 +128,8 @@ ul.jqueryFileTree li {
     float: left;
     width: 600px;
     list-style: none;
-    margin: 0 0 0 .25em;
+    padding: 0 0 0 0.25em;
+    margin: 0;
 }
 .data-object-header .file-properties li {
     float: left;
@@ -387,3 +198,31 @@ ul.jqueryFileTree li {
 .file.ext-psd { background-image: url(../img/icons/paintbrush.png); }
 .file.ext-rpm { background-image: url(../img/icons/page_white_linux.png); }
 .file.ext-sql { background-image: url(../img/icons/database.png); }
+
+.gallery-item-wrapper {
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.gallery-item {
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: flex;
+    width: 33.33333%;
+    padding: 10px;
+}
+
+.gallery-item > .thumbnail {
+    -webkit-flex: 1;
+    -moz-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    margin: 0;
+}

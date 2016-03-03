@@ -109,7 +109,7 @@ Datastore.Views.NodeListView = Backbone.View.extend({
         if (this.collection.moreData) {
             this.$el.append(
                 $('<a>', {
-                    'class': 'btn file-info-button',
+                    'class': 'btn btn-default file-info-button',
                     'id': 'load_more',
                 })
                 .append('Load more'))
@@ -214,11 +214,18 @@ Datastore.Views.DataApp = Backbone.View.extend({
     },
     navigate: function(model) {
         var self = this;
+        var base_width = $(window).width();
+        if (base_width >= 1200) {
+            base_width = 1140;
+        } else if (base_width >= 992) {
+            base_width = 940;
+        } else if (base_width >= 768) {
+            base_width = 720;
+        }
+        var new_width = base_width * 2;
+        self.$el.width(new_width);
         model.fetch({
             success: function() {
-                var new_width = 2 * 940;
-                self.$el.width(new_width);
-
                 // console.log('model', model);
                 var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
                 // var template = 'datacommons' //for testing
@@ -287,23 +294,25 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                 .append($("<div>", {'class': 'btn-group'})
                     .append(
                         $('<a>', {
-                            'class': 'btn file-info-button'
+                            'class': 'btn btn-default file-info-button'
                         })
                             .append($('<i>', {'class': 'icon-info-sign'}))
                             .append(' Info')
                             .popover({
                                 html: true,
+                                container: '.content',
                                 placement: 'bottom',
                                 title: this.model.get('name'),
                                 content: _.bind(this.file_info, this),
                                 afterShow: _.bind(this.highlight_link, this)
                             })
                     )
-                    .append($('<a>', {'class': 'btn file-info-button'})
+                    .append($('<a>', {'class': 'btn btn-default file-info-button'})
                             .append($('<i>', {'class': 'icon-list'}))
                             .append(' Metadata')
                             .popover({
                                 html: true,
+                                container: '.content',
                                 placement: 'bottom',
                                 title: this.model.get('name'),
                                 content: _.bind(this.metadata, this)
