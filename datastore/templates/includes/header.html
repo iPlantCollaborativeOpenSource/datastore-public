@@ -1,12 +1,25 @@
 {% load staticfiles %}
-<header class="row-fluid" id="header_container">
-  <div id="header">
-    <div id="logo_container">
-      <div>
-        <a href="/"><img src="{% static 'img/cyverse_cmyk-01.png' %}" alt="CyVerse Datastore"></a>
-        <!-- <a id="site-title" href="/">iPlant Datastore</a> -->
-        <!--<a id="wiki-link" href="https://pods.iplantcollaborative.org/wiki/x/EQ_Z">How does it work?</a>-->
+<header>
+  <nav class="navbar navbar-fixed-top navbar-cyverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a href="/" class="navbar-brand">
+          <img src="{% static 'img/cyverse_cmyk-01.png' %}" alt="CyVerse Datastore">
+        </a>
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="http://www.cyverse.org">CyVerse Home</a></li>
+          <li><a href="http://www.cyverse.org/discovery-environment">Discovery Environment</a></li>
+          <li><a href="http://www.cyverse.org/atmosphere">Atmosphere</a></li>
+        </ul>
       </div>
     </div>
-  </div>
+  </nav>
 </header>

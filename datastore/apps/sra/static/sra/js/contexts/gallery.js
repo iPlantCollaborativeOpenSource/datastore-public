@@ -11,8 +11,8 @@ Gallery.Models.Photo = Backbone.Model.extend();
 Gallery.Collections.PhotoCollection = Backbone.Collection.extend();
 
 Gallery.Views.Gallery = Backbone.View.extend({
-    tagName: "ul",
-    className: "thumbnails",
+    tagName: "div",
+    className: "gallery-item-wrapper",
     initialize: function() {
         this.collection.bind('reset', this.append_photos, this);
     },
@@ -29,8 +29,8 @@ Gallery.Views.Gallery = Backbone.View.extend({
 });
 
 Gallery.Views.Thumbnail = Backbone.View.extend({
-    tagName: "li",
-    className: "span4",
+    tagName: "div",
+    className: "gallery-item",
     events: {
         'click .thumbnail-link': 'open_image'
     },
@@ -74,14 +74,12 @@ Gallery.Views.MainView = Backbone.View.extend({
     initialize: function() {
     },
     render: function() {
-        var $container = $('<div>', {'class': 'row'});
+        var $container = $('<div>');
         var photo_collection = new Gallery.Collections.PhotoCollection();
         var gallery = new Gallery.Views.Gallery({
             collection: photo_collection
         }).render();
-        $container
-            .append($("<div>", {'class': 'span12'}).append(gallery.el))
-            .appendTo(this.$el);
+        this.$el.append(gallery.el);
 
         var self = this;
         this.collection.bind('reset', function() {
