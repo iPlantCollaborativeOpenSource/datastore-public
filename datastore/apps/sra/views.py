@@ -28,7 +28,6 @@ from . import settings as sra_settings
 
 logger = logging.getLogger(__name__)
 
-GOOGLE_RECAPTCHA_SECRET_KEY = "6LerigwTAAAAABTFBYCADArZ-pitvBo2oP-4f-6e"
 CACHE_EXPIRATION = 900 #15 minutes
 DE_HOST='https://everdene.iplantcollaborative.org/'
 
@@ -68,14 +67,14 @@ def get_file(request):
                 logger.exception(e)
                 return HttpResponseNotFound()
 
-        logger.debug(obj)
+        logger.debug('obj: {}'.format(obj))
 
         uuid = obj.metadata.get_one('ipc_UUID').__dict__['value']
 
         url= DE_HOST + 'terrain/secured/filesystem/' + str(uuid) + '/metadata'
         # import pdb; pdb.set_trace()
         de_response = send_request('GET', url=url)
-        logger.info('DE RESPONSE: {0} {1}'.format(de_response.status_code, de_response.reason))
+        logger.info('DE RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
         if de_response.status_code == 200:
             de_meta = de_response.json()
 
@@ -199,33 +198,8 @@ def serve_file(request, path=''):
     response['Content-Length'] = obj.size
     return response
 
-def verify_recaptcha(request, path=''):
-    # verify the google recaptcha success
-    url = "https://www.google.com/recaptcha/api/siteverify"
-    values = {
-        'secret': GOOGLE_RECAPTCHA_SECRET_KEY,
-        'response': request.POST.get(u'g-recaptcha-response', None),
-        'remoteip': request.META.get("REMOTE_ADDR", None),
-    }
-    data = urllib.urlencode(values)
-    req =  urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
-    result = json.loads(response.read())
-
-    # result['success'] will be True on a success
-    if result['success']:
-        return 'verified'
-
-    return result['error-codes']
 
 def download_file(request, path=''):
-    # recaptcha_status = ''
-
-    # if not request.COOKIES.has_key('recaptcha_status'):
-    #     recaptcha_status = verify_recaptcha(request)
-    #     if recaptcha_status != 'verified':
-    #         return HttpResponse(recaptcha_status)
-
     path = _check_path(path)
 
     try:
@@ -249,10 +223,6 @@ def download_file(request, path=''):
     response['Content-Length'] = obj.size
     response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
     response['Accept-Ranges'] = 'bytes'
-
-    # if recaptcha_status:
-    #     max_age = 365*24*60*60  #one year
-    #     response.set_cookie('recaptcha_status', recaptcha_status, max_age=max_age )
 
     return response
 

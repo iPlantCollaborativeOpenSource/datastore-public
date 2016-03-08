@@ -452,11 +452,6 @@ Datacommons.Views.DataObjectHeader = Backbone.View.extend({
     file_info: function() {
         return $("<dl>")
             .addClass('file-info')
-            .append($("<dt>").append("Download Link:"))
-            .append($("<dd>").append($("<input>", {
-                value: window.location.protocol + "//" + window.location.host + this.model.get('download_url'),
-                type: 'text'
-            })))
             .append($("<dt>").append("Checksum:"))
             .append($("<dd>").append(this.model.get('checksum')))
             .append($("<dt>").append("Created:"))

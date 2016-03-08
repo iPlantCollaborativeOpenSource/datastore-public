@@ -1,10 +1,11 @@
 body {
 	background-color: #FFF;
-	font-family: Univers, Calibri, "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*font-family: Univers, Calibri, "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	/*font-size: 18px;*/
 	font-size: 14px;
 	line-height: 1.5;
-	background-image: url("../img/bg.png");
+	/*background-image: url("../img/bg.png");*/
 	background-repeat: repeat-x;
 	color: #404040;
 }
@@ -21,7 +22,10 @@ body {
 	border-radius: 3px 3px 3px 3px;
 	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
 	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-	box-shadow: 0 1px 2px rgba(0,0,0,.15);
+	box-shadow: 0 0 1px 2px rgba(0,0,0,.15);
+}
+a {
+    color: #1071AB;
 }
 h1 {
 	font-family: inherit;
@@ -78,7 +82,7 @@ ul.jqueryFileTree li {
 .jqueryFileTree li.file span {
 }
 .jqueryFileTree li.file span.filename {
-	
+
 }
 .jqueryFileTree li li.file span.filename {
 }
@@ -113,11 +117,13 @@ ul.jqueryFileTree li {
 /* Header */
 
 #header_container {
-	background-color: #0098aa;
+    /*background-color: #0098aa;*/
+	background-color: #FFFFFE;
 	/*margin-bottom: 40px;*/
 	height: 39px;
-	box-shadow: 0 2px 10px #666;
-	background: url(../img/header_bg.png) no-repeat, url(../img/header_bg_bg.png);
+	/*box-shadow: 0 2px 10px #666;*/
+    border-bottom: #226895 solid 1px;
+	/*background: url(../img/header_bg.png) no-repeat, url(../img/header_bg_bg.png);*/
     position: fixed;
     top: 0;
     z-index: 1;
@@ -139,8 +145,9 @@ ul.jqueryFileTree li {
 }
 #logo_container div {
 	border-radius: 3px;
-	padding: 5px;
-	height: 28px;
+	/*padding: 5px;*/
+    /*height: 28px;*/
+	height: 42px;
 	overflow: hidden;
 }
 #logo_container #site-title {
@@ -153,7 +160,8 @@ ul.jqueryFileTree li {
 #logo_container img {
 	max-width: 100%;
 	max-height: 100px;
-	height: 28px;
+    /*height: 28px;*/
+	height: 42px;
 }
 
 #wiki-link {
@@ -170,7 +178,8 @@ ul.jqueryFileTree li {
  * Footer
  */
 #footer {
-	border-top: #CCC solid 1px;
+    /*border-top: #CCC solid 1px;*/
+	border-top: #226895 solid 1px;
 	padding-top: .75em;
 	text-align: center;
 	font-size: 14px;
@@ -319,7 +328,7 @@ ul.jqueryFileTree li {
     float: left;
     line-height: 30px;
     font-size: 16px;
-    margin-left: 6px;    
+    margin-left: 6px;
     padding-left: 6px;
     border-left: 1px solid #ccc;
 }
@@ -335,11 +344,11 @@ ul.jqueryFileTree li {
 
 .template-image .img-polaroid {
     margin-top: 1.5em;
-    max-width: 930px; 
+    max-width: 930px;
 }
 
 /* File Extensions*/
-.file.ext-3gp, .file.ext-avi, .file.ext-mov, .file.ext-mp4, .file.ext-mpg, 
+.file.ext-3gp, .file.ext-avi, .file.ext-mov, .file.ext-mp4, .file.ext-mpg,
 .file.ext-mpeg {
     background-image: url(../img/icons/film.png);
 }
@@ -347,14 +356,14 @@ ul.jqueryFileTree li {
     background-image: url(../img/icons/page_white_text.png);
 }
 .file.ext-afp, .file.ext-afpa, .file.ext-asp, .file.ext-aspx,
-.file.ext-c, .file.ext-cfm, .file.ext-cgi, .file.ext-h, .file.ext-cpp, 
+.file.ext-c, .file.ext-cfm, .file.ext-cgi, .file.ext-h, .file.ext-cpp,
 .file.ext-lasso {
     background-image: url(../img/icons/page_code.png);
 }
 .file.ext-bat, .file.ext-com, .file.ext-exe {
     background-image: url(../img/icons/application_xp_terminal.png);
 }
-.file.ext-bmp, .file.ext-gif, .file.ext-jpg, .file.ext-jpeg, .file.ext-pcx, 
+.file.ext-bmp, .file.ext-gif, .file.ext-jpg, .file.ext-jpeg, .file.ext-pcx,
 .file.ext-png {
     background-image: url(../img/icons/picture.png);
 }
