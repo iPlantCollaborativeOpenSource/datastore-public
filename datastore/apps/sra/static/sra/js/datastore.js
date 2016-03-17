@@ -426,7 +426,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                     .append($('<li>').append('Cyberduck'))
                     .append($('<li>').append($('<a>',{
                                 'TARGET':'_blank',
-                                'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Accessing+Data+in+the+iPlant+Data+Store'
+                                'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Downloading+and+Uploading+Data'
                             }).append("More Information")))
                 )
             )
