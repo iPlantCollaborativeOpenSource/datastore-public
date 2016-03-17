@@ -77,6 +77,12 @@ def get_file(request):
             response['modify_time'] = timegm(obj.modify_time.utctimetuple())
             response['checksum'] = obj.checksum
 
+            ext = splitext(obj.name)[1][1:]
+            try:
+                response['content_type'] = content_types[ext]
+            except KeyError as e:
+                pass #don't know the content type
+
         result = JsonResponse(response)
         cache.set(cache_file_key, result, CACHE_EXPIRATION)
     return result

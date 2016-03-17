@@ -226,8 +226,9 @@ Datastore.Views.DataApp = Backbone.View.extend({
         self.$el.width(new_width);
         model.fetch({
             success: function() {
-                // console.log('model', model);
+                console.log('model', model);
                 var template = model.get('template_metadata') ? model.get('template_metadata')['template'] : null;
+                var content_type = model.get('content_type') ? model.get('content_type') : null;
                 // var template = 'datacommons' //for testing
                 //console.log(template);
 
@@ -259,6 +260,12 @@ Datastore.Views.DataApp = Backbone.View.extend({
                         view = Context.Views.MainView;
                         view_options = model.get('template_metadata')['template_options'] || {};
                         // view_options = 'datacommons'; //for testing
+                        append_view(view, view_options);
+                    });
+                } if (content_type == 'text/plain') {
+                    require(['/static/sra/js/contexts/highlighter.js'], function(Context) {
+                        view = Context.Views.MainView;
+                        view_options = {};
                         append_view(view, view_options);
                     });
                 } else if (model.get('is_dir')) {
