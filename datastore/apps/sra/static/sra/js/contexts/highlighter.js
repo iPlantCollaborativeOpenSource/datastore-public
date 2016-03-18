@@ -14,7 +14,8 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
         'css': 'shBrushCss',
         'py': 'shBrushPython',
         'plain': 'shBrushPlain',
-        'fasta': 'shBrushFasta'
+        'fasta': 'shBrushFasta',
+        'eml': 'shBrushXml'
     };
 
     Highlighter.Views.MainView = Backbone.View.extend({
