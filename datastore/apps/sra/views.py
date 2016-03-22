@@ -111,6 +111,13 @@ def get_file(request):
             response['modify_time'] = timegm(obj.modify_time.utctimetuple())
             response['checksum'] = obj.checksum
 
+            ext = splitext(obj.name)[1][1:]
+
+            try:
+                response['content_type'] = content_types[ext]
+            except KeyError as e:
+                pass #don't know mimetype
+
         result = JsonResponse(response)
         # cache.set(cache_file_key, result, CACHE_EXPIRATION)
     return result
@@ -189,12 +196,14 @@ def serve_file(request, path=''):
 
     ext = splitext(obj.name)[1][1:]
 
-    if ext not in content_types:
-        return HttpResponse('File type not supported', status=501)
+    if ext in content_types:
+        content_type = content_types[ext]
+    else:
+        content_type = 'application/octet-stream'
 
     f = obj.open('r')
 
-    response = HttpResponse(f, content_type=content_types[ext])
+    response = HttpResponse(f, content_type=content_type)
     response['Content-Length'] = obj.size
     return response
 
