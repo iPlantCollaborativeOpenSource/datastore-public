@@ -82,12 +82,7 @@ def get_file(request):
             try:
                 response['content_type'] = content_types[ext]
             except KeyError as e:
-                if ext in ['csv', 'txt', 'tsv', 'md']:
-                    response['content_type'] = 'text'
-                elif ext == 'eml':
-                    response['content_type'] = 'xml'
-
-
+                pass #don't know mimetype
 
         result = JsonResponse(response)
         cache.set(cache_file_key, result, CACHE_EXPIRATION)

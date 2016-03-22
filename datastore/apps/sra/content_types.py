@@ -193,4 +193,9 @@ content_types = {
     'zip': 'application/zip',
     'php': 'text/plain',
     'fasta': 'text/plain',
+
+    #types manually added
+    'csv': 'text/csv',
+    'md': 'text/markdown',
+    'eml': 'text/xml',
 }
