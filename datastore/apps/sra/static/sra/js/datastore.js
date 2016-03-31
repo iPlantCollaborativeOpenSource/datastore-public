@@ -265,7 +265,7 @@ Datastore.Views.DataApp = Backbone.View.extend({
                 } else if (content_type.substring(0, 4) == 'text') {
                     require(['/static/sra/js/contexts/highlighter.js'], function(Context) {
                         view = Context.Views.MainView;
-                        view_options = {};
+                        view_options = {brush: content_type.substring(5)};
                         append_view(view, view_options);
                     });
                 } else if (model.get('is_dir')) {

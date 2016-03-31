@@ -15,7 +15,8 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
         'py': 'shBrushPython',
         'plain': 'shBrushPlain',
         'fasta': 'shBrushFasta',
-        'eml': 'shBrushXml'
+        'eml': 'shBrushXml',
+        'xml': 'shBrushXml'
     };
 
     Highlighter.Views.MainView = Backbone.View.extend({
@@ -30,7 +31,7 @@ define(['require', 'datastore', 'backbone', 'jquery', 'utils'], function(require
             this.$el.append(new Datastore.Views.DataObjectHeader({model: this.model}).render().el);
             var self = this;
             $.get(this.model.get('serve_url'), function(data, text_status, jqXHR) {
-                var $pre = $("<pre>", {'class' : 'brush: ' + self.options.brush}).append(_.escape(data));
+                var $pre = $('<pre>', {'class' : 'brush: ' + self.options.brush}).append(_.escape(jqXHR.responseText));
                 require(['shCore', self.brush_source], function(SyntaxHighlighter) {
                     // Set discoveredBrushes to null because this library sucks
                     SyntaxHighlighter.vars.discoveredBrushes = null;
