@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.http import JsonResponse
 
 from os.path import basename, splitext
+from os import O_RDONLY
 import logging
 from datetime import date
 from calendar import timegm
@@ -14,6 +15,7 @@ import urllib2
 import json
 
 from irods.collection import iRODSCollection, iRODSDataObject
+from irods.data_object import iRODSDataObjectFileRaw
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 from irods.manager.collection_manager import CollectionManager
 from irods.models import Collection, CollectionMeta
@@ -167,8 +169,13 @@ def serve_file(request, path=''):
     else:
         content_type = 'application/octet-stream'
 
-    f = obj.open('r')
+    if request.GET.get('preview') == 'true':
+        conn, desc = obj.manager.open(obj.path, O_RDONLY)
+        x = iRODSDataObjectFileRaw(conn, desc)
+        f = x.conn.read_file(desc, 8000)
+        return HttpResponse(f)
 
+    f = obj.open('r')
     response = HttpResponse(f, content_type=content_type)
     response['Content-Length'] = obj.size
     return response
