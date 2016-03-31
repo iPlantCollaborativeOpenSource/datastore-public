@@ -7,7 +7,7 @@ EXPOSE 8000
 CMD ["supervisord", "-n"]
 
 RUN apt-get update && \
-    apt-get install -y python python-dev gettext supervisor nginx memcached && \
+    apt-get install -y python python-dev gettext supervisor nginx nodejs npm memcached && \
     curl -SL 'https://bootstrap.pypa.io/get-pip.py' | python && \
     pip install uwsgi
 
@@ -23,6 +23,8 @@ COPY . /project
 RUN ln -s /project/conf/supervisor-uwsgi.conf /etc/supervisor/conf.d/uwsgi.conf
 
 WORKDIR /project
+
+RUN npm install
 
 RUN python manage.py collectstatic --noinput
 

@@ -1,0 +1,12 @@
+{
+  "name": "datastore-public",
+  "version": "1.0.0",
+  "description": "Public Datastore Interface ==========================",
+  "private": true,
+  "main": "manage.py",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+}
