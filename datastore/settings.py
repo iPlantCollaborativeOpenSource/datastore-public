@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'datastore.apps.sra',
+    'pipeline',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -121,6 +122,14 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'datastore', 'static'),
 )
 
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
@@ -175,3 +184,51 @@ LOGGING = {
         },
     },
 }
+
+#####
+#
+# Pipeline config
+#
+#####
+PIPELINE = {}
+PIPELINE['COMPILERS'] = (
+    'pipeline.compilers.sass.SASSCompiler',
+)
+PIPELINE_SASS_ARGUMENTS = '--update --compass --style compressed'
+
+PIPELINE['CSS_COMPRESSOR'] = None
+PIPELINE['JS_COMPRESSOR'] = None #'pipeline.compressors.slimit.SlimItCompressor'
+
+# wildcards put the files in alphabetical order
+# PIPELINE['STYLESHEETS']= {
+#     'vendor': {
+#         'source_filenames': (
+#           'vendor/bootstrap-dist/css/bootstrap.css',
+#           'vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.css',
+#         ),
+#         'output_filename': 'css/vendor.css',
+#     },
+#     'main': {
+#         'source_filenames': (
+#           'css/main.css',
+#           'css//global.css',
+#         ),
+#         'output_filename': 'css/main.css',
+#     },
+# }
+
+# PIPELINE['JAVASCRIPT'] = {
+#     'vendor': {
+#         'source_filenames': (
+#             'vendor/modernizer/modernizr.js',
+#             'vendor/jquery/dist/jquery.js',
+#             'vendor/bootstrap-ds/js/bootstrap.js',
+#             'vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js',
+#         ),
+#         'output_filename': 'js/vendor.js',
+#     },
+# }
+
+
+# compress when collect static
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
