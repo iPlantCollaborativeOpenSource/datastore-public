@@ -106,8 +106,6 @@ ul.jqueryFileTree li {
 /**
  * Extensions!
  */
-.jqueryFileTree li.file.ext_tar-gz {background: url('../js/jqueryFileTree/images/zip.png') left top no-repeat; }
-.jqueryFileTree li.file.ext_rtf {background: url('../js/jqueryFileTree/images/page.png') left top no-repeat; }
 
 #header h1 a {
     color: inherit;
@@ -385,5 +383,4 @@ ul.jqueryFileTree li {
 .file.ext-pdf { background-image: url(../img/icons/page_white_acrobat.png); }
 .file.ext-ppt { background-image: url(../img/icons/page_white_powerpoint.png); }
 .file.ext-psd { background-image: url(../img/icons/paintbrush.png); }
-.file.ext-rpm { background-image: url(../img/icons/page_white_linux.png); }
 .file.ext-sql { background-image: url(../img/icons/database.png); }

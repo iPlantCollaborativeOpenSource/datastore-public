@@ -198,4 +198,5 @@ content_types = {
     'csv': 'text/csv',
     'md': 'text/markdown',
     'eml': 'text/xml',
+    'xml': 'text/xml',
 }

@@ -28,6 +28,7 @@ Datacommons.Models.Node = Backbone.Model.extend({
         if (obj.is_dir != undefined && obj.is_dir == false) {
             r.download_url = '/download' + encoded_path;
             r.serve_url = '/serve' + encoded_path;
+            r.preview_url = '/serve' + encoded_path + '?preview=true';
         }
         r.browse_url = '/browse' + encoded_path;
 
@@ -343,7 +344,7 @@ Datacommons.Views.DataApp = Backbone.View.extend({
                 } else if (content_type.substring(0, 4) == 'text') {
                     require(['/static/sra/js/contexts/highlighter.js'], function(Context) {
                         view = Context.Views.MainView;
-                        view_options = {};
+                        view_options = {}
                         append_view(view, view_options);
                     });
                 } else if (model.get('is_dir')) {
@@ -505,7 +506,7 @@ Datacommons.Views.DataObjectHeader = Backbone.View.extend({
                     .append($('<li>').append('Cyberduck'))
                     .append($('<li>').append($('<a>',{
                                 'TARGET':'_blank',
-                                'href': 'https://pods.iplantcollaborative.org/wiki/display/DS/Downloading+and+Uploading+Data'
+                                'href': 'https://wiki.cyverse.org/wiki/display/DS/Downloading+and+Uploading+Data'
                             }).append("More Information")))
                 )
             )
