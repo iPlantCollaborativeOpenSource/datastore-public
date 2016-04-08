@@ -497,10 +497,16 @@ Datastore.Router = Backbone.Router.extend({
 // http://www.silviarebelo.com/2013/03/adding-callbacks-to-twitter-bootstraps-javascript-plugins/
 var pt = $.fn.popover.Constructor.prototype.show;
 $.fn.popover.Constructor.prototype.show = function(){
+    $('.btn').not(this.$element[0]).popover('hide').next('.popover').click().remove()
     pt.call(this);
     if (this.options.afterShow)
         this.options.afterShow();
 }
+// This is a hack to fix a bootstrap issue where trigger must be called twice after call to hide
+// https://github.com/twbs/bootstrap/issues/16732
+$('body').on('hidden.bs.popover', function (e) {
+    $(e.target).data("bs.popover").inState.click = false;
+});
 
 window.recaptcha_callback = function recaptcha_callback(response) {
     var d = new Date();
