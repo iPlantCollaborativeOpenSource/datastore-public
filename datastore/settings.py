@@ -115,7 +115,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_ROOT = '/home/mirrors/static'
+STATIC_ROOT = '/opt/mirrors/static'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
@@ -130,7 +130,7 @@ STATICFILES_FINDERS = (
     'pipeline.finders.PipelineFinder',
 )
 
-MEDIA_ROOT = '/home/mirrors/media'
+MEDIA_ROOT = '/opt/mirrors/media'
 MEDIA_URL = '/media/'
 
 #####
