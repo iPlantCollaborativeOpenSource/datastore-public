@@ -158,7 +158,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/home/mirrors/logs/django.log',
+            'filename': '/opt/mirrors/logs/django.log',
             'formatter': 'default',
         },
     },
