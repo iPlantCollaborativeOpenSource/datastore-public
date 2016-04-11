@@ -1,9 +1,9 @@
 [Unit]
-Description=uWSGI Emperor
+Description=uWSGI for DataCommons mirrors
 After=syslog.target
 
 [Service]
-ExecStart=/root/uwsgi/uwsgi --ini /etc/uwsgi/emperor.ini
+ExecStart=/bin/uwsgi --ini /etc/uwsgi/uwsgi.ini
 # Requires systemd version 211 or newer
 RuntimeDirectory=uwsgi
 Restart=always
