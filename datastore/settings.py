@@ -155,30 +155,31 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {
+        'default': {
             'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+            'class': 'logging.FileHandler',
+            'filename': '/home/mirrors/logs/django.log',
             'formatter': 'default',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
         'irods':{
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
         'datastore': {
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
         'sra': {
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
