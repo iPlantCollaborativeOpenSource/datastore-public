@@ -1,0 +1,10 @@
+---
+- name: Install Nginx, uWSGI
+  hosts: qa-server
+  sudo: yes
+
+  roles:
+    - common
+    - nginx
+    - uwsgi
+    - application
