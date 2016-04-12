@@ -1,0 +1,27 @@
+---
+- name: Change ownership of application files
+  file: path=/opt/mirrors state=directory owner=mirrors group=mirrors
+
+- name: Change ownership of application files
+  file: path=/opt/mirrors/logs state=directory owner=mirrors group=mirrors
+
+- name: Change ownership of application files
+  file: path=/opt/mirrors/static state=directory owner=mirrors group=mirrors
+
+- name: Change ownership of application files
+  file: path=/opt/mirrors/media state=directory owner=mirrors group=mirrors
+
+- name: Clone 'iPlantCollaborativeOpenSource/datastore-public' repository
+  git: repo=https://github.com/iPlantCollaborativeOpenSource/datastore-public.git dest=/opt/mirrors/datastore-public version=support/ansible
+
+- name: Configure application virtualenv
+  command: virtualenv /opt/mirrors/venv
+
+- name: Install application requirements
+  pip: requirements=/opt/mirrors/datastore-public/requirements.txt virtualenv=/opt/mirrors/venv
+
+- name: Django Collect Static
+  command: /opt/mirrors/venv/bin/python /opt/mirrors/datastore-public/manage.py collectstatic --noinput
+  become: yes
+  become_user: mirrors
+

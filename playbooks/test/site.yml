@@ -1,0 +1,12 @@
+---
+- name: Install Cyverse DataCommons
+  hosts: rodeo
+  remote_user: rodeo
+  become: yes
+  become_method: sudo
+
+  roles:
+    - common
+    - application
+    - nginx
+    - uwsgi
