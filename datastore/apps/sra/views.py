@@ -27,7 +27,7 @@ from . import settings as sra_settings
 
 logger = logging.getLogger(__name__)
 
-CACHE_EXPIRATION = 900 #15 minutes
+CACHE_EXPIRATION = 900  # 15 minutes
 PER_PAGE = 200
 
 def _check_path(path):
