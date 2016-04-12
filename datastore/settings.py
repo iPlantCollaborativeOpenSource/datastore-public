@@ -158,7 +158,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/opt/mirrors/logs/django.log',
+            'filename': 'logs/django.log',
             'formatter': 'default',
         },
     },
@@ -229,7 +229,3 @@ PIPELINE['JS_COMPRESSOR'] = None #'pipeline.compressors.slimit.SlimItCompressor'
 #         'output_filename': 'js/vendor.js',
 #     },
 # }
-
-
-# compress when collect static
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'

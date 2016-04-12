@@ -19,7 +19,7 @@ from irods.data_object import iRODSDataObjectFileRaw
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 from irods.manager.collection_manager import CollectionManager
 from irods.models import Collection, CollectionMeta
-from .api import get_irods_session
+from .api import DataStoreSession
 from .content_types import content_types
 from .file_iterable import FileIterable
 from . import settings as sra_settings
@@ -56,13 +56,12 @@ def get_file(request):
     cache_file_key = path + '_file_key'
     result = cache.get(cache_file_key)
 
-    irods_session = get_irods_session()
     if not result:
         try:
-            obj = irods_session.collections.get(path)
+            obj = DataStoreSession.collections.get(path)
         except CollectionDoesNotExist as e:
             try:
-                obj = irods_session.data_objects.get(path)
+                obj = DataStoreSession.data_objects.get(path)
             except DataObjectDoesNotExist as e:
                 logger.exception(e)
                 return HttpResponseNotFound()
@@ -109,13 +108,12 @@ def get_collection(request):
 
     offset = PER_PAGE * (page - 1)
 
-    irods_session = get_irods_session()
 
     try:
         cache_key = path + '_page_' + str(page)
         cache_value = cache.get(cache_key)
         if not cache_value:
-            collection = irods_session.collections.get(path)
+            collection = DataStoreSession.collections.get(path)
             sub_collections = collection.subcollections
             objects = collection.data_objects_paging(PER_PAGE, offset)
 
@@ -132,7 +130,7 @@ def get_collection(request):
             try:
                 collection
             except NameError:
-                collection = irods_session.collections.get(path)
+                collection = DataStoreSession.collections.get(path)
                 sub_collections = collection.subcollections
 
             next_page_objects = collection.data_objects_paging(PER_PAGE, int(offset+PER_PAGE))
@@ -159,7 +157,6 @@ def get_collection(request):
 
 def serve_file(request, path=''):
     path =_check_path(path)
-
     try:
         obj = DataStoreSession.data_objects.get('/' + path)
     except DataObjectDoesNotExist:
@@ -186,9 +183,8 @@ def serve_file(request, path=''):
 def download_file(request, path=''):
     path = _check_path(path)
 
-    irods_session = get_irods_session()
     try:
-        obj = irods_session.data_objects.get('/' + path)
+        obj = DataStoreSession.data_objects.get('/' + path)
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
 
@@ -215,9 +211,8 @@ def download_file(request, path=''):
 def markdown_view(request, path=''):
     path = _check_path(path)
 
-    irods_session = get_irods_session()
     try:
-        obj = irods_session.data_objects.get('/' + path)
+        obj = DataStoreSession.data_objects.get('/' + path)
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
 
@@ -251,14 +246,13 @@ def legacy_redirect(request, path=''):
 
     path = _check_path(path)
 
-    irods_session = get_irods_session()
     try:
-        obj = irods_session.collections.get(path)
+        obj = DataStoreSession.collections.get(path)
         logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
         return HttpResponseRedirect('/browse' + path)
     except CollectionDoesNotExist:
         try:
-            obj = irods_session.data_objects.get(path)
+            obj = DataStoreSession.data_objects.get(path)
             logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
             return HttpResponseRedirect('/download' + path)
         except DataObjectDoesNotExist:
@@ -269,8 +263,7 @@ def search_metadata(request):
     name = request.GET['name']
     value = request.GET['value']
 
-    irods_session = get_irods_session()
-    query_result = irods_session.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
+    query_result = DataStoreSession.query(Collection).filter(CollectionMeta.name == name, CollectionMeta.value == value).all()
 
     results = [iRODSCollection(CollectionManager, row) for row in query_result]
 
