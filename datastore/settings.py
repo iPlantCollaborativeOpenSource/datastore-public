@@ -172,6 +172,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'irods.pool':{
+            'handlers': ['default'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'datastore': {
             'handlers': ['default'],
             'level': 'INFO',
