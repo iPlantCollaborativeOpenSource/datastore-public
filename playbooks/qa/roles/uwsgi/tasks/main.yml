@@ -1,0 +1,14 @@
+---
+- name: Install uwsgi
+  pip: name=uwsgi state=latest
+
+- name: Copy uwsgi.service
+  copy: src=uwsgi.service dest=/usr/lib/systemd/system/uwsgi.service
+
+- name: Copy uwsgi.ini
+  file: path=/etc/uwsgi state=directory
+
+- name: Copy uwsgi.ini
+  copy: src=uwsgi.ini dest=/etc/uwsgi/uwsgi.ini
+  notify:
+    - restart uwsgi
