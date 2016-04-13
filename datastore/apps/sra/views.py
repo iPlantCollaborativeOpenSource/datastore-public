@@ -30,23 +30,39 @@ CACHE_EXPIRATION = 900  # 15 minutes
 PER_PAGE = 200
 
 
-class DataStoreSessionMixin(object):
-    def __init__(self, **kwargs):
-        self.irods_session = get_irods_session()
+def _check_path(path):
+    path = str(path)
+    if path[-1:] == '/':
+        path = path[:-1]
+    return path
+
+
+def home(request, path=''):
+    context = {
+        'root': sra_settings.irods['path'],
+        'root_name': basename(sra_settings.irods['path']),
+        'metadata_prefix': sra_settings.datastore['metadata_prefix'],
+        'year': date.today().year,
+    }
+    return render(request, 'sra/home.html', context)
+
+
+class DataStoreBaseView(View):
 
     def dispatch(self, request, *args, **kwargs):
+        irods_session = get_irods_session()
         try:
-            return super(DataStoreSessionMixin, self).dispatch(request, *args, **kwargs)
+            return super(DataStoreBaseView, self).dispatch(request, *args, **kwargs)
         except NetworkException:
             logger.warn('iRODS connection failed; retrying...')
-            self.irods_session.cleanup()
-            self.irods_session = get_irods_session()
-            return super(DataStoreSessionMixin, self).dispatch(request, *args, **kwargs)
+            irods_session.cleanup()
+            irods_session = get_irods_session()
+            return super(DataStoreBaseView, self).dispatch(request, *args, **kwargs)
         finally:
-            self.irods_session.cleanup()
+            irods_session.cleanup()
 
 
-class FileView(DataStoreSessionMixin, View):
+class FileView(DataStoreBaseView):
 
     def get(self, request):
         if not 'path' in request.GET:
@@ -92,22 +108,6 @@ class FileView(DataStoreSessionMixin, View):
             result = JsonResponse(response)
             cache.set(cache_file_key, result, CACHE_EXPIRATION)
         return result
-
-
-def _check_path(path):
-    path = str(path)
-    if path[-1:] == '/':
-        path = path[:-1]
-    return path
-
-def home(request, path=''):
-    context = {
-        'root': sra_settings.irods['path'],
-        'root_name': basename(sra_settings.irods['path']),
-        'metadata_prefix': sra_settings.datastore['metadata_prefix'],
-        'year': date.today().year,
-    }
-    return render(request, 'sra/home.html', context);
 
 
 # def get_file(request):
@@ -164,7 +164,7 @@ def format_subcoll(coll):
     }
 
 
-class CollectionView(DataStoreSessionMixin, View):
+class CollectionView(DataStoreBaseView):
 
     def get(self, request):
         if not 'path' in request.GET:
@@ -279,7 +279,7 @@ class CollectionView(DataStoreSessionMixin, View):
 #         return HttpResponse(status=500)
 
 
-class ServeFileView(DataStoreSessionMixin, View):
+class ServeFileView(DataStoreBaseView):
 
     def get(self, request, path=''):
         path = _check_path(path)
@@ -333,7 +333,7 @@ class ServeFileView(DataStoreSessionMixin, View):
 #     return response
 
 
-class DownloadFileView(DataStoreSessionMixin, View):
+class DownloadFileView(DataStoreBaseView):
 
     def get(self, request, path=''):
         path = _check_path(path)
@@ -391,7 +391,7 @@ class DownloadFileView(DataStoreSessionMixin, View):
 #     return response
 
 
-class MarkdownView(DataStoreSessionMixin, View):
+class MarkdownView(DataStoreBaseView):
 
     def get(self, request, path=''):
         path = _check_path(path)
@@ -434,7 +434,7 @@ class MarkdownView(DataStoreSessionMixin, View):
 #     return response
 
 
-class LegacyRedirectView(DataStoreSessionMixin, View):
+class LegacyRedirectView(DataStoreBaseView):
 
     def get(self, request, path=''):
         """
@@ -501,7 +501,7 @@ class LegacyRedirectView(DataStoreSessionMixin, View):
 #             return HttpResponseNotFound('File does not exist')
 
 
-class SearchMetadataView(DataStoreSessionMixin, View):
+class SearchMetadataView(DataStoreBaseView):
 
     def get(self, request):
         name = request.GET['name']
