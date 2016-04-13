@@ -19,7 +19,7 @@ from irods.exception import (DataObjectDoesNotExist, CollectionDoesNotExist,
                              NetworkException)
 from irods.manager.collection_manager import CollectionManager
 from irods.models import Collection, CollectionMeta
-from .api import get_irods_session
+from .api import DataStoreSession
 from .content_types import content_types
 from . import settings as sra_settings
 
@@ -48,9 +48,7 @@ def home(request, path=''):
 
 
 class DataStoreSessionMixin(object):
-
-    def __init__(self):
-        self.irods_session = get_irods_session()
+    irods_session = DataStoreSession
 
 
 class DataStoreSessionBaseView(DataStoreSessionMixin, View):
@@ -61,10 +59,7 @@ class DataStoreSessionBaseView(DataStoreSessionMixin, View):
         except NetworkException:
             logger.warn('iRODS connection failed; retrying...')
             self.irods_session.cleanup()
-            self.irods_session = get_irods_session()
             return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
-        finally:
-            self.irods_session.cleanup()
 
 
 class FileView(DataStoreSessionBaseView):
