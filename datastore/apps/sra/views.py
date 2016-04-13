@@ -47,22 +47,27 @@ def home(request, path=''):
     return render(request, 'sra/home.html', context)
 
 
-class DataStoreBaseView(View):
+class DataStoreSessionMixin(object):
+
+    def __init__(self):
+        self.irods_session = get_irods_session()
+
+
+class DataStoreSessionBaseView(DataStoreSessionMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
-        irods_session = get_irods_session()
         try:
-            return super(DataStoreBaseView, self).dispatch(request, *args, **kwargs)
+            return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
         except NetworkException:
             logger.warn('iRODS connection failed; retrying...')
-            irods_session.cleanup()
-            irods_session = get_irods_session()
-            return super(DataStoreBaseView, self).dispatch(request, *args, **kwargs)
+            self.irods_session.cleanup()
+            self.irods_session = get_irods_session()
+            return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
         finally:
-            irods_session.cleanup()
+            self.irods_session.cleanup()
 
 
-class FileView(DataStoreBaseView):
+class FileView(DataStoreSessionBaseView):
 
     def get(self, request):
         if not 'path' in request.GET:
@@ -164,7 +169,7 @@ def format_subcoll(coll):
     }
 
 
-class CollectionView(DataStoreBaseView):
+class CollectionView(DataStoreSessionBaseView):
 
     def get(self, request):
         if not 'path' in request.GET:
@@ -279,7 +284,7 @@ class CollectionView(DataStoreBaseView):
 #         return HttpResponse(status=500)
 
 
-class ServeFileView(DataStoreBaseView):
+class ServeFileView(DataStoreSessionBaseView):
 
     def get(self, request, path=''):
         path = _check_path(path)
@@ -333,7 +338,7 @@ class ServeFileView(DataStoreBaseView):
 #     return response
 
 
-class DownloadFileView(DataStoreBaseView):
+class DownloadFileView(DataStoreSessionBaseView):
 
     def get(self, request, path=''):
         path = _check_path(path)
@@ -391,7 +396,7 @@ class DownloadFileView(DataStoreBaseView):
 #     return response
 
 
-class MarkdownView(DataStoreBaseView):
+class MarkdownView(DataStoreSessionBaseView):
 
     def get(self, request, path=''):
         path = _check_path(path)
@@ -434,7 +439,7 @@ class MarkdownView(DataStoreBaseView):
 #     return response
 
 
-class LegacyRedirectView(DataStoreBaseView):
+class LegacyRedirectView(DataStoreSessionBaseView):
 
     def get(self, request, path=''):
         """
@@ -501,7 +506,7 @@ class LegacyRedirectView(DataStoreBaseView):
 #             return HttpResponseNotFound('File does not exist')
 
 
-class SearchMetadataView(DataStoreBaseView):
+class SearchMetadataView(DataStoreSessionBaseView):
 
     def get(self, request):
         name = request.GET['name']
