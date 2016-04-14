@@ -304,7 +304,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                         $('<a>', {
                             'class': 'btn btn-default file-info-button'
                         })
-                            .append($('<i>', {'class': 'icon-info-sign'}))
+                            .append($('<i>', {'class': 'glyphicon glyphicon-info-sign'}))
                             .append(' Info')
                             .popover({
                                 html: true,
@@ -316,7 +316,7 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                             })
                     )
                     .append($('<a>', {'class': 'btn btn-default file-info-button'})
-                            .append($('<i>', {'class': 'icon-list'}))
+                            .append($('<i>', {'class': 'glyphicon glyphicon-list'}))
                             .append(' Metadata')
                             .popover({
                                 html: true,
@@ -350,9 +350,10 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
         return $('<a>', {
                 'id': 'download_button',
                 'class': 'btn btn-primary',
-                'href': this.model.get('download_url')
+                'href': this.model.get('download_url'),
+                'rel': 'nofollow'
                 })
-                .append($('<i>', {'class': 'icon-circle-arrow-down icon-white'}))
+                .append($('<i>', {'class': 'glyphicon glyphicon-circle-arrow-down icon-white'}))
                 .append(' Download')
                 .popover({
                     html: true,
