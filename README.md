@@ -1,11 +1,9 @@
-Public Datastore Interface
-==========================
+# Public Datastore Interface
 
-Prerequisites
--------------------------
+## Prerequisites
 
-Docker and Compose
-******************
+### Docker and Compose
+
 
 This project is a dockerized application. You'll need [Docker][1] and [Compose][2]
 installed to run the application. If you are running on a Mac or Windows then you will
@@ -21,8 +19,8 @@ from the project's root directory will run the application on `http://localhost:
 (or `http://${DOCKER_MACHINE_IP}:8000` if you are running Docker Machine.)
 
 
-Environment
------------
+## Environment
+
 
 The `datastore.env` file has the environment configuration for the application. Customize
 as necessary, but the defaults are a Production-ready configuration.
@@ -39,16 +37,17 @@ Configuration options of note:
   desired iRODS deployment.
 
 
-Logging
--------
+## Logging
 
 Using the development `docker-compose.yml` configuration, the containers all log to
 `stdout`. The production configuration (see below) configures the [Docker syslog driver][4]
 to direct all logs to the host system's syslog.
 
 
-Production installation and configuration
------------------------------------------
+##  Production installation and configuration
+
+###  Deployment with Docker
+
 
 In production, the application is run as a systemd service.
 
@@ -96,8 +95,29 @@ $ systemctl enable idc-mirrors
 ```
 
 
+###  Deployment with Ansible
+
+There are playbooks for deploying to Production and QA at CyVerse, and 
+Testing on TACC's Rodeo. You will need to install `ansible` on your local
+system. There are no prerequisites required on the remote systems.
+
+You can run the desired playbook, `[prod, qa, test]`,  with the following
+command:
+
+```
+$ VER=test # set this to one of prod, qa, test
+$ ansible-playbook -i playbooks/$VER/hosts playbooks/$VER/site.yml
+```
+
+If you need to supply a password for `ssh` or `sudo`, add `--ask-pass` 
+or `--ask-sudo-pass` to the `ansible-playbook` command. 
+
+See the [Ansible Documentation][6] for full documentation on Ansible.
+
+
 [1]: https://docs.docker.com/installation/
 [2]: https://docs.docker.com/compose/install/
 [3]: https://docs.docker.com/machine/install-machine/
 [4]: https://docs.docker.com/engine/reference/logging/overview/#syslog-options
 [5]: https://docs.djangoproject.com/en/1.8/ref/settings/#std:setting-SECRET_KEY
+[6]: http://docs.ansible.com/ansible/index.html
