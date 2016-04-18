@@ -41,7 +41,8 @@ require.config({
         shBrushRuby: {deps: ['shCore']},
         shBrushXml: {deps: ['shCore']},
         shBrushFasta: {deps: ['shCore']}
-    }
+    },
+    urlArgs: "bust=" +  (new Date()).getTime()
 });
 
 require(['backbone', 'jquery', 'datastore'], function(Backbone, $, Datastore) {
