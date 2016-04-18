@@ -12,7 +12,7 @@ from datetime import date
 from calendar import timegm
 
 import markdown
-import socket
+from socket import error as SocketError
 
 from irods.collection import iRODSCollection, iRODSDataObject
 from irods.data_object import iRODSDataObjectFileRaw
@@ -57,7 +57,7 @@ class DataStoreSessionBaseView(DataStoreSessionMixin, View):
     def dispatch(self, request, *args, **kwargs):
         try:
             return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
-        except NetworkException, socket.error:
+        except (NetworkException, SocketError):
             logger.warn('iRODS connection failed; retrying...')
             self.irods_session.cleanup()
             return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
