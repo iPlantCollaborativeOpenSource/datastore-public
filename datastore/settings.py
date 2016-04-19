@@ -93,7 +93,7 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.8/topics/cache/#cache-key-transformation
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': '127.0.0.1:11211',
     }
 }
