@@ -24,6 +24,7 @@ from .api import DataStoreSession
 from .content_types import content_types
 from . import settings as sra_settings
 
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,10 @@ def _check_path(path):
     if path[-1:] == '/':
         path = path[:-1]
     return path
+
+
+def generate_cache_key(path):
+    return base64.urlsafe_b64encode(path)
 
 
 def home(request, path=''):
@@ -76,7 +81,7 @@ class FileView(DataStoreSessionBaseView):
         path = _check_path(request.GET['path'])
         logger.debug(path)
 
-        cache_file_key = path + '_file_key'
+        cache_file_key = generate_cache_key(path) + '_file_key'
         result = cache.get(cache_file_key)
 
         if not result:
@@ -135,7 +140,7 @@ class CollectionView(DataStoreSessionBaseView):
         offset = PER_PAGE * (page - 1)
 
         try:
-            cache_key = path + '_page_' + str(page)
+            cache_key = generate_cache_key(path) + '_page_' + str(page)
             cache_value = cache.get(cache_key)
             if not cache_value:
                 collection = self.irods_session.collections.get(path)
@@ -148,7 +153,7 @@ class CollectionView(DataStoreSessionBaseView):
                 cache_value = map(format_subcoll, sub_collections + objects)
                 cache.set(cache_key, cache_value, CACHE_EXPIRATION)
 
-            next_page_cache_key = path + '_page_' + str(page + 1)
+            next_page_cache_key = generate_cache_key(path) + '_page_' + str(page + 1)
             next_page_cache_value = cache.get(next_page_cache_key)
 
             if not isinstance(next_page_cache_value, list):
