@@ -61,6 +61,10 @@ class DataStoreSessionBaseView(DataStoreSessionMixin, View):
             logger.warn('iRODS connection failed; retrying...')
             self.irods_session.cleanup()
             return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
+        except:
+            logger.exception('UNKNOWN EXCEPTION! retrying...')
+            self.irods_session.cleanup()
+            return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
 
 
 class FileView(DataStoreSessionBaseView):
