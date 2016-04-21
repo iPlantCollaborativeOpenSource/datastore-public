@@ -139,51 +139,46 @@ class CollectionView(DataStoreSessionBaseView):
 
         offset = PER_PAGE * (page - 1)
 
-        try:
-            cache_key = generate_cache_key(path) + '_page_' + str(page)
-            cache_value = cache.get(cache_key)
-            if not cache_value:
+        cache_key = generate_cache_key(path) + '_page_' + str(page)
+        cache_value = cache.get(cache_key)
+        if not cache_value:
+            collection = self.irods_session.collections.get(path)
+            sub_collections = collection.subcollections
+            objects = collection.data_objects_paging(PER_PAGE, offset)
+
+            logger.debug(sub_collections)
+            logger.debug(objects)
+
+            cache_value = map(format_subcoll, sub_collections + objects)
+            cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+
+        next_page_cache_key = generate_cache_key(path) + '_page_' + str(page + 1)
+        next_page_cache_value = cache.get(next_page_cache_key)
+
+        if not isinstance(next_page_cache_value, list):
+            try:
+                collection
+            except NameError:
                 collection = self.irods_session.collections.get(path)
                 sub_collections = collection.subcollections
-                objects = collection.data_objects_paging(PER_PAGE, offset)
 
-                logger.debug(sub_collections)
-                logger.debug(objects)
+            next_page_objects = collection.data_objects_paging(PER_PAGE,
+                                                               int(offset + PER_PAGE))
+            next_page_cache_value = map(format_subcoll, next_page_objects)
+            cache.set(next_page_cache_key, next_page_cache_value, CACHE_EXPIRATION)
 
-                cache_value = map(format_subcoll, sub_collections + objects)
-                cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+        if next_page_cache_value:
+            more_data = True
+        else:
+            more_data = False
 
-            next_page_cache_key = generate_cache_key(path) + '_page_' + str(page + 1)
-            next_page_cache_value = cache.get(next_page_cache_key)
+        json = {'models': cache_value,
+                'more_data': more_data,
+                'page': page}
 
-            if not isinstance(next_page_cache_value, list):
-                try:
-                    collection
-                except NameError:
-                    collection = self.irods_session.collections.get(path)
-                    sub_collections = collection.subcollections
+        response = JsonResponse(json, safe=False)
 
-                next_page_objects = collection.data_objects_paging(PER_PAGE,
-                                                                   int(offset + PER_PAGE))
-                next_page_cache_value = map(format_subcoll, next_page_objects)
-                cache.set(next_page_cache_key, next_page_cache_value, CACHE_EXPIRATION)
-
-            if next_page_cache_value:
-                more_data = True
-            else:
-                more_data = False
-
-            json = {'models': cache_value,
-                    'more_data': more_data,
-                    'page': page}
-
-            response = JsonResponse(json, safe=False)
-
-            return response
-
-        except Exception as e:
-            logger.exception('FAIL: %s' % e)
-            return HttpResponse(status=500)
+        return response
 
 
 class ServeFileView(DataStoreSessionBaseView):
