@@ -1,7 +1,8 @@
 from django.core.cache import cache
 from django.shortcuts import render
 from django.http import (HttpResponse, HttpResponseRedirect, HttpResponseBadRequest,
-                         HttpResponseNotFound, StreamingHttpResponse)
+                         HttpResponseNotFound, StreamingHttpResponse,
+                         HttpResponseServerError)
 from django.http import JsonResponse
 from django.views.generic import View
 
@@ -65,11 +66,22 @@ class DataStoreSessionBaseView(DataStoreSessionMixin, View):
         except (NetworkException, SocketError):
             logger.warn('iRODS connection failed; retrying...')
             self.irods_session.cleanup()
-            return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
+            try:
+                return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
+            except:
+                # If it still didn't work, return HTTP 500
+                logger.exception('Retry failed.')
+                return HttpResponseServerError()
         except:
             logger.exception('UNKNOWN EXCEPTION! retrying...')
             self.irods_session.cleanup()
-            return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
+            try:
+                return super(DataStoreSessionBaseView, self).dispatch(request, *args, **kwargs)
+            except:
+                # If it still didn't work, return HTTP 500
+                logger.exception('Retry failed.')
+                return HttpResponseServerError()
+
 
 
 class FileView(DataStoreSessionBaseView):
