@@ -29,3 +29,7 @@
   become: yes
   become_user: mirrors
 
+- name: Copy DataCommons ENV
+  template: src=datastore.env.j2 dest=/opt/mirrors/datastore.env
+  notify:
+    - restart uwsgi
