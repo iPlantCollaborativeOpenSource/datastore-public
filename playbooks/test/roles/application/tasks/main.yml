@@ -12,7 +12,7 @@
   file: path=/opt/mirrors/media state=directory owner=mirrors group=mirrors
 
 - name: Clone 'iPlantCollaborativeOpenSource/datastore-public' repository
-  git: repo=https://github.com/iPlantCollaborativeOpenSource/datastore-public.git dest=/opt/mirrors/datastore-public version=master
+  git: repo=https://github.com/iPlantCollaborativeOpenSource/datastore-public.git dest=/opt/mirrors/datastore-public version={{ dc_version }}
   notify:
     - restart uwsgi
 
@@ -29,3 +29,7 @@
   become: yes
   become_user: mirrors
 
+- name: Copy DataCommons ENV
+  template: src=datastore.env.j2 dest=/opt/mirrors/datastore.env
+  notify:
+    - restart uwsgi
