@@ -428,12 +428,12 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                     .append($('<li>').append('Cyberduck'))
                     .append($('<li>').append($('<a>',{
                                 'TARGET':'_blank',
-                                'href': 'https://wiki.cyverse.org/wiki/display/DS/Downloading+and+Uploading+Data'
+                                'href': 'http://www.cyverse.org/learning-center/manage-data'
                             }).append("More Information")))
                 )
             )
             .append($('<div>')
-                .append('iPlant Users (Requires iPlant account)')
+                .append('CyVerse Users (Requires CyVerse account)')
                 .append($('<ul>')
                     .append($('<li>')
                         .append($('<a>',{
