@@ -1,8 +1,0 @@
-dc_version: master
-server_hostname: mirrors.cyverse.org
-irods_host: data.iplantc.org
-irods_port: 1247
-irods_zone: iplant
-irods_path: /iplant/home/shared
-irods_user: anonymous
-irods_password:
