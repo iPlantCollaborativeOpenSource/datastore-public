@@ -57,6 +57,12 @@ def get_file(request):
     cache_file_key = path + '_file_key'
     result = cache.get(cache_file_key)
 
+    url= DE_HOST + 'terrain/secured/filesystem/directory/'
+    params={'path': path}
+    # import pdb; pdb.set_trace()
+    de_response = send_request('GET', url=url, params=params)
+    logger.info('DE DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+
     if not result:
         try:
             obj = DataStoreSession.collections.get(path)
@@ -74,7 +80,7 @@ def get_file(request):
         url= DE_HOST + 'terrain/secured/filesystem/' + str(uuid) + '/metadata'
         # import pdb; pdb.set_trace()
         de_response = send_request('GET', url=url)
-        logger.info('DE RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+        logger.info('DE META RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
         if de_response.status_code == 200:
             de_meta = de_response.json()
 
@@ -139,6 +145,18 @@ def get_collection(request):
     page = int(request.GET.get('page', 1))
 
     offset = PER_PAGE * (page - 1)
+
+    url= DE_HOST + 'terrain/secured/filesystem/paged-directory'
+    params={
+        'path': path,
+        'limit': PER_PAGE,
+        'offset': offset,
+        'sort-col': 'name',
+        'sort-dir': 'ASC'
+        }
+    # import pdb; pdb.set_trace()
+    de_response = send_request('GET', url=url, params=params)
+    logger.info('DE PAGING DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
 
     try:
         cache_key = path + '_page_' + str(page)
@@ -211,27 +229,39 @@ def serve_file(request, path=''):
 def download_file(request, path=''):
     path = _check_path(path)
 
-    try:
-        obj = DataStoreSession.data_objects.get('/' + path)
-    except DataObjectDoesNotExist:
-        return HttpResponseNotFound()
+    url= DE_HOST + 'terrain/secured/fileio/download'
+    params={'path': path}
 
-    ext = splitext(obj.name)[1][1:]
+    de_response = send_request('GET', url=url, params=params)
 
-    if ext in content_types:
-        content_type = content_types[ext]
-    else:
-        content_type = 'application/octet-stream'
-
-    try:
-        f = obj.open('r')
-    except KeyError as e:
-        return HttpResponse('Download could not be completed.',status=500)
-
-    response = StreamingHttpResponse(f, content_type=content_type)
-    response['Content-Length'] = obj.size
-    response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
+    response = StreamingHttpResponse(de_response.content, content_type=de_response.headers['Content-Type'])
+    # response['Content-Length'] = de_response.headers
+    response['Content-Disposition'] = de_response.headers['Content-Disposition'] #'attachment; filename="%s"' % obj.name
     response['Accept-Ranges'] = 'bytes'
+
+    # logger.info('DE RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+
+    # try:
+    #     obj = DataStoreSession.data_objects.get('/' + path)
+    # except DataObjectDoesNotExist:
+    #     return HttpResponseNotFound()
+
+    # ext = splitext(obj.name)[1][1:]
+
+    # if ext in content_types:
+    #     content_type = content_types[ext]
+    # else:
+    #     content_type = 'application/octet-stream'
+
+    # try:
+    #     f = obj.open('r')
+    # except KeyError as e:
+    #     return HttpResponse('Download could not be completed.',status=500)
+
+    # response = StreamingHttpResponse(f, content_type=content_type)
+    # response['Content-Length'] = obj.size
+    # response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
+    # response['Accept-Ranges'] = 'bytes'
 
     return response
 
@@ -412,6 +442,7 @@ def send_request(http_method, url=None, params=None, payload=None):
 
     # url = 'https://everdene.iplantcollaborative.org/terrain/secured/filesystem/' + UUID + '/metadata'
     logger.info('url: {0}'.format(url))
+    logger.info('params: {0}'.format(params))
     logger.info('jwt: {0}'.format(encoded_jwt))
 
     if payload:
@@ -427,7 +458,7 @@ def send_request(http_method, url=None, params=None, payload=None):
     elif http_method.upper() == 'DELETE':
         response = requests.delete(url, headers=headers)
 
-    if response.status_code == 200:
-        print response.json()
+    # if response.status_code == 200:
+    #     print response.json()
 
     return response
