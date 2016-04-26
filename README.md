@@ -97,22 +97,41 @@ $ systemctl enable idc-mirrors
 
 ###  Deployment with Ansible
 
-There are playbooks for deploying to Production and QA at CyVerse, and 
-Testing on TACC's Rodeo. You will need to install `ansible` on your local
-system. There are no prerequisites required on the remote systems.
+There are playbooks for deploying to Production at CyVerse and QA at 
+CyVerse and on Rodeo at TACC. You will need to install [Ansible][6] on your 
+local system. There are no prerequisites required on the remote systems.
 
-You can run the desired playbook, `[prod, qa, test]`,  with the following
+You can run the desired playbook, `[prod, qa]`,  with the following
 command:
 
 ```
-$ VER=test # set this to one of prod, qa, test
-$ ansible-playbook -i playbooks/$VER/hosts playbooks/$VER/site.yml
+$ ansible-playbook -i playbooks/hosts playbooks/[prod,qa].yml --ask-sudo-pass
 ```
 
-If you need to supply a password for `ssh` or `sudo`, add `--ask-pass` 
-or `--ask-sudo-pass` to the `ansible-playbook` command. 
+You will be prompted for the sudo password and then ansible will configure
+the remote system(s). The `qa.yml` playbook will install on both the CyVerse
+and Rodeo QA systems, configured to point at `qairods.iplantc.org`. The
+`prod.yml` playbook will install on the Production system, configured to
+point at `data.iplantc.org`.
 
-See the [Ansible Documentation][6] for full documentation on Ansible.
+See the [Ansible Documentation][7] for full documentation on Ansible.
+
+### Manually restarting services
+
+Services are registered with `systemd` and can be restarted using the
+`systemctl` command directly on the host. The Ansible playbooks install
+two services, Nginx and uWSGI, which can be restarted with the following 
+commands:
+
+```
+$ systemctl restart uwsgi
+$ systemctl restart nginx
+```
+
+### Logging
+
+The Nginx service logs to `/var/log/nginx` and the uWSGI service logs
+to syslog, and can be found in `/var/log/messages`.
 
 
 [1]: https://docs.docker.com/installation/
@@ -120,4 +139,5 @@ See the [Ansible Documentation][6] for full documentation on Ansible.
 [3]: https://docs.docker.com/machine/install-machine/
 [4]: https://docs.docker.com/engine/reference/logging/overview/#syslog-options
 [5]: https://docs.djangoproject.com/en/1.8/ref/settings/#std:setting-SECRET_KEY
-[6]: http://docs.ansible.com/ansible/index.html
+[6]: http://ansible.com
+[7]: http://docs.ansible.com/ansible/index.html

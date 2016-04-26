@@ -1,0 +1,2 @@
+server_hostname: mirrors.cyverse.org
+selinux_enabled: false

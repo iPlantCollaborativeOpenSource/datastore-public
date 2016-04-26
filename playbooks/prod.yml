@@ -1,0 +1,11 @@
+---
+- name: Install CyVerse DataCommons on Production
+  hosts: prod
+  become: yes
+  become_method: sudo
+
+  roles:
+    - common
+    - application
+    - nginx
+    - uwsgi
