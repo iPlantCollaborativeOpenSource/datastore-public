@@ -364,8 +364,8 @@ Datastore.Views.DataObjectHeader = Backbone.View.extend({
                 })
     },
     recaptcha_popover: function() {
-        return $('<form>', {'action': this.model.get('download_url'), 'method': 'POST', 'id': 'download_form'})
-            .append($('<input>', {'type': 'hidden', 'name': 'csrfmiddlewaretoken', 'value': this.cookie_value('csrftoken')}))
+        return $('<form>', {'action': this.model.get('download_url'), 'method': 'GET', 'id': 'download_form'})
+            // .append($('<input>', {'type': 'hidden', 'name': 'csrfmiddlewaretoken', 'value': this.cookie_value('csrftoken')}))
             .append($('<div>', {
                 'id': 'recaptcha',
                 'class': 'g-recaptcha',
