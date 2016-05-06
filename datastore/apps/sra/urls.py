@@ -2,11 +2,12 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('datastore.apps.sra.views',
     url(r'^$', 'home', name='home'),
-    url(r'^browse/(?P<path>.*)/?$', 'home', name='browse'),
+    url(r'^browse/(?P<path>.*)/?$', 'home'),
+    # url(r'^api/browse/(?P<path>.*)/?$', 'get_file_or_folder', name='browse'),
+    url(r'^api/browse/(?P<path>.*)/page/(?P<page>\d*)/?$', 'get_file_or_folder', name='browse'),
 
-    # url(r'^api/file/?$', 'get_collection'), #for testing
-    url(r'^api/file/?$', 'get_file'),
-    url(r'^api/collection/?$', 'get_collection'),
+    url(r'^api/file/(?P<path>.*)/?$', 'get_file', name='get_file'),
+    url(r'^api/collection/(?P<path>.*)/?$', 'get_collection', name='get_collection'),
 
     url(r'^serve/(?P<path>.*)$', 'serve_file', name='serve'),
     url(r'^download/(?P<path>.*)$', 'download_file', name='download'),

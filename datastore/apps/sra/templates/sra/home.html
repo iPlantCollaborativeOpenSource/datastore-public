@@ -2,19 +2,38 @@
 
 {% load staticfiles %}
 
+
+{% block head_extra %}
+    <base href="{% url 'home' %}">
+{% endblock %}
+
 {% block content %}
 <div class="main-container container">
   <div class="content">
-    <div id="breadcrumbs"></div>
+    <div id="breadcrumbs">
+      <ul>
+
+      </ul>
+    </div>
+    <!-- <div id="file-scroller"> -->
     <div id="file-scroller">
-      <div id="file-scroller-inner" class="clearfix"></div>
+      <div id="file-scroller-inner" class="clearfix">
+        <div ng-view> </div>
+
+        <div ng-include="'/static/sra/templates/info.html'"> </div>
+        <!-- <div ng-include="'/static/sra/templates/file.html'"> </div> -->
+      </div>
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="{%static 'vendor/angular/angular.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'djangular/js/django-angular.js' %}"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.js"></script>
 <script data-main="{% static 'sra/js/main.js' %}" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+<script src="{%static 'sra/js/datastore.js' %}"></script>
 <script type="text/javascript">
   var root = "{{ root }}";
   var root_name = "{{ root_name }}";

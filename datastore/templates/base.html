@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="Datastore">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,6 +11,7 @@
     <link rel="canonical" href="{{ request.get_full_path }}">
     {% include "includes/styles.html" %}
     {% block extra_styles %}{% endblock %}
+    {% block head_extra %}{% endblock %}
 </head>
 
 <body>
@@ -21,3 +22,8 @@
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>
+
+{% block scripts %}
+    <!-- <script src="{%static 'vendor/angular/angular.min.js' %}"></script> -->
+    <script src="{%static 'logging/logger.js' %}"></script>
+{% endblock %}

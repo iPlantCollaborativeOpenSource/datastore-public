@@ -40,10 +40,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'datastore.apps.sra',
+    'djangular',
     'pipeline',
 )
 
 MIDDLEWARE_CLASSES = (
+    'djangular.middleware.DjangularUrlMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

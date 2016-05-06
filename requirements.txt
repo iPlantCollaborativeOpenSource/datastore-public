@@ -1,6 +1,7 @@
 cryptography==1.1
 Django==1.8.3
 django-pipeline
+django-angular==0.7.15
 Markdown==2.6.2
 prettytable==0.7.2
 PyJWT==1.4.0

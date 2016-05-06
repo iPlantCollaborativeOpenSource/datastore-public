@@ -49,21 +49,43 @@ def home(request, path=''):
     return render(request, 'sra/home.html', context);
 
 
-def get_file(request):
-    if not 'path' in request.GET:
+def get_file_or_folder(request, path, page=1):
+    url = DE_HOST + 'terrain/secured/filesystem/stat'
+    payload = {'paths': [str(path)]}
+
+    de_response = send_request('POST', url=url, payload=payload)
+
+    data = de_response.json()['paths'][path]
+    metadata = get_metadata(request, data['id'])
+
+    collection = {}
+    if data['type'] == 'dir':
+        collection = get_collection(request, path, int(page))
+
+    response = data
+    response['metadata'] = metadata
+    response['collection'] = collection
+
+    return JsonResponse(response)
+
+def get_file(request, path):
+    if not 'djng_url_kwarg_path' in request.GET:
         raise HttpResponseBadRequest()
 
-    path = _check_path(request.GET['path'])
-    logger.debug(path)
+    # path = _check_path(request.GET['path'])
+    # logger.debug(path)
 
     cache_file_key = path + '_file_key'
     result = cache.get(cache_file_key)
 
-    url= DE_HOST + 'terrain/secured/filesystem/directory/'
+
+    url= DE_HOST + '/secured/filesystem/directory'#'terrain/secured/filesystem/file/manifest'
     params={'path': path}
     # import pdb; pdb.set_trace()
     de_response = send_request('GET', url=url, params=params)
+    import pdb; pdb.set_trace()
     logger.info('DE DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+
 
     if not result:
         try:
@@ -79,40 +101,40 @@ def get_file(request):
 
         uuid = obj.metadata.get_one('ipc_UUID').__dict__['value']
 
-        url= DE_HOST + 'terrain/secured/filesystem/' + str(uuid) + '/metadata'
-        # import pdb; pdb.set_trace()
-        de_response = send_request('GET', url=url)
-        logger.info('DE META RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
-        if de_response.status_code == 200:
-            de_meta = de_response.json()
+        # url= DE_HOST + 'terrain/secured/filesystem/' + str(uuid) + '/metadata'
+        # # import pdb; pdb.set_trace()
+        # de_response = send_request('GET', url=url)
+        # logger.info('DE META RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+        # if de_response.status_code == 200:
+        #     de_meta = de_response.json()
 
-            # if de_meta['error_code']:
-            #     template_meta=[]
-            #     irods_meta=[{"attr": "Error", "value": de_meta['reason']}]
-            # else:
-            #     try:
-            #         template_meta = de_meta['metadata']['templates'][0]['avus']
-            #     except IndexError: #there is no template metadata
-            #         template_meta=[]
-            #     irods_meta = de_meta['irods-avus']
+        #     # if de_meta['error_code']:
+        #     #     template_meta=[]
+        #     #     irods_meta=[{"attr": "Error", "value": de_meta['reason']}]
+        #     # else:
+        #     #     try:
+        #     #         template_meta = de_meta['metadata']['templates'][0]['avus']
+        #     #     except IndexError: #there is no template metadata
+        #     #         template_meta=[]
+        #     #     irods_meta = de_meta['irods-avus']
 
-            try:
-                template_meta = de_meta['metadata']['templates'][0]['avus']
-            except IndexError: #there is no template metadata
-                template_meta=[]
+        #     try:
+        #         template_meta = de_meta['metadata']['templates'][0]['avus']
+        #     except IndexError: #there is no template metadata
+        #         template_meta=[]
 
-            irods_meta = de_meta['irods-avus']
+        #     irods_meta = de_meta['irods-avus']
 
-        else: #something is wrong with DE metadata endpoint
-            irods_meta=[{"attr": "Error", "value": de_response.reason}]
-            template_meta=[]
+        # else: #something is wrong with DE metadata endpoint
+        #     irods_meta=[{"attr": "Error", "value": de_response.reason}]
+        #     template_meta=[]
 
-        response = {
-            'name': obj.name,
-            'path': obj.path,
-            'metadata': irods_meta + template_meta,
-            'is_dir': isinstance(obj, iRODSCollection),
-        }
+        # response = {
+        #     'name': obj.name,
+        #     'path': obj.path,
+        #     'metadata': irods_meta + template_meta,
+        #     'is_dir': isinstance(obj, iRODSCollection),
+        # }
         if isinstance(obj, iRODSDataObject):
             response['size'] = obj.size
             response['create_time'] = timegm(obj.create_time.utctimetuple())
@@ -137,14 +159,40 @@ def format_subcoll(coll):
         'is_dir': isinstance(coll, iRODSCollection)
     }
 
-def get_collection(request):
+def get_metadata(request, id):
+    url= DE_HOST + 'terrain/secured/filesystem/' + str(id) + '/metadata'
+    # import pdb; pdb.set_trace()
+    de_response = send_request('GET', url=url)
+    # logger.info('DE META RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+    if de_response.status_code == 200:
+        de_meta = de_response.json()
+
+        try:
+            template_meta = de_meta['metadata']['templates'][0]['avus']
+        except IndexError: #there is no template metadata
+            template_meta=[]
+
+        irods_meta = de_meta['irods-avus']
+
+    else: #something is wrong with DE metadata endpoint
+        irods_meta=[{"attr": "Error", "value": de_response.reason}]
+        template_meta=[]
+
+    metadata = {
+        'irods': irods_meta + template_meta,
+        'template': template_meta,
+    }
+
+    return metadata
+
+def get_collection(request, path, page=1):
     PER_PAGE = 200
+    # logger.info('get_collection request: {}'.format(request.GET))
+    # if not 'djng_url_kwarg_path' in request.GET:
+    #     return HttpResponseBadRequest()
 
-    if not 'path' in request.GET:
-        return HttpResponseBadRequest()
-
-    path = _check_path(request.GET['path'])
-    page = int(request.GET.get('page', 1))
+    # path = _check_path(request.GET['path'])
+    # page = int(request.GET.get('page', 1))
 
     offset = PER_PAGE * (page - 1)
 
@@ -156,10 +204,23 @@ def get_collection(request):
         'sort-col': 'name',
         'sort-dir': 'ASC'
         }
-    # import pdb; pdb.set_trace()
-    de_response = send_request('GET', url=url, params=params)
-    logger.info('DE PAGING DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
 
+    collection = send_request('GET', url=url, params=params).json()
+
+    logger.info('URL: {}'.format(url))
+    logger.info('DE PAGING DIRECTORY RESPONSE: {0}'.format(collection))
+    # logger.info('DE PAGING DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(collection.status_code, collection.reason, collection.json()))
+
+    metadata=get_metadata(request, collection['id'])
+
+    if collection['total'] > PER_PAGE*page:
+        collection['more_data'] = True
+    else:
+        collection['more_data'] = False
+
+    return collection
+    return JsonResponse({'collection': collection, 'metadata': metadata})
+#  wont run right now
     try:
         cache_key = path + '_page_' + str(page)
         cache_value = cache.get(cache_key)
@@ -447,9 +508,8 @@ def send_request(http_method, url=None, params=None, payload=None):
     encoded_jwt = create_jwt_token()
     headers = {'X-Iplant-De-Jwt': encoded_jwt}
 
-    # url = 'https://everdene.iplantcollaborative.org/terrain/secured/filesystem/' + UUID + '/metadata'
-    logger.info('url: {0}'.format(url))
-    logger.info('params: {0}'.format(params))
+    # logger.info('url: {0}'.format(url))
+    # logger.info('params: {0}'.format(params))
     logger.info('jwt: {0}'.format(encoded_jwt))
 
     if payload:
@@ -467,5 +527,5 @@ def send_request(http_method, url=None, params=None, payload=None):
 
     # if response.status_code == 200:
     #     print response.json()
-
+    logger.info('response time: {}'.format(response.elapsed))
     return response
