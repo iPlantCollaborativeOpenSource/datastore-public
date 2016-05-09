@@ -8,24 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="main-container container">
-  <div class="content">
-    <div id="breadcrumbs">
-      <ul>
-
-      </ul>
-    </div>
-    <!-- <div id="file-scroller"> -->
-    <div id="file-scroller">
-      <div id="file-scroller-inner" class="clearfix">
-        <div ng-view> </div>
-
-        <div ng-include="'/static/sra/templates/info.html'"> </div>
-        <!-- <div ng-include="'/static/sra/templates/file.html'"> </div> -->
-      </div>
-    </div>
-  </div>
-</div>
+  <div ng-include="'/static/sra/templates/info.html'"> </div>
 {% endblock %}
 
 {% block extra_scripts %}

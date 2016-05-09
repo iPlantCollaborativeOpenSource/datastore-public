@@ -13,17 +13,31 @@
 
 
   angular.module('Datastore').controller('DatastoreCtrl', ['$scope','$rootScope','$location','$route','$routeParams','datastoreFactory', function($scope,$rootScope,$location,$route,$routeParams,datastoreFactory) {
-      $scope.page = 1
-      console.log('$location.path()', $location.path())
+      $scope.data={}
+      $location.replace();
+
       if ($location.path() == '/'){
         $scope.path = '/iplant/home/shared/'
-        // $scope.path = '/iplant/home/shared/data_commons/curated/Duitama_rice_variation_2015'
         $location.path('browse' + $scope.path);
       } else {
         $scope.path = $location.path()
       }
 
       $scope.browse = function(path){
+        // var fullPath = $location.path().split('/');
+        // // console.log('fullPath ', fullPath);
+        // var trail = fullPath.slice(0, 4);
+        // trail = trail.join('/');
+        // // console.log('trail ', trail);
+        // fullPath = fullPath.splice(4);
+        // // console.log('fullPath', fullPath);
+        // $scope.data.breadcrumbs = fullPath.map(function(s, index){
+        //     return { 'name': s,
+        //               'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
+        //             };
+        // });
+        // console.log('breadcrumbs ', $scope.data.breadcrumbs);
+
         if (path.substring(0, 7) == "/browse") {
           var real_path=path.slice(7)
         } else {
@@ -31,26 +45,46 @@
         }
         console.log('path',path)
         console.log('real_path',real_path)
+
         datastoreFactory.browse(real_path).then(function(resp) {
           console.log('response', resp)
           $scope.data = resp.data
+          $scope.data.page = 1
 
           if ($scope.data.type == 'dir') {
-            for (var i=0; i <= $scope.data.collection.files.length; i++) {
+            for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
               $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
             }
           } else {
               $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
           }
+
+
+          var fullPath = real_path.split('/');
+          // console.log('fullPath ', fullPath);
+          var trail = fullPath.slice(0, 3);
+          trail = trail.join('/');
+          // console.log('trail ', trail);
+          fullPath = fullPath.splice(3);
+          // console.log('fullPath', fullPath);
+          $scope.data.breadcrumbs = fullPath.map(function(s, index){
+              return {  'name': s,
+                        'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
+                      };
+          });
+
+          $location.state(angular.copy($scope.data))
+          $location.path('browse' + real_path);
+          console.log('$scope.data', $scope.data)
+
         })
-        $location.path('browse' + real_path);
-        $scope.page = 1
       };
 
       $scope.load_more = function(path){
-        $scope.page++;
+        $scope.data.page++;
+        console.log('page', $scope.data.page)
 
-        datastoreFactory.browse(path, $scope.page).then(function(resp) {
+        datastoreFactory.browse(path, $scope.data.page).then(function(resp) {
           console.log('response', resp)
 
           if ($scope.data.type == 'dir') {
@@ -64,6 +98,7 @@
           $scope.data.collection.folders.push.apply($scope.data.collection.folders, resp.data.collection.folders);
           $scope.data.collection.files.push.apply($scope.data.collection.files, resp.data.collection.files);
           console.log('$scope.data', $scope.data)
+          $location.state(angular.copy($scope.data))
         })
       };
 
@@ -75,9 +110,13 @@
           return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
       }
 
-      $scope.$on('$locationChangeSuccess', function ($event, newUrl, newState, oldUrl, oldState) {
+      $scope.$on('$locationChangeSuccess', function ($event, newUrl, oldUrl, newState, oldState) {
         if (newUrl !== oldUrl) {
-          console.log('location change success', newUrl, oldUrl, newState, oldState)
+          // console.log('location change success')
+          // console.log('newUrl', newUrl)
+          // console.log('oldUrl', oldUrl)
+          // console.log('newState', newState)
+          // console.log('oldState', oldState)
           $scope.data = newState;
         }
       });

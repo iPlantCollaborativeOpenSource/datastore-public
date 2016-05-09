@@ -50,23 +50,29 @@ def home(request, path=''):
 
 
 def get_file_or_folder(request, path, page=1):
-    url = DE_HOST + 'terrain/secured/filesystem/stat'
-    payload = {'paths': [str(path)]}
+    cache_key = path + '_page_' + str(page)
+    cache_value = cache.get(cache_key)
+    logger.info('{} - cache value:{}'.format(cache_key, cache_value))
+    if not cache_value:
+        url = DE_HOST + 'terrain/secured/filesystem/stat'
+        payload = {'paths': [str(path)]}
 
-    de_response = send_request('POST', url=url, payload=payload)
+        de_response = send_request('POST', url=url, payload=payload)
 
-    data = de_response.json()['paths'][path]
-    metadata = get_metadata(request, data['id'])
+        data = de_response.json()['paths'][path]
+        metadata = get_metadata(request, data['id'])
 
-    collection = {}
-    if data['type'] == 'dir':
-        collection = get_collection(request, path, int(page))
+        collection = {}
+        if data['type'] == 'dir':
+            collection = get_collection(request, path, int(page))
 
-    response = data
-    response['metadata'] = metadata
-    response['collection'] = collection
+        cache_value = data
+        cache_value['metadata'] = metadata
+        cache_value['collection'] = collection
 
-    return JsonResponse(response)
+        cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+
+    return JsonResponse(cache_value)
 
 def get_file(request, path):
     if not 'djng_url_kwarg_path' in request.GET:
@@ -83,7 +89,7 @@ def get_file(request, path):
     params={'path': path}
     # import pdb; pdb.set_trace()
     de_response = send_request('GET', url=url, params=params)
-    import pdb; pdb.set_trace()
+
     logger.info('DE DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
 
 
@@ -207,11 +213,11 @@ def get_collection(request, path, page=1):
 
     collection = send_request('GET', url=url, params=params).json()
 
-    logger.info('URL: {}'.format(url))
-    logger.info('DE PAGING DIRECTORY RESPONSE: {0}'.format(collection))
+    # logger.info('URL: {}'.format(url))
+    # logger.info('DE PAGING DIRECTORY RESPONSE: {0}'.format(collection))
     # logger.info('DE PAGING DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(collection.status_code, collection.reason, collection.json()))
 
-    metadata=get_metadata(request, collection['id'])
+    # metadata=get_metadata(request, collection['id'])
 
     if collection['total'] > PER_PAGE*page:
         collection['more_data'] = True
@@ -510,7 +516,7 @@ def send_request(http_method, url=None, params=None, payload=None):
 
     # logger.info('url: {0}'.format(url))
     # logger.info('params: {0}'.format(params))
-    logger.info('jwt: {0}'.format(encoded_jwt))
+    # logger.info('jwt: {0}'.format(encoded_jwt))
 
     if payload:
         headers['Content-Type'] = 'application/json'
@@ -527,5 +533,5 @@ def send_request(http_method, url=None, params=None, payload=None):
 
     # if response.status_code == 200:
     #     print response.json()
-    logger.info('response time: {}'.format(response.elapsed))
+    logger.info('{} - response time: {}'.format(url, response.elapsed))
     return response
