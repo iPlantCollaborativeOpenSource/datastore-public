@@ -1,8 +1,10 @@
 <div class="main-container container">
   <div class="content" ng-controller="DatastoreCtrl">
     <div id="breadcrumbs">
-      <ul ng-repeat="crumb in data.breadcrumbs">
-        <a ng-click="browse(crumb.path)">{{crumb.name}}</a>
+      <ul class="clearfix">
+        <li ng-repeat="crumb in data.breadcrumbs">
+          <a ng-click="browse(crumb.path)">{{crumb.name}}</a>
+        </li>
       </ul>
     </div>
     <!-- <div id="file-scroller"> -->
@@ -20,14 +22,14 @@
               <dt>{{meta.value}}</dt>
             </li>
         </ul>
-        <ul ng-if="data.type == 'dir'">
+        <ul class="clearfix node-list" ng-if="data.type == 'dir'">
           <!-- <div ng-if="folders"> -->
-            <li class="dir node-list" ng-repeat="folder in data.collection.folders">
-              <a ng-click="browse(folder.path)" ><span class="glyphicon glyphicon-folder-close"></span> {{ folder.label }}</a>
+            <li class="dir" ng-repeat="folder in data.collection.folders">
+              <a ng-click="browse(folder.path)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
             </li>
           <!-- </div> -->
           <!-- <div ng-if="files"> -->
-            <li class="node-list" ng-repeat="file in data.collection.files">
+            <li class="file" ng-repeat="file in data.collection.files">
               <a ng-click="browse(file.path)">{{ file.label }} ({{file['file-size']}})</a>
             </li>
           <!-- </div> -->
