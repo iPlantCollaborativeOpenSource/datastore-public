@@ -22,10 +22,10 @@
               <dt>{{meta.value}}</dt>
             </li>
         </ul>
-        <ul class="clearfix node-list" ng-if="data.type == 'dir'">
+        <ul class="clearfix node-list" ng-if="data.collection.id">
           <!-- <div ng-if="folders"> -->
             <li class="dir" ng-repeat="folder in data.collection.folders">
-              <a ng-click="browse(folder.path)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
+              <a ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
             </li>
           <!-- </div> -->
           <!-- <div ng-if="files"> -->
@@ -45,7 +45,7 @@
 
         </div>
 
-        <a id="load_more" class="btn btn-default file-info-button" ng-if="data.collection.more_data" ng-click="load_more(data.path)">
+        <a id="load_more" class="btn btn-default file-info-button" ng-if="data.collection.more_data" ng-click="load_more(data.collection.path)">
           Load More
         </a>
       </div>

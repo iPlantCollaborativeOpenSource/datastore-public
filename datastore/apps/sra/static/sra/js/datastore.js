@@ -23,7 +23,7 @@
         $scope.path = $location.path()
       }
 
-      $scope.browse = function(path){
+      $scope.browse = function(path, id = ''){
         // var fullPath = $location.path().split('/');
         // // console.log('fullPath ', fullPath);
         // var trail = fullPath.slice(0, 4);
@@ -46,45 +46,82 @@
         console.log('path',path)
         console.log('real_path',real_path)
 
-        datastoreFactory.browse(real_path).then(function(resp) {
-          console.log('response', resp)
-          $scope.data = resp.data
-          $scope.data.page = 1
+        if (id){
+          datastoreFactory.get_collection(real_path, id).then(function(resp) {
+            console.log('response', resp)
+            $scope.data = resp.data
+            $scope.data.page = 1
 
-          if ($scope.data.type == 'dir') {
-            for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
-              $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+            if ($scope.data.type == 'dir') {
+              for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
+                $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+              }
+            } else {
+                $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
             }
-          } else {
-              $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
-          }
 
 
-          var fullPath = real_path.split('/');
-          // console.log('fullPath ', fullPath);
-          var trail = fullPath.slice(0, 3);
-          trail = trail.join('/');
-          // console.log('trail ', trail);
-          fullPath = fullPath.splice(3);
-          // console.log('fullPath', fullPath);
-          $scope.data.breadcrumbs = fullPath.map(function(s, index){
-              return {  'name': s,
-                        'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
-                      };
-          });
+            var fullPath = real_path.split('/');
+            // console.log('fullPath ', fullPath);
+            var trail = fullPath.slice(0, 3);
+            trail = trail.join('/');
+            // console.log('trail ', trail);
+            fullPath = fullPath.splice(3);
+            // console.log('fullPath', fullPath);
+            $scope.data.breadcrumbs = fullPath.map(function(s, index){
+                return {  'name': s,
+                          'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
+                        };
+            });
 
-          $location.state(angular.copy($scope.data))
-          $location.path('browse' + real_path);
-          console.log('$scope.data', $scope.data)
+            $location.state(angular.copy($scope.data))
+            $location.path('browse' + real_path);
+            console.log('$scope.data', $scope.data)
 
-        })
+          })
+
+        } else {
+
+          datastoreFactory.browse(real_path).then(function(resp) {
+            console.log('response', resp)
+            $scope.data = resp.data
+            $scope.data.page = 1
+
+            if ($scope.data.type == 'dir') {
+              for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
+                $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+              }
+            } else {
+                $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
+            }
+
+
+            var fullPath = real_path.split('/');
+            // console.log('fullPath ', fullPath);
+            var trail = fullPath.slice(0, 3);
+            trail = trail.join('/');
+            // console.log('trail ', trail);
+            fullPath = fullPath.splice(3);
+            // console.log('fullPath', fullPath);
+            $scope.data.breadcrumbs = fullPath.map(function(s, index){
+                return {  'name': s,
+                          'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
+                        };
+            });
+
+            $location.state(angular.copy($scope.data))
+            $location.path('browse' + real_path);
+            console.log('$scope.data', $scope.data)
+
+          })
+        }
       };
 
       $scope.load_more = function(path){
         $scope.data.page++;
         console.log('page', $scope.data.page)
 
-        datastoreFactory.browse(path, $scope.data.page).then(function(resp) {
+        datastoreFactory.load_more(path, $scope.data.page).then(function(resp) {
           console.log('response', resp)
 
           if ($scope.data.type == 'dir') {
@@ -126,14 +163,18 @@
   angular.module('Datastore').factory('datastoreFactory', ['$http', 'djangoUrl', function($http, djangoUrl) {
     var service = {};
 
-    service.browse = function(path, page=1) {
-      return $http.get(djangoUrl.reverse('browse', {'path': path, 'page': page}));
+    service.browse = function(path) {
+      return $http.get(djangoUrl.reverse('browse', {'path': path}));
     };
 
-    // service.get_collection = function(path) {
-    //   // console.log('path', path)
-    //   return $http.get(djangoUrl.reverse('get_collection', {'path': path}));
-    // };
+    service.get_collection = function(path, id='') {
+      // console.log('path', path)
+      return $http.get(djangoUrl.reverse('get_collection', {'path': path, 'id': id}));
+    };
+
+    service.load_more = function(path, page=1) {
+      return $http.get(djangoUrl.reverse('load_more', {'path': path, 'page': page}));
+    };
 
     // service.get_file = function(path) {
     //   console.log('path', path)

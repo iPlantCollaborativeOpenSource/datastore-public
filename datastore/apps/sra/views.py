@@ -59,6 +59,10 @@ def get_file_or_folder(request, path, page=1):
 
         de_response = send_request('POST', url=url, payload=payload)
 
+        if de_response.status_code != 200:
+            return de_response.raw
+            return HttpResponse(de_response.reason, status_code=de_response.status_code)
+
         data = de_response.json()['paths'][path]
         metadata = get_metadata(request, data['id'])
 
@@ -191,41 +195,59 @@ def get_metadata(request, id):
 
     return metadata
 
-def get_collection(request, path, page=1):
-    PER_PAGE = 200
-    # logger.info('get_collection request: {}'.format(request.GET))
-    # if not 'djng_url_kwarg_path' in request.GET:
-    #     return HttpResponseBadRequest()
+def get_collection(request, path, page=1, id=None):
+    if id:
+        cache_key = 'collection_and_meta_' + path + '_page_' + str(page)
+    else: #need cache with metadata
+        cache_key = 'collection_' + path + '_page_' + str(page)
+    collection = cache.get(cache_key)
+    logger.info('cache_key: {} ---- cache_value: {}'.format(cache_key, collection))
+    if not collection:
+        PER_PAGE = 200
+        # logger.info('get_collection request: {}'.format(request.GET))
+        # if not 'djng_url_kwarg_path' in request.GET:
+        #     return HttpResponseBadRequest()
 
-    # path = _check_path(request.GET['path'])
-    # page = int(request.GET.get('page', 1))
+        # path = _check_path(request.GET['path'])
+        # page = int(request.GET.get('page', 1))
+        page=int(page)
+        offset = PER_PAGE * (page - 1)
 
-    offset = PER_PAGE * (page - 1)
+        url= DE_HOST + 'terrain/secured/filesystem/paged-directory'
+        params={
+            'path': path,
+            'limit': PER_PAGE,
+            'offset': offset,
+            'sort-col': 'name',
+            'sort-dir': 'ASC'
+            }
 
-    url= DE_HOST + 'terrain/secured/filesystem/paged-directory'
-    params={
-        'path': path,
-        'limit': PER_PAGE,
-        'offset': offset,
-        'sort-col': 'name',
-        'sort-dir': 'ASC'
-        }
+        collection = send_request('GET', url=url, params=params).json()
 
-    collection = send_request('GET', url=url, params=params).json()
+        # logger.info('URL: {}'.format(url))
+        # logger.info('DE PAGING DIRECTORY RESPONSE: {0}'.format(collection))
+        # logger.info('DE PAGING DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(collection.status_code, collection.reason, collection.json()))
+        metadata={}
 
-    # logger.info('URL: {}'.format(url))
-    # logger.info('DE PAGING DIRECTORY RESPONSE: {0}'.format(collection))
-    # logger.info('DE PAGING DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(collection.status_code, collection.reason, collection.json()))
+        if id:
+            metadata=get_metadata(request, id)
 
-    # metadata=get_metadata(request, collection['id'])
+        if collection['total'] > PER_PAGE*page:
+            collection['more_data'] = True
+        else:
+            collection['more_data'] = False
 
-    if collection['total'] > PER_PAGE*page:
-        collection['more_data'] = True
+        if 'djng_url_kwarg_id' in request.GET or 'djng_url_kwarg_page' in request.GET: #this function was called by get_file_or_folder
+            cache_value = {'collection': collection, 'metadata': metadata}
+            cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+            return JsonResponse(cache_value)
+
+        cache.set(cache_key, collection, CACHE_EXPIRATION)
+
+    if 'djng_url_kwarg_id' in request.GET or 'djng_url_kwarg_page' in request.GET: #this function was called by get_file_or_folder
+        return JsonResponse(collection)
     else:
-        collection['more_data'] = False
-
-    return collection
-    return JsonResponse({'collection': collection, 'metadata': metadata})
+        return collection
 #  wont run right now
     try:
         cache_key = path + '_page_' + str(page)
