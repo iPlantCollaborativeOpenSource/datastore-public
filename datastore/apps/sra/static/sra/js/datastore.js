@@ -109,6 +109,10 @@
                         };
             });
 
+            if ($scope.data.type == 'file') {
+              $scope.data.breadcrumbs[$scope.data.breadcrumbs.length-1]['type'] = 'file'
+            }
+
             $location.state(angular.copy($scope.data))
             $location.path('browse' + real_path);
             console.log('$scope.data', $scope.data)

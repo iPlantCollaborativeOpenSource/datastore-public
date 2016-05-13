@@ -2,8 +2,8 @@
   <div class="content" ng-controller="DatastoreCtrl">
     <div id="breadcrumbs">
       <ul class="clearfix">
-        <li ng-repeat="crumb in data.breadcrumbs">
-          <a ng-click="browse(crumb.path)">{{crumb.name}}</a>
+        <li ng-class="{'file': crumb.type == 'file'}" ng-repeat="crumb in data.breadcrumbs">
+          <a href="/browse{{crumb.path}}" ng-click="browse(crumb.path)">{{crumb.name}}</a>
         </li>
       </ul>
     </div>
@@ -25,7 +25,7 @@
         <ul class="clearfix node-list" ng-if="data.collection.id">
           <!-- <div ng-if="folders"> -->
             <li class="dir" ng-repeat="folder in data.collection.folders">
-              <a ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
+              <a href="/browse{{folder.path" ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
             </li>
           <!-- </div> -->
           <!-- <div ng-if="files"> -->
