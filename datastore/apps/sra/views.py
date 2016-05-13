@@ -523,7 +523,7 @@ def create_jwt_token():
     from cryptography.hazmat.primitives.serialization import load_pem_private_key
     from cryptography.hazmat.backends import default_backend
 
-    key = load_pem_private_key(shared_key, 'mirrors', default_backend())
+    key = load_pem_private_key(shared_key, sra_settings.PASSPHRASE, default_backend())
 
     # jwt_string = jwt.encode(payload, shared_key, algorithm='RS256')
     jwt_string = jwt.encode(payload, key, algorithm='RS256')

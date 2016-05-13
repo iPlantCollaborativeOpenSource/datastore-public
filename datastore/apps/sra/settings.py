@@ -15,3 +15,6 @@ logging.getLogger(__name__).debug(irods)
 datastore = {
     'metadata_prefix': os.getenv('METADATA_PREFIX', 'ipc_template'),
 }
+
+#DE API JWWT
+PASSPHRASE=os.getenv('PASSPHRASE')
