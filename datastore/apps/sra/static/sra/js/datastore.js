@@ -59,14 +59,13 @@
               $scope.data = resp.data
               $scope.data.page = 1
 
-              if ($scope.data.type == 'dir') {
+              // if ($scope.data.type == 'dir') {
                 for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
                   $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
                 }
-              } else {
-                  $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
-              }
-
+              // } else {
+              //     $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
+              // }
 
               var fullPath = real_path.replace(/\/$/, "").split('/'); //remove trailing slash then split
               // console.log('fullPath ', fullPath);
@@ -205,17 +204,6 @@
 
       };
 
-      $scope.preview = function(item){
-        if (item.isPreviewable()){
-            $scope.temp = item;
-            return item.preview()//.catch(
-            //     function(data){
-            //         item.error = $translate.instant('error_invalid_filename');
-            //     }
-            // );
-        }
-      };
-
   }]);
 
   angular.module('Datastore').factory('datastoreFactory', ['$http', 'djangoUrl', function($http, djangoUrl) {
@@ -269,6 +257,17 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    };
+
+    $scope.preview = function(item){
+      if (item.isPreviewable()){
+          $scope.temp = item;
+          return item.preview()//.catch(
+          //     function(data){
+          //         item.error = $translate.instant('error_invalid_filename');
+          //     }
+          // );
+      }
     };
 
     // $scope.selected = {
