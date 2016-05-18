@@ -1,4 +1,4 @@
-  (function(window, angular) {
+  (function(window, angular, $) {
   "use strict";
 
   function config($routeProvider, $locationProvider, $interpolateProvider, $httpProvider) {
@@ -9,10 +9,10 @@
     $locationProvider.html5Mode(true);
   }
 
-  var app = angular.module('Datastore', ['ngRoute', 'ng.django.urls', 'logging']).config(['$routeProvider', '$locationProvider', '$interpolateProvider', '$httpProvider', config]);
+  var app = angular.module('Datastore', ['ngRoute', 'ng.django.urls', 'ui.bootstrap','logging']).config(['$routeProvider', '$locationProvider', '$interpolateProvider', '$httpProvider', config]);
 
 
-  angular.module('Datastore').controller('DatastoreCtrl', ['$scope','$rootScope','$location','$route','$routeParams','datastoreFactory', function($scope,$rootScope,$location,$route,$routeParams,datastoreFactory) {
+  angular.module('Datastore').controller('DatastoreCtrl', ['$scope','$rootScope','$location','$route','$routeParams','$uibModal', 'datastoreFactory', function($scope,$rootScope,$location,$route,$routeParams, $uibModal,datastoreFactory) {
       $scope.data={}
       $location.replace();
 
@@ -21,6 +21,12 @@
         $location.path('browse' + $scope.path);
       } else {
         $scope.path = $location.path()
+      }
+
+      if ($scope.path.substring(0, 7) == "/browse") {
+        $scope.real_path=$scope.path.slice(7)
+      } else {
+        $scope.real_path = $scope.path
       }
 
       $scope.browse = function(path, id = ''){
@@ -47,77 +53,87 @@
         console.log('real_path',real_path)
 
         if (id){
-          datastoreFactory.get_collection(real_path, id).then(function(resp) {
-            console.log('response', resp)
-            $scope.data = resp.data
-            $scope.data.page = 1
+          datastoreFactory.get_collection(real_path, id).then(
+            function(resp) {
+              console.log('response', resp)
+              $scope.data = resp.data
+              $scope.data.page = 1
 
-            if ($scope.data.type == 'dir') {
-              for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
-                $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+              if ($scope.data.type == 'dir') {
+                for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
+                  $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+                }
+              } else {
+                  $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
               }
-            } else {
-                $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
+
+
+              var fullPath = real_path.replace(/\/$/, "").split('/'); //remove trailing slash then split
+              // console.log('fullPath ', fullPath);
+              var trail = fullPath.slice(0, 3);
+              trail = trail.join('/');
+              // console.log('trail ', trail);
+              fullPath = fullPath.splice(3);
+              // console.log('fullPath', fullPath);
+              $scope.data.breadcrumbs = fullPath.map(function(s, index){
+                  return {  'name': s,
+                            'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
+                          };
+              });
+
+              $location.state(angular.copy($scope.data))
+              $location.path('browse' + real_path);
+              console.log('$scope.data', $scope.data)
+            },
+            function(data) {
+              console.log('data', data)
+              $scope.data.msg = data.data
             }
-
-
-            var fullPath = real_path.split('/');
-            // console.log('fullPath ', fullPath);
-            var trail = fullPath.slice(0, 3);
-            trail = trail.join('/');
-            // console.log('trail ', trail);
-            fullPath = fullPath.splice(3);
-            // console.log('fullPath', fullPath);
-            $scope.data.breadcrumbs = fullPath.map(function(s, index){
-                return {  'name': s,
-                          'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
-                        };
-            });
-
-            $location.state(angular.copy($scope.data))
-            $location.path('browse' + real_path);
-            console.log('$scope.data', $scope.data)
-
-          })
-
+          )
         } else {
 
-          datastoreFactory.browse(real_path).then(function(resp) {
-            console.log('response', resp)
-            $scope.data = resp.data
-            $scope.data.page = 1
+          datastoreFactory.browse(real_path).then(
+            function(resp) {
+              console.log('response', resp)
+              $scope.data = resp.data
+              $scope.data.page = 1
 
-            if ($scope.data.type == 'dir') {
-              for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
-                $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+              if ($scope.data.type == 'dir') {
+                for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
+                  $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+                }
+              } else {
+                  $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
               }
-            } else {
-                $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
+
+
+              var fullPath = real_path.replace(/\/$/, "").split('/'); //remove trailing slash then split
+              // console.log('fullPath ', fullPath);
+              var trail = fullPath.slice(0, 3);
+              trail = trail.join('/');
+              // console.log('trail ', trail);
+              fullPath = fullPath.splice(3);
+              // console.log('fullPath', fullPath);
+              $scope.data.breadcrumbs = fullPath.map(function(s, index){
+                  return {  'name': s,
+                            'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
+                          };
+              });
+
+              if ($scope.data.type == 'file') {
+                $scope.data.breadcrumbs[$scope.data.breadcrumbs.length-1]['type'] = 'file'
+              }
+
+              $location.state(angular.copy($scope.data))
+              $location.path('browse' + real_path);
+              console.log('$scope.data', $scope.data)
+
+            },
+            function(data) {
+              console.log('data', data)
+              $scope.data.msg = data.data
             }
-
-
-            var fullPath = real_path.split('/');
-            // console.log('fullPath ', fullPath);
-            var trail = fullPath.slice(0, 3);
-            trail = trail.join('/');
-            // console.log('trail ', trail);
-            fullPath = fullPath.splice(3);
-            // console.log('fullPath', fullPath);
-            $scope.data.breadcrumbs = fullPath.map(function(s, index){
-                return {  'name': s,
-                          'path': trail + '/' + fullPath.slice(0, index + 1).join('/')
-                        };
-            });
-
-            if ($scope.data.type == 'file') {
-              $scope.data.breadcrumbs[$scope.data.breadcrumbs.length-1]['type'] = 'file'
-            }
-
-            $location.state(angular.copy($scope.data))
-            $location.path('browse' + real_path);
-            console.log('$scope.data', $scope.data)
-
-          })
+          )
         }
       };
 
@@ -125,22 +141,28 @@
         $scope.data.page++;
         console.log('page', $scope.data.page)
 
-        datastoreFactory.load_more(path, $scope.data.page).then(function(resp) {
-          console.log('response', resp)
+        datastoreFactory.load_more(path, $scope.data.page).then(
+          function(resp) {
+            console.log('response', resp)
 
-          if ($scope.data.type == 'dir') {
-            for (var i=0; i <= resp.data.collection.files.length - 1 ; i++) {
-              resp.data.collection.files[i]['file-size'] = $scope.bytes_to_human(resp.data.collection.files[i]['file-size'])
+            if ($scope.data.type == 'dir') {
+              for (var i=0; i <= resp.data.collection.files.length - 1 ; i++) {
+                resp.data.collection.files[i]['file-size'] = $scope.bytes_to_human(resp.data.collection.files[i]['file-size'])
+              }
+            } else {
+                $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
             }
-          } else {
-              $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
+            $scope.data.collection.more_data = resp.data.collection.more_data
+            $scope.data.collection.folders.push.apply($scope.data.collection.folders, resp.data.collection.folders);
+            $scope.data.collection.files.push.apply($scope.data.collection.files, resp.data.collection.files);
+            console.log('$scope.data', $scope.data)
+            $location.state(angular.copy($scope.data))
+          },
+          function(data) {
+            console.log('data', data)
+            $scope.data.msg = data.data
           }
-          $scope.data.collection.more_data = resp.data.collection.more_data
-          $scope.data.collection.folders.push.apply($scope.data.collection.folders, resp.data.collection.folders);
-          $scope.data.collection.files.push.apply($scope.data.collection.files, resp.data.collection.files);
-          console.log('$scope.data', $scope.data)
-          $location.state(angular.copy($scope.data))
-        })
+        )
       };
 
       $scope.browse($scope.path);
@@ -162,6 +184,38 @@
         }
       });
 
+      $scope.modal = function(file_path, file_name) {
+            // $('#' + id).modal(hide ? 'hide' : 'show');
+            $scope.items = ['item1', 'item2', 'item3'];
+            $uibModal.open({
+              animation:$scope.animationsEnabled,
+              // templateUrl: '/static/sra/templates/preview_modal.html',
+              templateUrl: 'preview_modal.html',
+              controller: 'ModalInstanceCtrl',
+              size: 'lg',
+              resolve: {
+                file_path: function () {
+                  return file_path;
+                },
+                file_name: function () {
+                  return file_name;
+                },
+              }
+            })
+
+      };
+
+      $scope.preview = function(item){
+        if (item.isPreviewable()){
+            $scope.temp = item;
+            return item.preview()//.catch(
+            //     function(data){
+            //         item.error = $translate.instant('error_invalid_filename');
+            //     }
+            // );
+        }
+      };
+
   }]);
 
   angular.module('Datastore').factory('datastoreFactory', ['$http', 'djangoUrl', function($http, djangoUrl) {
@@ -180,6 +234,10 @@
       return $http.get(djangoUrl.reverse('load_more', {'path': path, 'page': page}));
     };
 
+    // service.download = function(path) {
+    //   return $http.get(djangoUrl.reverse('download', {'path': path}));
+    // };
+
     // service.get_file = function(path) {
     //   console.log('path', path)
     //   return $http.get(djangoUrl.reverse('get_file', {'path': path}));
@@ -191,6 +249,40 @@
 
     return service;
   }]);
+
+  angular.module('Datastore').controller('ModalInstanceCtrl', function ($http, djangoUrl, $scope, $uibModalInstance, file_path, file_name) {
+    $scope.data = {}
+    $scope.data.file_path = file_path
+    $scope.data.file_name = file_name
+    console.log('ModalInstanceCtrl scope', $scope)
+
+    $scope.download = function(path){
+      $uibModalInstance.close();
+      // return $http.get(djangoUrl.reverse('download', {'path': path}));
+
+      var url = 'download'+ path //djangoUrl.reverse('download', {'path': path})
+      var link = document.createElement('a');
+      link.setAttribute('download', $scope.data.file_name);
+      link.setAttribute('href', url);
+      link.setAttribute('target', '_self');
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    // $scope.selected = {
+    //   item: $scope.items[0]
+    // };
+
+    // $scope.ok = function () {
+    //   $uibModalInstance.close($scope.selected.item);
+    // };
+
+    // $scope.cancel = function () {
+    //   $uibModalInstance.dismiss('cancel');
+    // };
+  });
 
   // angular.module('ds.notifications', ['logging', 'toastr']).config(config);
 
@@ -254,7 +346,7 @@
   // angular.module('Datastore')
   // .provider('NotificationService', NotificationServiceProvider);
 
-})(window, angular);
+})(window, angular, jQuery);
 
 
 // -------- OLD STUFF ---------

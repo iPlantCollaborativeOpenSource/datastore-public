@@ -60,8 +60,8 @@ def get_file_or_folder(request, path, page=1):
         de_response = send_request('POST', url=url, payload=payload)
 
         if de_response.status_code != 200:
-            return de_response.raw
-            return HttpResponse(de_response.reason, status_code=de_response.status_code)
+            # return de_response.raw
+            return HttpResponse(de_response.reason + ' -- ' + de_response.content, status=de_response.status_code)
 
         data = de_response.json()['paths'][path]
         metadata = get_metadata(request, data['id'])
@@ -222,7 +222,12 @@ def get_collection(request, path, page=1, id=None):
             'sort-dir': 'ASC'
             }
 
-        collection = send_request('GET', url=url, params=params).json()
+        de_response = send_request('GET', url=url, params=params)
+
+        if de_response.status_code != 200:
+            return HttpResponse(de_response.reason + ' -- ' + de_response.content, status=de_response.status_code)
+
+        collection = de_response.json()
 
         # logger.info('URL: {}'.format(url))
         # logger.info('DE PAGING DIRECTORY RESPONSE: {0}'.format(collection))
@@ -323,12 +328,16 @@ def serve_file(request, path=''):
 
 
 def download_file(request, path=''):
-    path = _check_path(path)
+    # path = _check_path(path)
 
     url= DE_HOST + 'terrain/secured/fileio/download'
     params={'path': path}
 
     de_response = send_request('GET', url=url, params=params)
+
+    if de_response.status_code != 200:
+        # return de_response.raw
+        return HttpResponse(de_response.reason, status=de_response.status_code)
 
     response = StreamingHttpResponse(de_response.content, content_type=de_response.headers['Content-Type'])
     # response['Content-Length'] = de_response.headers

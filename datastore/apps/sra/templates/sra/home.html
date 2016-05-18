@@ -12,10 +12,14 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="{%static 'vendor/angular/angular.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'djangular/js/django-angular.js' %}"></script>
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.js"></script>
-<script data-main="{% static 'sra/js/main.js' %}" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+<script type="text/javascript" src="{% static 'vendor/angular-bootstrap/ui-bootstrap-tpls.js' %}"></script>
+<!-- <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.1.js"></script> -->
+<!-- <script data-main="{% static 'sra/js/main.js' %}" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script> -->
 <script src="{%static 'sra/js/datastore.js' %}"></script>
 <script type="text/javascript">
   var root = "{{ root }}";

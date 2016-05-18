@@ -1,15 +1,44 @@
 <div class="main-container container">
   <div class="content" ng-controller="DatastoreCtrl">
+  {{data.msg}}
     <div id="breadcrumbs">
       <ul class="clearfix">
         <li ng-class="{'file': crumb.type == 'file'}" ng-repeat="crumb in data.breadcrumbs">
-          <a href="/browse{{crumb.path}}" ng-click="browse(crumb.path)">{{crumb.name}}</a>
+          <a ng-href="/browse{{crumb.path}}" ng-click="browse(crumb.path)">{{crumb.name}}</a>
         </li>
       </ul>
     </div>
     <!-- <div id="file-scroller"> -->
     <div id="file-scroller">
       <div id="file-scroller-inner" class="clearfix">
+
+
+
+
+      <script type="text/ng-template" id="preview_modal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">I'm a modal!</h3>
+        </div>
+        <div class="modal-body">
+            <ul>
+                <li ng-repeat="item in items">
+                    <a ng-href="#" ng-click="$event.preventDefault(); selected.item = item">{{ item }}</a>
+                </li>
+            </ul>
+            Selected: <b>{{ selected.item }}</b>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        </div>
+        <button type="button" class="btn btn-default" ng-click="download(data.file_path)">Download</button>
+        <!-- <a ng-href="/download{{data.file_path}}" class="btn btn-default" download>Download</a> -->
+      </script>
+
+
+
+
+
 
 
         <ul>
@@ -25,12 +54,12 @@
         <ul class="clearfix node-list" ng-if="data.collection.id">
           <!-- <div ng-if="folders"> -->
             <li class="dir" ng-repeat="folder in data.collection.folders">
-              <a href="/browse{{folder.path}}" ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
+              <a ng-href="/browse{{folder.path}}" ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
             </li>
           <!-- </div> -->
           <!-- <div ng-if="files"> -->
             <li class="file" ng-repeat="file in data.collection.files">
-              <a ng-click="browse(file.path)">{{ file.label }} ({{file['file-size']}})</a>
+              <a ng-click="modal(file.path, file.label)">{{ file.label }} ({{file['file-size']}})</a>
             </li>
           <!-- </div> -->
         </ul>
