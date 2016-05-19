@@ -61,7 +61,7 @@
 
               // if ($scope.data.type == 'dir') {
                 for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
-                  $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+                  $scope.data.collection.files[i]['file-size'] = datastoreFactory.bytes_to_human($scope.data.collection.files[i]['file-size'])
                 }
               // } else {
               //     $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
@@ -99,10 +99,10 @@
 
               if ($scope.data.type == 'dir') {
                 for (var i=0; i <= $scope.data.collection.files.length - 1; i++) {
-                  $scope.data.collection.files[i]['file-size'] = $scope.bytes_to_human($scope.data.collection.files[i]['file-size'])
+                  $scope.data.collection.files[i]['file-size'] = datastoreFactory.bytes_to_human($scope.data.collection.files[i]['file-size'])
                 }
               } else {
-                  $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
+                  $scope.data['file-size'] = datastoreFactory.bytes_to_human($scope.data['file-size'])
               }
 
 
@@ -146,10 +146,10 @@
 
             if ($scope.data.type == 'dir') {
               for (var i=0; i <= resp.data.collection.files.length - 1 ; i++) {
-                resp.data.collection.files[i]['file-size'] = $scope.bytes_to_human(resp.data.collection.files[i]['file-size'])
+                resp.data.collection.files[i]['file-size'] = datastoreFactory.bytes_to_human(resp.data.collection.files[i]['file-size'])
               }
             } else {
-                $scope.data['file-size'] = $scope.bytes_to_human($scope.data['file-size'])
+                $scope.data['file-size'] = datastoreFactory.bytes_to_human($scope.data['file-size'])
             }
             $scope.data.collection.more_data = resp.data.collection.more_data
             $scope.data.collection.folders.push.apply($scope.data.collection.folders, resp.data.collection.folders);
@@ -166,11 +166,11 @@
 
       $scope.browse($scope.path);
 
-      $scope.bytes_to_human = function(bytes) {
-          var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-          var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-          return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-      }
+      // $scope.bytes_to_human = function(bytes) {
+      //     var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      //     var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+      //     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+      // }
 
       $scope.$on('$locationChangeSuccess', function ($event, newUrl, oldUrl, newState, oldState) {
         if (newUrl !== oldUrl) {
@@ -185,23 +185,70 @@
 
       $scope.modal = function(file_path, file_name) {
             // $('#' + id).modal(hide ? 'hide' : 'show');
-            $scope.items = ['item1', 'item2', 'item3'];
-            $uibModal.open({
-              animation:$scope.animationsEnabled,
-              // templateUrl: '/static/sra/templates/preview_modal.html',
-              templateUrl: 'preview_modal.html',
-              controller: 'ModalInstanceCtrl',
-              size: 'lg',
-              resolve: {
-                file_path: function () {
-                  return file_path;
-                },
-                file_name: function () {
-                  return file_name;
-                },
-              }
-            })
 
+            datastoreFactory.browse(file_path).then(
+              function(resp) {
+                console.log('modal response', resp)
+                var data = resp.data
+                data['file-size'] = datastoreFactory.bytes_to_human(data['file-size'])
+
+                var date = new Date($scope.data['date-created'])
+                data['date-created'] = date.toDateString()
+
+                date = new Date($scope.data['date-modified'])
+                data['date-modified'] = date.toDateString()
+                console.log('modal scope', $scope)
+
+                // if ($scope.data['content-type'] == 'text/plain'){
+
+                // }
+
+                $uibModal.open({
+                  animation:$scope.animationsEnabled,
+                  // templateUrl: '/static/sra/templates/preview_modal.html',
+                  templateUrl: 'preview_modal.html',
+                  controller: 'ModalInstanceCtrl',
+                  size: 'lg',
+                  resolve: {
+                    file_path: function () {
+                      return file_path;
+                    },
+                    file_name: function () {
+                      return file_name;
+                    },
+                    data: function () {
+                      return data;
+                    },
+                  }
+                })
+
+              },
+              function(data) {
+                console.log('data', data)
+                $scope.data.msg = data.data
+              }
+
+
+
+              // $uibModal.open({
+              //   animation:$scope.animationsEnabled,
+              //   // templateUrl: '/static/sra/templates/preview_modal.html',
+              //   templateUrl: 'preview_modal.html',
+              //   controller: 'ModalInstanceCtrl',
+              //   size: 'lg',
+              //   resolve: {
+              //     file_path: function () {
+              //       return file_path;
+              //     },
+              //     file_name: function () {
+              //       return file_name;
+              //     },
+              //     data: function () {
+              //       return $scope.data;
+              //     },
+              //   }
+              // })
+            )
       };
 
   }]);
@@ -222,6 +269,16 @@
       return $http.get(djangoUrl.reverse('load_more', {'path': path, 'page': page}));
     };
 
+    service.bytes_to_human = function(bytes) {
+          var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+          var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+          return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    };
+
+    service.serve_file = function(path) {
+      return $http.get(djangoUrl.reverse('serve', {'path': path}));
+    };
+
     // service.download = function(path) {
     //   return $http.get(djangoUrl.reverse('download', {'path': path}));
     // };
@@ -238,10 +295,11 @@
     return service;
   }]);
 
-  angular.module('Datastore').controller('ModalInstanceCtrl', function ($http, djangoUrl, $scope, $uibModalInstance, file_path, file_name) {
+  angular.module('Datastore').controller('ModalInstanceCtrl', ['$http', 'djangoUrl', '$uibModalInstance', 'file_path', 'file_name', 'data', '$scope', 'datastoreFactory', function ($http, djangoUrl, $uibModalInstance, file_path, file_name, data, $scope, datastoreFactory) {
     $scope.data = {}
-    $scope.data.file_path = file_path
-    $scope.data.file_name = file_name
+    $scope.data = data
+    $scope.file_path = file_path
+    $scope.file_name = file_name
     console.log('ModalInstanceCtrl scope', $scope)
 
     $scope.download = function(path){
@@ -250,7 +308,7 @@
 
       var url = 'download'+ path //djangoUrl.reverse('download', {'path': path})
       var link = document.createElement('a');
-      link.setAttribute('download', $scope.data.file_name);
+      link.setAttribute('download', $scope.file_name);
       link.setAttribute('href', url);
       link.setAttribute('target', '_self');
       link.style.display = 'none';
@@ -259,16 +317,58 @@
       document.body.removeChild(link);
     };
 
-    $scope.preview = function(item){
-      if (item.isPreviewable()){
-          $scope.temp = item;
-          return item.preview()//.catch(
-          //     function(data){
-          //         item.error = $translate.instant('error_invalid_filename');
-          //     }
-          // );
-      }
+    $scope.preview = function(path){
+      // if (item.isPreviewable()){
+      //     $scope.temp = item;
+      //     return item.preview()//.catch(
+      //     //     function(data){
+      //     //         item.error = $translate.instant('error_invalid_filename');
+      //     //     }
+      //     // );
+      // }
+
+      datastoreFactory.serve_file(path).then(
+        function(resp) {
+          console.log('response', resp)
+          $scope.data.file_preview = resp.data
+
+        },
+        function(data) {
+          console.log('data', data)
+          $scope.data.msg = data.data
+        }
+      )
+
     };
+
+    $scope.preview($scope.data.path)
+
+    // $scope.get_file = function(path, id = ''){
+    //   datastoreFactory.browse(path).then(
+    //     function(resp) {
+    //       console.log('modal response', resp)
+    //       $scope.data = resp.data
+    //       $scope.data['file-size'] = datastoreFactory.bytes_to_human($scope.data['file-size'])
+
+    //       var date = new Date($scope.data['date-created'])
+    //       $scope.data['date-created'] = date.toDateString()
+
+    //       date = new Date($scope.data['date-modified'])
+    //       $scope.data['date-modified'] = date.toDateString()
+    //       console.log('modal scope', $scope)
+
+    //       // if ($scope.data['content-type'] == 'text/plain'){
+
+    //       // }
+    //     },
+    //     function(data) {
+    //       console.log('data', data)
+    //       $scope.data.msg = data.data
+    //     }
+    //   )
+    // };
+
+    // $scope.get_file(file_path)
 
     // $scope.selected = {
     //   item: $scope.items[0]
@@ -281,7 +381,7 @@
     // $scope.cancel = function () {
     //   $uibModalInstance.dismiss('cancel');
     // };
-  });
+  }]);
 
   // angular.module('ds.notifications', ['logging', 'toastr']).config(config);
 

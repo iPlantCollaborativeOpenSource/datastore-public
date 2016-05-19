@@ -50,6 +50,8 @@ def home(request, path=''):
 
 
 def get_file_or_folder(request, path, page=1):
+    path =_check_path(path)
+
     cache_key = path + '_page_' + str(page)
     cache_value = cache.get(cache_key)
     logger.info('{} - cache value:{}'.format(cache_key, cache_value))
@@ -196,6 +198,8 @@ def get_metadata(request, id):
     return metadata
 
 def get_collection(request, path, page=1, id=None):
+    path =_check_path(path)
+
     if id:
         cache_key = 'collection_and_meta_' + path + '_page_' + str(page)
     else: #need cache with metadata
@@ -303,8 +307,26 @@ def get_collection(request, path, page=1, id=None):
 def serve_file(request, path=''):
     path =_check_path(path)
 
+    url= DE_HOST + 'terrain/secured/fileio/download'
+    params={
+        'path': path,
+        'chunk-size': 8000,
+        'start': 0
+        }
+
+    de_response = send_request('GET', url=url, params=params)
+
+    if de_response.status_code != 200:
+        # return de_response.raw
+        return HttpResponse(de_response.reason, status=de_response.status_code)
+
+    return HttpResponse(de_response.content)
+    # return StreamingHttpResponse(de_response.content)
+
+##############
     try:
-        obj = DataStoreSession.data_objects.get('/' + path)
+        obj = DataStoreSession.data_objects.get(path)
+        # obj = DataStoreSession.data_objects.get('/' + path)
     except DataObjectDoesNotExist:
         return HttpResponseNotFound()
 
@@ -328,7 +350,7 @@ def serve_file(request, path=''):
 
 
 def download_file(request, path=''):
-    # path = _check_path(path)
+    path = _check_path(path)
 
     url= DE_HOST + 'terrain/secured/fileio/download'
     params={'path': path}
@@ -545,9 +567,9 @@ def send_request(http_method, url=None, params=None, payload=None):
     encoded_jwt = create_jwt_token()
     headers = {'X-Iplant-De-Jwt': encoded_jwt}
 
-    # logger.info('url: {0}'.format(url))
+    logger.info('url: {0}'.format(url))
     # logger.info('params: {0}'.format(params))
-    # logger.info('jwt: {0}'.format(encoded_jwt))
+    logger.info('jwt: {0}'.format(encoded_jwt))
 
     if payload:
         headers['Content-Type'] = 'application/json'

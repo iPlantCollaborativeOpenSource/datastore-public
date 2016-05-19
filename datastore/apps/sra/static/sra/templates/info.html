@@ -17,21 +17,51 @@
 
       <script type="text/ng-template" id="preview_modal.html">
         <div class="modal-header">
-            <h3 class="modal-title">I'm a modal!</h3>
+            <h3 class="modal-title">{{file_name}}</h3>
         </div>
         <div class="modal-body">
+            <h4 ng-if="data.metadata.template || data.metadata.irods"> Metadata </h4>
             <ul>
-                <li ng-repeat="item in items">
-                    <a ng-href="#" ng-click="$event.preventDefault(); selected.item = item">{{ item }}</a>
+                <li class="list-group-item" ng-repeat="meta in data.metadata.template">
+                  <dd>{{meta.attr}}</dd>
+                  <dt>{{meta.value}}</dt>
+                </li>
+                <li class="list-group-item" ng-repeat="meta in data.metadata.irods">
+                  <dd>{{meta.attr}}</dd>
+                  <dt>{{meta.value}}</dt>
                 </li>
             </ul>
-            Selected: <b>{{ selected.item }}</b>
+            <h4>File information</h4>
+            <ul>
+              <li>
+                <dd>File Path</dd>
+                <dt>{{data.path}}</dt>
+              </li>
+              <li>
+                <dd>File Size</dd>
+                <dt>{{data['file-size']}}</dt>
+              </li>
+              <li>
+                <dd>Created</dd>
+                <dt>{{data['date-created']}}</dt>
+              </li>
+              <li>
+                <dd>Last Modified</dd>
+                <dt>{{data['date-modified']}}</dt>
+              </li>
+            </ul>
+
+            <div ng-if="data.file_preview">
+              <h4> File Preview </h4>
+              <p>Preview may truncate file. Download to view entire file.</p>
+              {{data.file_preview}}
+            </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
-            <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+            <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
+            <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
+            <button type="button" class="btn btn-default" ng-click="download(file_path)">Download</button>
         </div>
-        <button type="button" class="btn btn-default" ng-click="download(data.file_path)">Download</button>
         <!-- <a ng-href="/download{{data.file_path}}" class="btn btn-default" download>Download</a> -->
       </script>
 
