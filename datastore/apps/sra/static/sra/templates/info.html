@@ -154,3 +154,20 @@
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+window.recaptcha_callback = function recaptcha_callback(response) {
+    var d = new Date();
+    d.setTime(d.getTime() + (365*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = 'recaptcha_status=verified; ' + expires;
+
+    // $('#download_form').submit();
+    // $('#download_button').popover('hide');
+    var el = document.querySelector('.g-recaptcha'),
+    $el = angular.element(el),
+    $scope = $el.scope();
+    console.log('callback scope', $scope)
+    $scope.download($scope.file_path)
+}
+</script>

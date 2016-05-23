@@ -398,15 +398,15 @@
 
     $scope.recaptchaPopover = $sce.trustAsHtml('<form action="/download'+ $scope.data.path +'" method="GET" id="download_form"> <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX"><div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="$scope.recaptcha_callback"></div></form>');
 
-    $scope.recaptcha_callback = function recaptcha_callback(response) {
-        var d = new Date();
-        d.setTime(d.getTime() + (365*24*60*60*1000));
-        var expires = "expires="+d.toUTCString();
-        document.cookie = 'recaptcha_status=verified; ' + expires;
+    // $scope.recaptcha_callback = function recaptcha_callback(response) {
+    //     var d = new Date();
+    //     d.setTime(d.getTime() + (365*24*60*60*1000));
+    //     var expires = "expires="+d.toUTCString();
+    //     document.cookie = 'recaptcha_status=verified; ' + expires;
 
-        $('#download_form').submit();
-        $('#download_button').popover('hide');
-    }
+    //     $('#download_form').submit();
+    //     $('#download_button').popover('hide');
+    // }
 
     // $scope.get_file = function(path, id = ''){
     //   datastoreFactory.browse(path).then(
