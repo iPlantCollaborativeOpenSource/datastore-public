@@ -190,6 +190,9 @@
               function(resp) {
                 console.log('modal response', resp)
                 var data = resp.data
+                if (data['file-size'] < 20000000000) {
+                  data['downloadable'] = true
+                }
                 data['file-size'] = datastoreFactory.bytes_to_human(data['file-size'])
 
                 var date = new Date($scope.data['date-created'])
@@ -338,10 +341,43 @@
           $scope.data.msg = data.data
         }
       )
-
     };
 
-    $scope.preview($scope.data.path)
+    // $scope.isPreviewable = function(contentType){
+    //   if (contentType.substring(0, 4) == 'text') {
+    //     $scope.preview($scope.data.path)
+    //   }
+    // }
+    // $scope.isPreviewable($scope.data['content-type'])
+
+    $scope.isPreviewable = function(filename){
+      var BrushSources = {
+        'php': 'shBrushPhp',
+        'js': 'shBrushJScript',
+        'css': 'shBrushCss',
+        'py': 'shBrushPython',
+        'plain': 'shBrushPlain',
+        'fasta': 'shBrushFasta',
+        'eml': 'shBrushXml',
+        'xml': 'shBrushXml'
+      };
+
+      var ext = filename.split('.').pop();
+
+      if (ext in BrushSources || $scope.data['content-type'].substring(0, 4) == 'text'){
+        // try {
+        //   $scope.data.brush = BrushSources[ext]
+        // }
+        // catch(err) {
+        //   $scope.data.brush = 'shBrushPlain'
+        // }
+        $scope.data.brush = BrushSources[ext] || 'shBrushPlain'
+        $scope.preview($scope.data.path)
+        console.log('ModalInstanceCtrl scope after checking previewable', $scope)
+      }
+    }
+
+    $scope.isPreviewable($scope.data['label'])
 
     // $scope.get_file = function(path, id = ''){
     //   datastoreFactory.browse(path).then(

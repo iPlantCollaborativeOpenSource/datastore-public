@@ -20,7 +20,7 @@
             <h3 class="modal-title">{{file_name}}</h3>
         </div>
         <div class="modal-body">
-            <h4 ng-if="data.metadata.template || data.metadata.irods"> Metadata </h4>
+            <h4 ng-if="data.metadata.template.length || data.metadata.irods.length"> Metadata </h4>
             <ul>
                 <li class="list-group-item" ng-repeat="meta in data.metadata.template">
                   <dd>{{meta.attr}}</dd>
@@ -51,18 +51,51 @@
               </li>
             </ul>
 
+            <h4> File Preview </h4>
             <div ng-if="data.file_preview">
-              <h4> File Preview </h4>
               <p>Preview may truncate file. Download to view entire file.</p>
-              {{data.file_preview}}
+              <pre ng-class="{'{{data.brush}} syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview}}</pre>
+            </div>
+            <div ng-if="!data.file_preview">
+              <p>Preview not available</p>
             </div>
         </div>
         <div class="modal-footer">
             <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
             <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
-            <button type="button" class="btn btn-default" ng-click="download(file_path)">Download</button>
+              <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button>
+            <div ng-if="!data['downloadable']">
+              <div>
+                Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:<div>Public Access (No account required)
+                <ul>
+                  <li>iCommands</li>
+                  <li>iDrop</li>
+                  <li>Cyberduck</li>
+                  <li>
+                    <a target="_blank" href="http://www.cyverse.org/learning-center/manage-data">More Information</a>
+                  </li>
+                </ul>
+              </div>
+              <div>CyVerse Users (Requires CyVerse account)
+                <ul>
+                  <li>
+                    <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder=/iplant/home/shared/commons_repo/curated/Duitama_rice_variation_2015/">Discovery Environment (DE)</a>
+                  </li>
+                </ul>
+              </div>
+              <dl>
+                <dt>Path:</dt>
+                <dd>
+                  <input value="/iplant/home/shared/commons_repo/curated/Duitama_rice_variation_2015/" type="text">
+                </dd>
+                <dt>File Name:</dt>
+                <dd>
+                  <input value="WGSOryza_CIAT_LSU_USDA_NCGR_Q40_annotated.vcf.gz" type="text">
+                </dd>
+              </dl>
+              </div>
+            </div>
         </div>
-        <!-- <a ng-href="/download{{data.file_path}}" class="btn btn-default" download>Download</a> -->
       </script>
 
 

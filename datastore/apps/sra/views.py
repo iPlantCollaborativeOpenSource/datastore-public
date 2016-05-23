@@ -544,7 +544,7 @@ def search(request):
 def create_jwt_token():
     payload = {
         "iat": int(time.time()),
-        "sub": 'ipcdev',
+        "sub": 'anonymous',
         "email": 'test@email.com'
     }
 
@@ -568,7 +568,7 @@ def send_request(http_method, url=None, params=None, payload=None):
     headers = {'X-Iplant-De-Jwt': encoded_jwt}
 
     logger.info('url: {0}'.format(url))
-    # logger.info('params: {0}'.format(params))
+    logger.info('params: {0}'.format(params))
     logger.info('jwt: {0}'.format(encoded_jwt))
 
     if payload:
