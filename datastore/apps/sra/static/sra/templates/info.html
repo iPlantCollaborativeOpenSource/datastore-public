@@ -64,6 +64,16 @@
             <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
             <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
               <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button>
+              <div id="download_button">
+                <!-- <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']" uib-popover-html="recaptchaPopover" popover-placement="bottom">Download test recaptcha</button> -->
+                <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']">Download test recaptcha</button>
+
+                <form action="{{download_path}}" method="GET" id="download_form">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
+                  <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
+                </form>
+              </div>
+
             <div ng-if="!data['downloadable']">
               <div>
                 Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:<div>Public Access (No account required)

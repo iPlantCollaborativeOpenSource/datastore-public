@@ -9,7 +9,7 @@
     $locationProvider.html5Mode(true);
   }
 
-  var app = angular.module('Datastore', ['ngRoute', 'ng.django.urls', 'ui.bootstrap','logging']).config(['$routeProvider', '$locationProvider', '$interpolateProvider', '$httpProvider', config]);
+  var app = angular.module('Datastore', ['ngRoute', 'ng.django.urls', 'ui.bootstrap','logging', 'ngCookies']).config(['$routeProvider', '$locationProvider', '$interpolateProvider', '$httpProvider', '$cookiesProvider', config]);
 
 
   angular.module('Datastore').controller('DatastoreCtrl', ['$scope','$rootScope','$location','$route','$routeParams','$uibModal', 'datastoreFactory', function($scope,$rootScope,$location,$route,$routeParams, $uibModal,datastoreFactory) {
@@ -298,7 +298,7 @@
     return service;
   }]);
 
-  angular.module('Datastore').controller('ModalInstanceCtrl', ['$http', 'djangoUrl', '$uibModalInstance', 'file_path', 'file_name', 'data', '$scope', 'datastoreFactory', function ($http, djangoUrl, $uibModalInstance, file_path, file_name, data, $scope, datastoreFactory) {
+  angular.module('Datastore').controller('ModalInstanceCtrl', ['$http', 'djangoUrl', '$uibModalInstance', '$cookies', 'file_path', 'file_name', 'data', '$scope', 'datastoreFactory', '$sce', function ($http, djangoUrl, $uibModalInstance, $cookies, file_path, file_name, data, $scope, datastoreFactory, $sce) {
     $scope.data = {}
     $scope.data = data
     $scope.file_path = file_path
@@ -375,9 +375,38 @@
         $scope.preview($scope.data.path)
         console.log('ModalInstanceCtrl scope after checking previewable', $scope)
       }
-    }
+    };
 
     $scope.isPreviewable($scope.data['label'])
+
+    $scope.check_recaptcha_cookie = function(path) {
+      $scope.download_path = '/download' + path
+
+      if ($cookies.get('recaptcha_status') != 'verified') {
+
+          $('#download_button').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
+      } else {
+        $scope.download(path)
+          $('#download_button').popover('hide');
+
+      }
+
+      if ($('#recaptcha').html()) {
+          grecaptcha.reset();
+      }
+    };
+
+    $scope.recaptchaPopover = $sce.trustAsHtml('<form action="/download'+ $scope.data.path +'" method="GET" id="download_form"> <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX"><div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="$scope.recaptcha_callback"></div></form>');
+
+    $scope.recaptcha_callback = function recaptcha_callback(response) {
+        var d = new Date();
+        d.setTime(d.getTime() + (365*24*60*60*1000));
+        var expires = "expires="+d.toUTCString();
+        document.cookie = 'recaptcha_status=verified; ' + expires;
+
+        $('#download_form').submit();
+        $('#download_button').popover('hide');
+    }
 
     // $scope.get_file = function(path, id = ''){
     //   datastoreFactory.browse(path).then(
