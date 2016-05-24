@@ -37,6 +37,7 @@ def _check_path(path):
     path = str(path)
     if path[-1:] == '/':
         path = path[:-1]
+    path = urllib.unquote(path).decode('utf8') #why is only the space automatically encoding?
     return path
 
 def home(request, path=''):
@@ -351,7 +352,6 @@ def serve_file(request, path=''):
 
 def download_file(request, path=''):
     path = _check_path(path)
-
     url= DE_HOST + 'terrain/secured/fileio/download'
     params={'path': path}
 

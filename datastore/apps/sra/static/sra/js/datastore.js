@@ -144,7 +144,7 @@
 
         datastoreFactory.load_more(path, $scope.data.page).then(
           function(resp) {
-            console.log('load moreresponse', resp)
+            console.log('load more response', resp)
 
             if ($scope.data.type == 'dir') {
               for (var i=0; i <= resp.data.collection.files.length - 1 ; i++) {
@@ -156,11 +156,11 @@
             $scope.data.collection.more_data = resp.data.collection.more_data
             $scope.data.collection.folders.push.apply($scope.data.collection.folders, resp.data.collection.folders);
             $scope.data.collection.files.push.apply($scope.data.collection.files, resp.data.collection.files);
-            console.log('load more$scope.data', $scope.data)
+            console.log('load more $scope.data', $scope.data)
             $location.state(angular.copy($scope.data))
           },
           function(data) {
-            console.log('load more errordata', data)
+            console.log('load more error data', data)
             $scope.data.msg = data.data
           }
         )
@@ -181,9 +181,7 @@
           console.log('oldUrl', oldUrl)
           console.log('newState', newState)
           console.log('oldState', oldState)
-          console.log('location change before change scope', $scope.data)
           $scope.data = newState;
-          console.log('location change after change scope', $scope.data)
         }
       });
 
@@ -322,6 +320,7 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      console.log('downloading', path)
     };
 
     $scope.preview = function(path){
@@ -363,7 +362,7 @@
         'plain': 'shBrushPlain',
         'fasta': 'shBrushFasta',
         'eml': 'shBrushXml',
-        'xml': 'shBrushXml'
+        'xml': 'shBrushXml',
       };
 
       var ext = filename.split('.').pop();
