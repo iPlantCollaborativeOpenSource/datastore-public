@@ -4,7 +4,8 @@
     <div id="breadcrumbs">
       <ul class="clearfix">
         <li ng-class="{'file': crumb.type == 'file'}" ng-repeat="crumb in data.breadcrumbs">
-          <a ng-href="/browse{{crumb.path}}" ng-click="browse(crumb.path)">{{crumb.name}}</a>
+          <!-- <a ng-href="/browse{{crumb.path}}" ng-click="browse(crumb.path)">{{crumb.name}}</a> -->
+          <a ng-click="browse(crumb.path)">{{crumb.name}}</a>
         </li>
       </ul>
     </div>
@@ -63,12 +64,12 @@
         <div class="modal-footer">
             <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
             <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
-              <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button>
+            <!-- <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button> -->
               <div id="download_button">
                 <!-- <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']" uib-popover-html="recaptchaPopover" popover-placement="bottom">Download test recaptcha</button> -->
-                <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']">Download test recaptcha</button>
+                <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']">Download</button>
 
-                <form action="{{download_path}}" method="GET" id="download_form">
+                <form action="?" method="GET" id="download_form">
                   <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
                   <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
                 </form>
@@ -127,7 +128,8 @@
         <ul class="clearfix node-list" ng-if="data.collection.id">
           <!-- <div ng-if="folders"> -->
             <li class="dir" ng-repeat="folder in data.collection.folders">
-              <a ng-href="/browse{{folder.path}}" ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
+              <!-- <a ng-href="/browse{{folder.path}}" ng-click="browse(folder.path, id=folder.id)" ><span class="glyphicon glyphicon-folder-close"></span> {{ folder.label }}</a> -->
+              <a ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
             </li>
           <!-- </div> -->
           <!-- <div ng-if="files"> -->
@@ -162,12 +164,9 @@ window.recaptcha_callback = function recaptcha_callback(response) {
     var expires = "expires="+d.toUTCString();
     document.cookie = 'recaptcha_status=verified; ' + expires;
 
-    // $('#download_form').submit();
-    // $('#download_button').popover('hide');
     var el = document.querySelector('.g-recaptcha'),
     $el = angular.element(el),
     $scope = $el.scope();
-    console.log('callback scope', $scope)
     $scope.download($scope.file_path)
 }
 </script>

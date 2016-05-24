@@ -49,13 +49,13 @@
         } else {
           real_path = path
         }
-        console.log('path',path)
-        console.log('real_path',real_path)
+        // console.log('path',path)
+        // console.log('real_path',real_path)
 
         if (id){
           datastoreFactory.get_collection(real_path, id).then(
             function(resp) {
-              console.log('response', resp)
+              // console.log('get_collection response', resp)
               $scope.data = resp.data
               $scope.data.page = 1
 
@@ -80,12 +80,13 @@
                           };
               });
 
-              $location.state(angular.copy($scope.data))
-              $location.path('browse' + real_path);
               console.log('$scope.data', $scope.data)
+              $location.state(angular.copy($scope.data))
+              console.log('get collection location.state', $location.state())
+              $location.path('browse' + real_path);
             },
             function(data) {
-              console.log('data', data)
+              console.log('get_collection error data', data)
               $scope.data.msg = data.data
             }
           )
@@ -93,7 +94,7 @@
 
           datastoreFactory.browse(real_path).then(
             function(resp) {
-              console.log('response', resp)
+              console.log('browse response', resp)
               $scope.data = resp.data
               $scope.data.page = 1
 
@@ -123,13 +124,14 @@
                 $scope.data.breadcrumbs[$scope.data.breadcrumbs.length-1]['type'] = 'file'
               }
 
+              console.log('browse $scope.data', $scope.data)
               $location.state(angular.copy($scope.data))
+              console.log('browse location.state', $location.state())
               $location.path('browse' + real_path);
-              console.log('$scope.data', $scope.data)
 
             },
             function(data) {
-              console.log('data', data)
+              console.log('browse error data', data)
               $scope.data.msg = data.data
             }
           )
@@ -142,7 +144,7 @@
 
         datastoreFactory.load_more(path, $scope.data.page).then(
           function(resp) {
-            console.log('response', resp)
+            console.log('load moreresponse', resp)
 
             if ($scope.data.type == 'dir') {
               for (var i=0; i <= resp.data.collection.files.length - 1 ; i++) {
@@ -154,11 +156,11 @@
             $scope.data.collection.more_data = resp.data.collection.more_data
             $scope.data.collection.folders.push.apply($scope.data.collection.folders, resp.data.collection.folders);
             $scope.data.collection.files.push.apply($scope.data.collection.files, resp.data.collection.files);
-            console.log('$scope.data', $scope.data)
+            console.log('load more$scope.data', $scope.data)
             $location.state(angular.copy($scope.data))
           },
           function(data) {
-            console.log('data', data)
+            console.log('load more errordata', data)
             $scope.data.msg = data.data
           }
         )
@@ -174,12 +176,14 @@
 
       $scope.$on('$locationChangeSuccess', function ($event, newUrl, oldUrl, newState, oldState) {
         if (newUrl !== oldUrl) {
-          // console.log('location change success')
-          // console.log('newUrl', newUrl)
-          // console.log('oldUrl', oldUrl)
-          // console.log('newState', newState)
-          // console.log('oldState', oldState)
+          console.log('location change success', $event)
+          console.log('newUrl', newUrl)
+          console.log('oldUrl', oldUrl)
+          console.log('newState', newState)
+          console.log('oldState', oldState)
+          console.log('location change before change scope', $scope.data)
           $scope.data = newState;
+          console.log('location change after change scope', $scope.data)
         }
       });
 
@@ -227,7 +231,7 @@
 
               },
               function(data) {
-                console.log('data', data)
+                console.log('modal error data', data)
                 $scope.data.msg = data.data
               }
 
@@ -332,12 +336,12 @@
 
       datastoreFactory.serve_file(path).then(
         function(resp) {
-          console.log('response', resp)
+          console.log('serve_file response', resp)
           $scope.data.file_preview = resp.data
 
         },
         function(data) {
-          console.log('data', data)
+          console.log('serve_file error data', data)
           $scope.data.msg = data.data
         }
       )
@@ -396,7 +400,7 @@
       }
     };
 
-    $scope.recaptchaPopover = $sce.trustAsHtml('<form action="/download'+ $scope.data.path +'" method="GET" id="download_form"> <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX"><div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="$scope.recaptcha_callback"></div></form>');
+    // $scope.recaptchaPopover = $sce.trustAsHtml('<form action="/download'+ $scope.data.path +'" method="GET" id="download_form"> <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX"><div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="$scope.recaptcha_callback"></div></form>');
 
     // $scope.recaptcha_callback = function recaptcha_callback(response) {
     //     var d = new Date();
