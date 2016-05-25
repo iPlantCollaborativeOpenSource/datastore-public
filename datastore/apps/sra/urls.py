@@ -7,7 +7,7 @@ urlpatterns = patterns('datastore.apps.sra.views',
     url(r'^api/browse/(?P<path>.*)/?$', 'get_file_or_folder', name='browse'),
     # url(r'^api/browse/(?P<path>.*)/page/(?P<page>\d*)/?$', 'get_file_or_folder', name='browse'),
 
-    url(r'^api/file/(?P<path>.*)/?$', 'get_file', name='get_file'),
+    # url(r'^api/file/(?P<path>.*)/?$', 'get_file', name='get_file'),
     url(r'^api/collection/(?P<path>.*)/id/(?P<id>.*-.*)/?$', 'get_collection', name='get_collection'),
     url(r'^api/load_more/(?P<path>.*)/page/(?P<page>\d*)/?$', 'get_collection', name='load_more'),
 

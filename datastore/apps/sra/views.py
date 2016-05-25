@@ -22,7 +22,7 @@ from irods.data_object import iRODSDataObjectFileRaw
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 from irods.manager.collection_manager import CollectionManager
 from irods.models import Collection, CollectionMeta
-from .models import DataStoreSession
+# from .models import DataStoreSession
 from .content_types import content_types
 from .file_iterable import FileIterable
 from . import settings as sra_settings
@@ -81,89 +81,89 @@ def get_file_or_folder(request, path, page=1):
 
     return JsonResponse(cache_value)
 
-def get_file(request, path):
-    if not 'djng_url_kwarg_path' in request.GET:
-        raise HttpResponseBadRequest()
+# def get_file(request, path):
+#     if not 'djng_url_kwarg_path' in request.GET:
+#         raise HttpResponseBadRequest()
 
-    # path = _check_path(request.GET['path'])
-    # logger.debug(path)
+#     # path = _check_path(request.GET['path'])
+#     # logger.debug(path)
 
-    cache_file_key = path + '_file_key'
-    result = cache.get(cache_file_key)
-
-
-    url= DE_HOST + '/secured/filesystem/directory'#'terrain/secured/filesystem/file/manifest'
-    params={'path': path}
-    # import pdb; pdb.set_trace()
-    de_response = send_request('GET', url=url, params=params)
-
-    logger.info('DE DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+#     cache_file_key = path + '_file_key'
+#     result = cache.get(cache_file_key)
 
 
-    if not result:
-        try:
-            obj = DataStoreSession.collections.get(path)
-        except CollectionDoesNotExist as e:
-            try:
-                obj = DataStoreSession.data_objects.get(path)
-            except DataObjectDoesNotExist as e:
-                logger.exception(e)
-                return HttpResponseNotFound()
+#     url= DE_HOST + '/secured/filesystem/directory'#'terrain/secured/filesystem/file/manifest'
+#     params={'path': path}
+#     # import pdb; pdb.set_trace()
+#     de_response = send_request('GET', url=url, params=params)
 
-        logger.debug('obj: {}'.format(obj))
+#     logger.info('DE DIRECTORY RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
 
-        uuid = obj.metadata.get_one('ipc_UUID').__dict__['value']
 
-        # url= DE_HOST + 'terrain/secured/filesystem/' + str(uuid) + '/metadata'
-        # # import pdb; pdb.set_trace()
-        # de_response = send_request('GET', url=url)
-        # logger.info('DE META RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
-        # if de_response.status_code == 200:
-        #     de_meta = de_response.json()
+#     if not result:
+#         try:
+#             obj = DataStoreSession.collections.get(path)
+#         except CollectionDoesNotExist as e:
+#             try:
+#                 obj = DataStoreSession.data_objects.get(path)
+#             except DataObjectDoesNotExist as e:
+#                 logger.exception(e)
+#                 return HttpResponseNotFound()
 
-        #     # if de_meta['error_code']:
-        #     #     template_meta=[]
-        #     #     irods_meta=[{"attr": "Error", "value": de_meta['reason']}]
-        #     # else:
-        #     #     try:
-        #     #         template_meta = de_meta['metadata']['templates'][0]['avus']
-        #     #     except IndexError: #there is no template metadata
-        #     #         template_meta=[]
-        #     #     irods_meta = de_meta['irods-avus']
+#         logger.debug('obj: {}'.format(obj))
 
-        #     try:
-        #         template_meta = de_meta['metadata']['templates'][0]['avus']
-        #     except IndexError: #there is no template metadata
-        #         template_meta=[]
+#         uuid = obj.metadata.get_one('ipc_UUID').__dict__['value']
 
-        #     irods_meta = de_meta['irods-avus']
+#         # url= DE_HOST + 'terrain/secured/filesystem/' + str(uuid) + '/metadata'
+#         # # import pdb; pdb.set_trace()
+#         # de_response = send_request('GET', url=url)
+#         # logger.info('DE META RESPONSE: {0} {1} -------- {2}'.format(de_response.status_code, de_response.reason, de_response.json()))
+#         # if de_response.status_code == 200:
+#         #     de_meta = de_response.json()
 
-        # else: #something is wrong with DE metadata endpoint
-        #     irods_meta=[{"attr": "Error", "value": de_response.reason}]
-        #     template_meta=[]
+#         #     # if de_meta['error_code']:
+#         #     #     template_meta=[]
+#         #     #     irods_meta=[{"attr": "Error", "value": de_meta['reason']}]
+#         #     # else:
+#         #     #     try:
+#         #     #         template_meta = de_meta['metadata']['templates'][0]['avus']
+#         #     #     except IndexError: #there is no template metadata
+#         #     #         template_meta=[]
+#         #     #     irods_meta = de_meta['irods-avus']
 
-        # response = {
-        #     'name': obj.name,
-        #     'path': obj.path,
-        #     'metadata': irods_meta + template_meta,
-        #     'is_dir': isinstance(obj, iRODSCollection),
-        # }
-        if isinstance(obj, iRODSDataObject):
-            response['size'] = obj.size
-            response['create_time'] = timegm(obj.create_time.utctimetuple())
-            response['modify_time'] = timegm(obj.modify_time.utctimetuple())
-            response['checksum'] = obj.checksum
+#         #     try:
+#         #         template_meta = de_meta['metadata']['templates'][0]['avus']
+#         #     except IndexError: #there is no template metadata
+#         #         template_meta=[]
 
-            ext = splitext(obj.name)[1][1:]
+#         #     irods_meta = de_meta['irods-avus']
 
-            try:
-                response['content_type'] = content_types[ext]
-            except KeyError as e:
-                pass #don't know mimetype
+#         # else: #something is wrong with DE metadata endpoint
+#         #     irods_meta=[{"attr": "Error", "value": de_response.reason}]
+#         #     template_meta=[]
 
-        result = JsonResponse(response)
-        # cache.set(cache_file_key, result, CACHE_EXPIRATION)
-    return result
+#         # response = {
+#         #     'name': obj.name,
+#         #     'path': obj.path,
+#         #     'metadata': irods_meta + template_meta,
+#         #     'is_dir': isinstance(obj, iRODSCollection),
+#         # }
+#         if isinstance(obj, iRODSDataObject):
+#             response['size'] = obj.size
+#             response['create_time'] = timegm(obj.create_time.utctimetuple())
+#             response['modify_time'] = timegm(obj.modify_time.utctimetuple())
+#             response['checksum'] = obj.checksum
+
+#             ext = splitext(obj.name)[1][1:]
+
+#             try:
+#                 response['content_type'] = content_types[ext]
+#             except KeyError as e:
+#                 pass #don't know mimetype
+
+#         result = JsonResponse(response)
+#         # cache.set(cache_file_key, result, CACHE_EXPIRATION)
+#     return result
 
 def format_subcoll(coll):
     return {
@@ -258,51 +258,51 @@ def get_collection(request, path, page=1, id=None):
         return JsonResponse(collection)
     else:
         return collection
-#  wont run right now
-    try:
-        cache_key = path + '_page_' + str(page)
-        cache_value = cache.get(cache_key)
+# #  wont run right now
+#     try:
+#         cache_key = path + '_page_' + str(page)
+#         cache_value = cache.get(cache_key)
 
-        if not cache_value:
-            collection = DataStoreSession.collections.get(path)
-            sub_collections = collection.subcollections
-            objects = collection.data_objects_paging(PER_PAGE, offset)
+#         if not cache_value:
+#             collection = DataStoreSession.collections.get(path)
+#             sub_collections = collection.subcollections
+#             objects = collection.data_objects_paging(PER_PAGE, offset)
 
-            logger.debug(sub_collections)
-            logger.debug(objects)
+#             logger.debug(sub_collections)
+#             logger.debug(objects)
 
-            cache_value = map(format_subcoll, sub_collections + objects)
-            # cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+#             cache_value = map(format_subcoll, sub_collections + objects)
+#             # cache.set(cache_key, cache_value, CACHE_EXPIRATION)
 
-        next_page_cache_key = path + '_page_' + str(page + 1)
-        next_page_cache_value = cache.get(next_page_cache_key)
+#         next_page_cache_key = path + '_page_' + str(page + 1)
+#         next_page_cache_value = cache.get(next_page_cache_key)
 
-        if not isinstance(next_page_cache_value, list):
-            try:
-              collection
-            except NameError:
-                collection = DataStoreSession.collections.get(path)
-                sub_collections = collection.subcollections
+#         if not isinstance(next_page_cache_value, list):
+#             try:
+#               collection
+#             except NameError:
+#                 collection = DataStoreSession.collections.get(path)
+#                 sub_collections = collection.subcollections
 
-            next_page_objects = collection.data_objects_paging(PER_PAGE, int(offset+PER_PAGE))
-            next_page_cache_value = map(format_subcoll, next_page_objects)
-            # cache.set(next_page_cache_key, next_page_cache_value, CACHE_EXPIRATION)
+#             next_page_objects = collection.data_objects_paging(PER_PAGE, int(offset+PER_PAGE))
+#             next_page_cache_value = map(format_subcoll, next_page_objects)
+#             # cache.set(next_page_cache_key, next_page_cache_value, CACHE_EXPIRATION)
 
-        if next_page_cache_value:
-            more_data = True
-        else:
-            more_data = False
+#         if next_page_cache_value:
+#             more_data = True
+#         else:
+#             more_data = False
 
-        json={'models': cache_value,
-            'more_data': more_data,
-            'page': page}
+#         json={'models': cache_value,
+#             'more_data': more_data,
+#             'page': page}
 
-        response = JsonResponse(json, safe=False)
-        return response
+#         response = JsonResponse(json, safe=False)
+#         return response
 
-    except Exception as e:
-        logger.exception('FAIL: %s' % e)
-        return HttpResponse(status=500)
+#     except Exception as e:
+#         logger.exception('FAIL: %s' % e)
+#         return HttpResponse(status=500)
 
 
 def serve_file(request, path=''):
@@ -324,30 +324,30 @@ def serve_file(request, path=''):
     return HttpResponse(de_response.content)
     # return StreamingHttpResponse(de_response.content)
 
-##############
-    try:
-        obj = DataStoreSession.data_objects.get(path)
-        # obj = DataStoreSession.data_objects.get('/' + path)
-    except DataObjectDoesNotExist:
-        return HttpResponseNotFound()
+# ##############
+#     try:
+#         obj = DataStoreSession.data_objects.get(path)
+#         # obj = DataStoreSession.data_objects.get('/' + path)
+#     except DataObjectDoesNotExist:
+#         return HttpResponseNotFound()
 
-    ext = splitext(obj.name)[1][1:]
+#     ext = splitext(obj.name)[1][1:]
 
-    if ext in content_types:
-        content_type = content_types[ext]
-    else:
-        content_type = 'application/octet-stream'
+#     if ext in content_types:
+#         content_type = content_types[ext]
+#     else:
+#         content_type = 'application/octet-stream'
 
-    if request.GET.get('preview') == 'true':
-        conn, desc = obj.manager.open(obj.path, O_RDONLY)
-        x = iRODSDataObjectFileRaw(conn, desc)
-        f = x.conn.read_file(desc, 8000)
-        return HttpResponse(f)
+#     if request.GET.get('preview') == 'true':
+#         conn, desc = obj.manager.open(obj.path, O_RDONLY)
+#         x = iRODSDataObjectFileRaw(conn, desc)
+#         f = x.conn.read_file(desc, 8000)
+#         return HttpResponse(f)
 
-    f = obj.open('r')
-    response = HttpResponse(f, content_type=content_type)
-    response['Content-Length'] = obj.size
-    return response
+#     f = obj.open('r')
+#     response = HttpResponse(f, content_type=content_type)
+#     response['Content-Length'] = obj.size
+#     return response
 
 
 def download_file(request, path=''):

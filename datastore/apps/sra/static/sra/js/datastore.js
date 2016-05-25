@@ -9,7 +9,7 @@
     $locationProvider.html5Mode(true);
   }
 
-  var app = angular.module('Datastore', ['ngRoute', 'ng.django.urls', 'ui.bootstrap','logging', 'ngCookies']).config(['$routeProvider', '$locationProvider', '$interpolateProvider', '$httpProvider', '$cookiesProvider', config]);
+  var app = angular.module('Datastore', ['ngRoute', 'ng.django.urls', 'ui.bootstrap', 'ngCookies']).config(['$routeProvider', '$locationProvider', '$interpolateProvider', '$httpProvider', '$cookiesProvider', config]);
 
 
   angular.module('Datastore').controller('DatastoreCtrl', ['$scope','$rootScope','$location','$route','$routeParams','$uibModal', 'datastoreFactory', function($scope,$rootScope,$location,$route,$routeParams, $uibModal,datastoreFactory) {
