@@ -1,0 +1,12 @@
+---
+- name: Install CyVerse DataCommons on QA
+  hosts: qa
+  become: yes
+  become_method: sudo
+
+  roles:
+    - common
+    - application
+    - nginx
+    - { role: selinux, when: selinux_enabled == 'true'}
+    - uwsgi

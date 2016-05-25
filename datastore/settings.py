@@ -95,7 +95,7 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.8/topics/cache/#cache-key-transformation
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': '127.0.0.1:11211',
     }
 }
@@ -117,7 +117,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = '/opt/mirrors/static'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
@@ -132,7 +132,7 @@ STATICFILES_FINDERS = (
     'pipeline.finders.PipelineFinder',
 )
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/opt/mirrors/media'
 MEDIA_URL = '/media/'
 
 #####
@@ -157,7 +157,7 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {
+        'default': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'default',
@@ -165,22 +165,22 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
         'irods':{
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
         'datastore': {
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
         'sra': {
-            'handlers': ['console'],
+            'handlers': ['default'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -230,7 +230,3 @@ PIPELINE['JS_COMPRESSOR'] = None #'pipeline.compressors.slimit.SlimItCompressor'
 #         'output_filename': 'js/vendor.js',
 #     },
 # }
-
-
-# compress when collect static
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'

@@ -1,0 +1,7 @@
+dc_version: master
+irods_host: qairods.iplantc.org
+irods_port: 1247
+irods_zone: iplant
+irods_path: /iplant/home/shared
+irods_user: anonymous
+irods_password:

@@ -1,15 +1,11 @@
-cryptography==1.1
 Django==1.8.3
 django-pipeline
-django-angular==0.7.15
 Markdown==2.6.2
 prettytable==0.7.2
-PyJWT==1.4.0
 python-memcached==1.57
-requests==2.8.1
 six==1.9.0
 slimit
 supervisor==3.0b2
-uWSGI==2.0.11.1
+uWSGI==2.0.12
 wheel==0.24.0
 -e git+https://github.com/mrhanlon/python-irodsclient.git@mirrors#egg=python_irodsclient

@@ -1,11 +1,9 @@
-Public Datastore Interface
-==========================
+# Public Datastore Interface
 
-Prerequisites
--------------------------
+## Prerequisites
 
-Docker and Compose
-******************
+### Docker and Compose
+
 
 This project is a dockerized application. You'll need [Docker][1] and [Compose][2]
 installed to run the application. If you are running on a Mac or Windows then you will
@@ -21,8 +19,8 @@ from the project's root directory will run the application on `http://localhost:
 (or `http://${DOCKER_MACHINE_IP}:8000` if you are running Docker Machine.)
 
 
-Environment
------------
+## Environment
+
 
 The `datastore.env` file has the environment configuration for the application. Customize
 as necessary, but the defaults are a Production-ready configuration.
@@ -39,16 +37,17 @@ Configuration options of note:
   desired iRODS deployment.
 
 
-Logging
--------
+## Logging
 
 Using the development `docker-compose.yml` configuration, the containers all log to
 `stdout`. The production configuration (see below) configures the [Docker syslog driver][4]
 to direct all logs to the host system's syslog.
 
 
-Production installation and configuration
------------------------------------------
+##  Production installation and configuration
+
+###  Deployment with Docker
+
 
 In production, the application is run as a systemd service.
 
@@ -96,8 +95,49 @@ $ systemctl enable idc-mirrors
 ```
 
 
+###  Deployment with Ansible
+
+There are playbooks for deploying to Production at CyVerse and QA at 
+CyVerse and on Rodeo at TACC. You will need to install [Ansible][6] on your 
+local system. There are no prerequisites required on the remote systems.
+
+You can run the desired playbook, `[prod, qa]`,  with the following
+command:
+
+```
+$ ansible-playbook -i playbooks/hosts playbooks/[prod,qa].yml --ask-sudo-pass
+```
+
+You will be prompted for the sudo password and then ansible will configure
+the remote system(s). The `qa.yml` playbook will install on both the CyVerse
+and Rodeo QA systems, configured to point at `qairods.iplantc.org`. The
+`prod.yml` playbook will install on the Production system, configured to
+point at `data.iplantc.org`.
+
+See the [Ansible Documentation][7] for full documentation on Ansible.
+
+### Manually restarting services
+
+Services are registered with `systemd` and can be restarted using the
+`systemctl` command directly on the host. The Ansible playbooks install
+two services, Nginx and uWSGI, which can be restarted with the following 
+commands:
+
+```
+$ systemctl restart uwsgi
+$ systemctl restart nginx
+```
+
+### Logging
+
+The Nginx service logs to `/var/log/nginx` and the uWSGI service logs
+to syslog, and can be found in `/var/log/messages`.
+
+
 [1]: https://docs.docker.com/installation/
 [2]: https://docs.docker.com/compose/install/
 [3]: https://docs.docker.com/machine/install-machine/
 [4]: https://docs.docker.com/engine/reference/logging/overview/#syslog-options
 [5]: https://docs.djangoproject.com/en/1.8/ref/settings/#std:setting-SECRET_KEY
+[6]: http://ansible.com
+[7]: http://docs.ansible.com/ansible/index.html

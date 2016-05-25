@@ -1,0 +1,3 @@
+---
+- name: Ensure SELinux doesn't block Nginx
+  seboolean: name=httpd_can_network_connect state=yes persistent=yes
