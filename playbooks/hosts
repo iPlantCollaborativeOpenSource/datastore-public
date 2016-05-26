@@ -2,4 +2,5 @@
 ringo.iplantc.org
 
 [qa]
-rodney.iplantc.org:1657
+marybell.iplantc.org
+129.114.6.147 ansible_user=rodeo selinux_enabled=true
