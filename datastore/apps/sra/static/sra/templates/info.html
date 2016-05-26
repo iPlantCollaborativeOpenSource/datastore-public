@@ -53,31 +53,35 @@
             </ul>
 
             <h4> File Preview </h4>
-            <div ng-if="data.file_preview">
+              <div syntax-highlighter id="testing_id"></div>
+              <syntax-highlighter></syntax-highlighter>
+            <div ng-if="data.isPreviewable == 'yes'">
               <p>Preview may truncate file. Download to view entire file.</p>
-              <pre ng-class="{'{{data.brush}} syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview}}</pre>
+              <!-- <pre id="file_preview" ng-class="{'{{data.brush}} syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview || 'Loading'}}</pre> -->
+              <pre syntax-highlighter id="file_preview" ng-class="{'{{xml syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview || 'Loading'}}</pre>
             </div>
-            <div ng-if="!data.file_preview">
+            <div ng-if="data.isPreviewable == 'no'">
               <p>Preview not available</p>
             </div>
         </div>
         <div class="modal-footer">
-            <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
-            <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
-            <!-- <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button> -->
-              <div id="download_button">
-                <!-- <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']" uib-popover-html="recaptchaPopover" popover-placement="bottom">Download test recaptcha</button> -->
-                <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']">Download</button>
+          <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
+          <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
+          <!-- <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button> -->
+          <div id="download_button">
+            <!-- <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']" uib-popover-html="recaptchaPopover" popover-placement="bottom">Download test recaptcha</button> -->
+            <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']">Download</button>
 
-                <form action="?" method="GET" id="download_form">
-                  <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
-                  <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
-                </form>
-              </div>
+            <form action="?" method="GET" id="download_form">
+              <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
+              <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
+            </form>
+          </div>
 
-            <div ng-if="!data['downloadable']">
-              <div>
-                Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:<div>Public Access (No account required)
+          <div ng-if="!data['downloadable']">
+            <div>
+              Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:
+              <div>Public Access (No account required)
                 <ul>
                   <li>iCommands</li>
                   <li>iDrop</li>
@@ -104,8 +108,8 @@
                   <input value="{{file_name}}" type="text">
                 </dd>
               </dl>
-              </div>
             </div>
+          </div>
         </div>
       </script>
 

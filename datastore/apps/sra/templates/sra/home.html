@@ -22,33 +22,22 @@
 <!-- <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.1.js"></script> -->
 <!-- <script data-main="{% static 'sra/js/main.js' %}" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script> -->
 <script src="{%static 'sra/js/datastore.js' %}"></script>
-<!-- <script src="{%static '/static/sra/syntaxhighlighter/styles/shCore.css' %}"></script> -->
-<!-- <script src="{%static '/static/sra/syntaxhighlighter/styles/shThemeDefault.css' %}"></script> -->
 
-<!-- <script src="{%static '/static/sra/syntaxhighlighter/scripts/shCore' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushCss' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushJava' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPerl' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPhp' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPlain' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPython' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushRuby' %}"></script>
-<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushXml' %}"></script>
-<script src="{%static '/static/sra/js/brushes/shBrushFasta' %}"></script>
- -->
+<!-- <script src="{%static 'sra/syntaxhighlighter/src/shCore.js' %}"></script> -->
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shCore.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/styles/shCore.css' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/styles/shThemeDefault.css' %}"></script>
 
-<!-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> -->
-<!-- <script type="text/javascript">
-window.recaptcha_callback = function recaptcha_callback(response) {
-    var d = new Date();
-    d.setTime(d.getTime() + (365*24*60*60*1000));
-    var expires = "expires="+d.toUTCString();
-    document.cookie = 'recaptcha_status=verified; ' + expires;
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushCss.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushJava.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPerl.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPhp.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPlain.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushPython.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushRuby.js' %}"></script>
+<script src="{%static '/static/sra/syntaxhighlighter/scripts/shBrushXml.js' %}"></script>
+<!-- <script src="{%static '/static/sra/js/brushes/shBrushFasta.js' %}"></script> -->
 
-    $('#download_form').submit();
-    $('#download_button').popover('hide');
-}
-</script> -->
 <script type="text/javascript">
   var root = "{{ root }}";
   var root_name = "{{ root_name }}";

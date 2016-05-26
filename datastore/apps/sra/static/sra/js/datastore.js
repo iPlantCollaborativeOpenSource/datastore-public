@@ -324,20 +324,10 @@
     };
 
     $scope.preview = function(path){
-      // if (item.isPreviewable()){
-      //     $scope.temp = item;
-      //     return item.preview()//.catch(
-      //     //     function(data){
-      //     //         item.error = $translate.instant('error_invalid_filename');
-      //     //     }
-      //     // );
-      // }
-
       datastoreFactory.serve_file(path).then(
         function(resp) {
           console.log('serve_file response', resp)
           $scope.data.file_preview = resp.data
-
         },
         function(data) {
           console.log('serve_file error data', data)
@@ -345,13 +335,6 @@
         }
       )
     };
-
-    // $scope.isPreviewable = function(contentType){
-    //   if (contentType.substring(0, 4) == 'text') {
-    //     $scope.preview($scope.data.path)
-    //   }
-    // }
-    // $scope.isPreviewable($scope.data['content-type'])
 
     $scope.isPreviewable = function(filename){
       var BrushSources = {
@@ -368,19 +351,18 @@
       var ext = filename.split('.').pop();
 
       if (ext in BrushSources || $scope.data['content-type'].substring(0, 4) == 'text'){
-        // try {
-        //   $scope.data.brush = BrushSources[ext]
-        // }
-        // catch(err) {
-        //   $scope.data.brush = 'shBrushPlain'
-        // }
+        $scope.data.isPreviewable = 'yes'
         $scope.data.brush = BrushSources[ext] || 'shBrushPlain'
         $scope.preview($scope.data.path)
         console.log('ModalInstanceCtrl scope after checking previewable', $scope)
+        $scope.$broadcast('previewLoaded');
+      } else {
+        $scope.data.isPreviewable = 'no'
       }
     };
 
     $scope.isPreviewable($scope.data['label'])
+
 
     $scope.check_recaptcha_cookie = function(path) {
       $scope.download_path = '/download' + path
@@ -398,6 +380,24 @@
           grecaptcha.reset();
       }
     };
+
+
+    $scope.$on('previewLoaded', $scope.test_listen)
+    $scope.test_listen = function(){
+      console.log('heard the broadcast')
+    }
+
+    // $scope.$on('previewLoaded', function () {
+    //   // SyntaxHighlighter.highlight($('#file_preview'));
+    //   // SyntaxHighlighter.all()
+    //   console.log('syntaxHighlighter scope', $scope)
+    //   console.log('syntaxHighlighter elem', element)
+    //   console.log('syntaxHighlighter attrs', attrs)
+    //   SyntaxHighlighter.all()
+    //   element.html('hjdkhfkjalshdfljskhdjfklhsaldkjhfajklsdfhlksdhfkalshfjksdhafskljdhfla')
+    // });
+
+
 
     // $scope.recaptchaPopover = $sce.trustAsHtml('<form action="/download'+ $scope.data.path +'" method="GET" id="download_form"> <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX"><div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="$scope.recaptcha_callback"></div></form>');
 
@@ -451,67 +451,26 @@
     // };
   }]);
 
-  // angular.module('ds.notifications', ['logging', 'toastr']).config(config);
+  angular.module('Datastore').directive('syntaxHighlighter', function () {
+    return {
+        // controller:function ($scope, $element, $attrs){
+        //     this.highlight=$scope.$eval ($attrs.syntaxHighlighter);
+        // },
+        link:function ($scope, element, attrs) {
+          $scope.$on('previewLoaded'), function () {
+            // SyntaxHighlighter.highlight($('#file_preview'));
+            // SyntaxHighlighter.all()
+            console.log('syntaxhighlighter directive heard the broadcast')
+            SyntaxHighlighter.all()
+            element.html('hjdkhfkjalshdfljskhdjfklhsaldkjhfajklsdfhlksdhfkalshfjksdhafskljdhfla')
+          }
+          console.log('syntaxHighlighter scope', $scope)
+          console.log('syntaxHighlighter elem', element)
+          console.log('syntaxHighlighter attrs', attrs)
+        }
+    }
+  });
 
-  // function NotificationService($rootScope, logger, toastr){
-  //     var service = {
-  //         init: init,
-  //     };
-
-  //     return service;
-
-  //     function init(){
-  //         console.log('asdfsafdfsdadfs')
-  //     }
-
-  //     function processMessage(e, msg){
-  //         //var rScope = $injector.get('$rootScope');
-  //         logger.log('websockets msg', msg);
-  //         if (msg.toast) {
-  //             if(msg.action_link) {
-  //                 toastr.info(msg.toast.msg,
-  //                 {
-  //                     closeButton: true,
-  //                     closeHtml: '<a target="_blank" href="' + msg.action_link.value + '">' + msg.action_link.label + '</a>',
-  //                     onHidden: function undo(clicked, toast){
-  //                         logger.log('clicked', clicked)
-  //                         logger.log('toast', toast)
-
-  //                     }
-  //                 });
-  //             } else {
-  //                 toastr.info(msg.toast.msg);
-  //             }
-  //         }
-  //         if (msg.status == 'FINISHED' || msg.status == 'FAILED') {
-  //             var notification_badge = angular.element( document.querySelector( '#notification_badge' ) );
-  //             notification_badge.removeClass('label-default')
-  //             notification_badge.addClass('label-info')
-
-  //             var numNotifications = notification_badge.html();
-  //             if (isNaN(numNotifications)) {
-  //                 notification_badge.html(1);
-  //             } else {
-  //                 notification_badge.html(Number(numNotifications) + 1);
-  //             }
-  //         }
-  //     }
-  // }
-
-  // function NotificationServiceProvider($injector){
-  //     // var configURL = '';
-  //     this.$get = ['$rootScope', 'logger', 'toastr', NotificationBusHelper];
-
-  //     // this.setUrl = function setUrl(url){
-  //         // configURL = url;
-  //     // };
-  //     function NotificationBusHelper($rootScope, logger, toastr){
-  //         return new NotificationService($rootScope, logger, toastr);
-  //     }
-  // }
-
-  // angular.module('Datastore')
-  // .provider('NotificationService', NotificationServiceProvider);
 
 })(window, angular, jQuery);
 
