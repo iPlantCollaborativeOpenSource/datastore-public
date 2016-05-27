@@ -456,52 +456,20 @@
     // };
   }]);
 
-  angular.module('Datastore').factory ('syntaxHighlighterService', function () {
+  angular.module('Datastore').directive('syntaxHighlighter', function () {
       return {
-          highlight:function ($scope, $element) {
-              // $element.find("pre").each (function() {
-              //     $( this ).addClass( "brush:xml" );
-              //     SyntaxHighlighter.highlight({}, this);
-              // });
-              $element.each (function() {
-                  var brush='brush:' + $scope.data.brush
-                  $( this ).addClass( brush );
-                  SyntaxHighlighter.highlight({}, this);
-              });
-
-              $(".toolbar").remove();
-
-              $(".syntaxhighlighter").attr("style", "overflow-y: hidden !important");
-
-          }
-      };
-  });
-
-  angular.module('Datastore').directive('syntaxHighlighter', function (syntaxHighlighterService) {
-    return {
-        controller:function ($scope, $element, $attrs){
-            this.highlight= ($attrs.$attr.syntaxHighlighter == 'syntax-highlighter')//$scope.$eval($attrs.$attr.syntaxHighlighter);
-        },
-
-        link:function ($scope, $element, $attrs, controller) {
-
-            $scope.$on('previewLoaded'), function () {
-              // SyntaxHighlighter.highlight($('#file_preview'));
-              // SyntaxHighlighter.all()
-              console.log('syntaxhighlighter directive heard the broadcast')
-            }
-
-            // $scope.$watch(function(){return $scope.data.file_preview;}, function(value) {
+          link:function ($scope, element, attrs) {
             $scope.$watch('data.file_preview', function(value) {
               console.log('saw $scope.data.file_preview change')
-              if (controller.highlight && value)
-                syntaxHighlighterService.highlight($scope, $element);
+              var brush='brush:' + $scope.data.brush
+              $(element).addClass(brush);
+              if (value) {
+                SyntaxHighlighter.highlight({}, element[0]);
+              }
             });
-
-
-        }
-    }
-  });
+          }
+      }
+    });
 
 
 })(window, angular, jQuery);
