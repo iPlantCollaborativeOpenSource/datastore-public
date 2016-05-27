@@ -359,7 +359,12 @@
 
       if (ext in BrushSources || $scope.data['content-type'].substring(0, 4) == 'text'){
         $scope.data.isPreviewable = 'yes'
-        $scope.data.brush = BrushSources[ext] || 'shBrushPlain'
+        // $scope.data.brush = BrushSources[ext] || 'shBrushPlain'
+        if (ext in BrushSources) {
+            $scope.data.brush = ext;
+        } else {
+            $scope.data.brush = 'text';
+        }
         $scope.preview($scope.data.path)
         console.log('ModalInstanceCtrl scope after checking previewable', $scope)
       } else {
@@ -451,26 +456,49 @@
     // };
   }]);
 
-  angular.module('Datastore').directive('syntaxHighlighter', function ($rootScope) {
-    return {
-        restrict: 'A',
-        // controller:function ($scope, $element, $attrs){
-        //     this.highlight=$scope.$eval ($attrs.syntaxHighlighter);
-        // },
-        link:function ($scope, element, attrs) {
-          $rootScope.$on('previewLoaded'), function () {
-            // SyntaxHighlighter.highlight($('#file_preview'));
-            // SyntaxHighlighter.all()
-            console.log('syntaxhighlighter directive heard the broadcast')
-            SyntaxHighlighter.all()
-            // element.html('hjdkhfkjalshdfljskhdjfklhsaldkjhfajklsdfhlksdhfkalshfjksdhafskljdhfla')
+  angular.module('Datastore').factory ('syntaxHighlighterService', function () {
+      return {
+          highlight:function ($scope, $element) {
+              // $element.find("pre").each (function() {
+              //     $( this ).addClass( "brush:xml" );
+              //     SyntaxHighlighter.highlight({}, this);
+              // });
+              $element.each (function() {
+                  var brush='brush:' + $scope.data.brush
+                  $( this ).addClass( brush );
+                  SyntaxHighlighter.highlight({}, this);
+              });
+
+              $(".toolbar").remove();
+
+              $(".syntaxhighlighter").attr("style", "overflow-y: hidden !important");
+
           }
-          // element.html('hjdkhfkjalshdfljskhdjfklhsaldkjhfajklsdfhlksdhfkalshfjksdhafskljdhfla')
-          // console.log('syntaxHighlighter scope', $scope)
-          // console.log('syntaxHighlighter elem', element)
-          // console.log('syntaxHighlighter attrs', attrs)
-          // SyntaxHighlighter.all()
-          // SyntaxHighlighter.highlight({}, element);
+      };
+  });
+
+  angular.module('Datastore').directive('syntaxHighlighter', function (syntaxHighlighterService) {
+    return {
+        controller:function ($scope, $element, $attrs){
+            this.highlight= ($attrs.$attr.syntaxHighlighter == 'syntax-highlighter')//$scope.$eval($attrs.$attr.syntaxHighlighter);
+        },
+
+        link:function ($scope, $element, $attrs, controller) {
+
+            $scope.$on('previewLoaded'), function () {
+              // SyntaxHighlighter.highlight($('#file_preview'));
+              // SyntaxHighlighter.all()
+              console.log('syntaxhighlighter directive heard the broadcast')
+            }
+
+            // $scope.$watch(function(){return $scope.data.file_preview;}, function(value) {
+            $scope.$watch('data.file_preview', function(value) {
+              console.log('saw $scope.data.file_preview change')
+              if (controller.highlight && value)
+                syntaxHighlighterService.highlight($scope, $element);
+            });
+
+
         }
     }
   });
