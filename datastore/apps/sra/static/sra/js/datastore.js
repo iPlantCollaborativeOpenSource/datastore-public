@@ -300,7 +300,7 @@
     return service;
   }]);
 
-  angular.module('Datastore').controller('ModalInstanceCtrl', ['$http', 'djangoUrl', '$uibModalInstance', '$cookies', 'file_path', 'file_name', 'data', '$scope', 'datastoreFactory', '$sce', function ($http, djangoUrl, $uibModalInstance, $cookies, file_path, file_name, data, $scope, datastoreFactory, $sce) {
+  angular.module('Datastore').controller('ModalInstanceCtrl', ['$http', 'djangoUrl', '$uibModalInstance', '$cookies', 'file_path', 'file_name', 'data', '$scope', '$rootScope', 'datastoreFactory', '$sce', function ($http, djangoUrl, $uibModalInstance, $cookies, file_path, file_name, data, $scope, $rootScope, datastoreFactory, $sce) {
     $scope.data = {}
     $scope.data = data
     $scope.file_path = file_path
@@ -328,6 +328,7 @@
         function(resp) {
           console.log('serve_file response', resp)
           $scope.data.file_preview = resp.data
+          $rootScope.$broadcast('previewLoaded');
         },
         function(data) {
           console.log('serve_file error data', data)
@@ -335,6 +336,12 @@
         }
       )
     };
+
+    $scope.test_listen = function(){
+      console.log('heard the broadcast');
+      SyntaxHighlighter.all()
+    };
+    $rootScope.$on('previewLoaded', $scope.test_listen);
 
     $scope.isPreviewable = function(filename){
       var BrushSources = {
@@ -355,7 +362,6 @@
         $scope.data.brush = BrushSources[ext] || 'shBrushPlain'
         $scope.preview($scope.data.path)
         console.log('ModalInstanceCtrl scope after checking previewable', $scope)
-        $scope.$broadcast('previewLoaded');
       } else {
         $scope.data.isPreviewable = 'no'
       }
@@ -380,12 +386,6 @@
           grecaptcha.reset();
       }
     };
-
-
-    $scope.$on('previewLoaded', $scope.test_listen)
-    $scope.test_listen = function(){
-      console.log('heard the broadcast')
-    }
 
     // $scope.$on('previewLoaded', function () {
     //   // SyntaxHighlighter.highlight($('#file_preview'));
@@ -451,22 +451,26 @@
     // };
   }]);
 
-  angular.module('Datastore').directive('syntaxHighlighter', function () {
+  angular.module('Datastore').directive('syntaxHighlighter', function ($rootScope) {
     return {
+        restrict: 'A',
         // controller:function ($scope, $element, $attrs){
         //     this.highlight=$scope.$eval ($attrs.syntaxHighlighter);
         // },
         link:function ($scope, element, attrs) {
-          $scope.$on('previewLoaded'), function () {
+          $rootScope.$on('previewLoaded'), function () {
             // SyntaxHighlighter.highlight($('#file_preview'));
             // SyntaxHighlighter.all()
             console.log('syntaxhighlighter directive heard the broadcast')
             SyntaxHighlighter.all()
-            element.html('hjdkhfkjalshdfljskhdjfklhsaldkjhfajklsdfhlksdhfkalshfjksdhafskljdhfla')
+            // element.html('hjdkhfkjalshdfljskhdjfklhsaldkjhfajklsdfhlksdhfkalshfjksdhafskljdhfla')
           }
-          console.log('syntaxHighlighter scope', $scope)
-          console.log('syntaxHighlighter elem', element)
-          console.log('syntaxHighlighter attrs', attrs)
+          // element.html('hjdkhfkjalshdfljskhdjfklhsaldkjhfajklsdfhlksdhfkalshfjksdhafskljdhfla')
+          // console.log('syntaxHighlighter scope', $scope)
+          // console.log('syntaxHighlighter elem', element)
+          // console.log('syntaxHighlighter attrs', attrs)
+          // SyntaxHighlighter.all()
+          // SyntaxHighlighter.highlight({}, element);
         }
     }
   });

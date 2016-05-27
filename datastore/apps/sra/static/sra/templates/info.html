@@ -53,12 +53,13 @@
             </ul>
 
             <h4> File Preview </h4>
-              <div syntax-highlighter id="testing_id"></div>
-              <syntax-highlighter></syntax-highlighter>
+              <div class="xml syntaxhighlighter" syntax-highlighter id="testing_id"></div>
+
             <div ng-if="data.isPreviewable == 'yes'">
               <p>Preview may truncate file. Download to view entire file.</p>
               <!-- <pre id="file_preview" ng-class="{'{{data.brush}} syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview || 'Loading'}}</pre> -->
-              <pre syntax-highlighter id="file_preview" ng-class="{'{{xml syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview || 'Loading'}}</pre>
+              <!-- <pre syntax-highlighter id="file_preview" class="xml syntaxhighlighter brush:xml">{{data.file_preview || 'Loading'}}</pre> -->
+              <pre syntax-highlighter id="file_preview" class="xml syntaxhighlighter brush:xml">{{data.file_preview || 'Loading'}}</pre>
             </div>
             <div ng-if="data.isPreviewable == 'no'">
               <p>Preview not available</p>

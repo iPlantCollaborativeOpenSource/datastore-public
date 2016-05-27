@@ -22,7 +22,7 @@ from irods.data_object import iRODSDataObjectFileRaw
 from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
 from irods.manager.collection_manager import CollectionManager
 from irods.models import Collection, CollectionMeta
-# from .models import DataStoreSession
+from .api import DataStoreSession
 from .content_types import content_types
 from .file_iterable import FileIterable
 from . import settings as sra_settings
