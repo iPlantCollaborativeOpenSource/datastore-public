@@ -237,14 +237,38 @@ class DownloadFileView(DataStoreSessionBaseView):
             content_type = content_types[ext]
         else:
             content_type = 'application/octet-stream'
+        
+
+
 
         try:
             f = obj.open('r')
         except KeyError as e:
             return HttpResponse('Download could not be completed.', status=500)
 
-        response = StreamingHttpResponse(f, content_type=content_type)
-        response['Content-Length'] = obj.size
+        range_request = False;
+        try:
+            range = request.META['HTTP_RANGE']
+            range_request = True;
+            import re
+            prog = re.compile("bytes=(\d+)-(\d+)")
+            m = prog.match(range);
+            start = int(m.group(1));
+            stop = int(m.group(2));
+            f.seek(int(start))
+        except KeyError:
+            pass 
+
+        if range_request : 
+            status_code = 206
+        else :
+            status_code = 200
+
+        response = StreamingHttpResponse(f, content_type=content_type, status=status_code)
+        if range_request :
+            response['Content-Length'] = stop-start+1
+        else : 
+            response['Content-Length'] = obj.size
         response['Content-Disposition'] = 'attachment; filename="%s"' % obj.name
         response['Accept-Ranges'] = 'bytes'
 
