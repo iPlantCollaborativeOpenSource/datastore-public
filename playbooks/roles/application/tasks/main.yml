@@ -12,7 +12,7 @@
   file: path=/opt/mirrors/media state=directory owner=mirrors group=mirrors
 
 - name: Clone 'iPlantCollaborativeOpenSource/datastore-public' repository
-  git: repo=https://github.com/iPlantCollaborativeOpenSource/datastore-public.git dest=/opt/mirrors/datastore-public version=master
+    git: repo=https://github.com/iPlantCollaborativeOpenSource/datastore-public.git dest=/opt/mirrors/datastore-public version={{ dc_version }}
   notify:
     - restart uwsgi
 
