@@ -431,18 +431,41 @@ def legacy_redirect(request, path=''):
 
     path = _check_path(path)
 
-    try:
-        obj = DataStoreSession.collections.get(path)
+    url = DE_HOST + 'terrain/secured/filesystem/stat'
+    payload = {'paths': [str(path)]}
+
+    de_response = send_request('POST', url=url, payload=payload)
+
+    if de_response.status_code != 200:
+        # return de_response.raw
+        return HttpResponse(de_response.reason + ' -- ' + de_response.content, status=de_response.status_code)
+
+    data = de_response.json()['paths'][path]
+
+    if data['type'] == 'dir':
         logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
         return HttpResponseRedirect('/browse' + path)
-    except CollectionDoesNotExist:
-        try:
-            obj = DataStoreSession.data_objects.get(path)
-            logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
-            return HttpResponseRedirect('/download' + path)
-        except DataObjectDoesNotExist:
-            logger.warn('Legacy URL for path %s not satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
-            return HttpResponseNotFound('File does not exist')
+    elif data['type'] == 'file':
+        logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+        return HttpResponseRedirect('/download' + path)
+
+    logger.warn('Legacy URL for path %s not satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+    return HttpResponseNotFound('File does not exist')
+
+
+
+    # try:
+    #     obj = DataStoreSession.collections.get(path)
+    #     logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+    #     return HttpResponseRedirect('/browse' + path)
+    # except CollectionDoesNotExist:
+    #     try:
+    #         obj = DataStoreSession.data_objects.get(path)
+    #         logger.warn('Legacy URL for path %s satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+    #         return HttpResponseRedirect('/download' + path)
+    #     except DataObjectDoesNotExist:
+    #         logger.warn('Legacy URL for path %s not satisfied from referer %s' % (path, request.META.get('HTTP_REFERER')))
+    #         return HttpResponseNotFound('File does not exist')
 
 
 def search_metadata(request):
