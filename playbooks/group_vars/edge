@@ -1,5 +1,5 @@
-dc_version: static-navbar
-irods_host: qairods.iplantc.org
+dc_version: DE/angular
+irods_host: data.iplantcollaborative.org
 irods_port: 1247
 irods_zone: iplant
 irods_path: /iplant/home/shared
