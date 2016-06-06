@@ -3,7 +3,7 @@ server {
         server_name localhost;
 
         location /static {
-	    alias /project/static;
+	    alias /opt/mirrors/static;
         }
 
         location /media {
