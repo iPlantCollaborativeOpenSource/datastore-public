@@ -1,5 +1,5 @@
 ---
-- name: Install CyVerse DataCommons on Production
+- name: Install CyVerse DataCommons on Edge
   hosts: edge
   become: yes
   become_method: sudo

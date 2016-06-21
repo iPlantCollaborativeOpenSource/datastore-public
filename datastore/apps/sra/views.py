@@ -192,7 +192,7 @@ def get_metadata(request, id):
         template_meta=[]
 
     metadata = {
-        'irods': irods_meta + template_meta,
+        'irods': irods_meta,
         'template': template_meta,
     }
 
@@ -395,23 +395,42 @@ def download_file(request, path=''):
 
 def markdown_view(request, path=''):
     path = _check_path(path)
+    url= DE_HOST + 'terrain/secured/fileio/download'
+    params={'path': path}
 
-    try:
-        obj = DataStoreSession.data_objects.get('/' + path)
-    except DataObjectDoesNotExist:
-        return HttpResponseNotFound()
+    de_response = send_request('GET', url=url, params=params)
 
-    ext = splitext(obj.name)[1][1:]
+    if de_response.status_code != 200:
+        # return de_response.raw
+        return HttpResponse(de_response.reason, status=de_response.status_code)
 
+    ext = splitext(de_response.headers['Content-Disposition'])[1][1:].strip('"')
 
     if ext not in ['md', 'markdown']:
         return HttpResponseBadRequest()
 
-    with obj.open('r') as f:
-        html = markdown.markdown(f.read())
+    html = markdown.markdown(de_response.content)
     response = HttpResponse(html, content_type='text/html')
     response['Content-Length'] = len(html)
     return response
+
+###old stuff
+    # try:
+    #     obj = DataStoreSession.data_objects.get('/' + path)
+    # except DataObjectDoesNotExist:
+    #     return HttpResponseNotFound()
+
+    # ext = splitext(obj.name)[1][1:]
+
+
+    # if ext not in ['md', 'markdown']:
+    #     return HttpResponseBadRequest()
+
+    # with obj.open('r') as f:
+    #     html = markdown.markdown(f.read())
+    # response = HttpResponse(html, content_type='text/html')
+    # response['Content-Length'] = len(html)
+    # return response
 
 
 def legacy_redirect(request, path=''):
