@@ -192,15 +192,17 @@
               function(resp) {
                 console.log('modal response', resp)
                 var data = resp.data
-                if (data['file-size'] < 20000000000) {
+                if (data['file-size'] < 2000000000) {
                   data['downloadable'] = true
+                } else {
+                  data['downloadable'] = false
                 }
-                data['file-size'] = datastoreFactory.bytes_to_human(data['file-size'])
+                data['file-size-readable'] = datastoreFactory.bytes_to_human(data['file-size'])
 
-                var date = new Date($scope.data['date-created'])
+                var date = new Date(data['date-created'])
                 data['date-created'] = date.toDateString()
 
-                date = new Date($scope.data['date-modified'])
+                date = new Date(data['date-modified'])
                 data['date-modified'] = date.toDateString()
                 console.log('modal scope', $scope)
 
@@ -337,11 +339,11 @@
       )
     };
 
-    $scope.test_listen = function(){
-      console.log('heard the broadcast');
-      SyntaxHighlighter.all()
-    };
-    $rootScope.$on('previewLoaded', $scope.test_listen);
+    // $scope.test_listen = function(){
+    //   console.log('heard the broadcast');
+    //   SyntaxHighlighter.all()
+    // };
+    // $rootScope.$on('previewLoaded', $scope.test_listen);
 
     $scope.isPreviewable = function(filename){
       var BrushSources = {

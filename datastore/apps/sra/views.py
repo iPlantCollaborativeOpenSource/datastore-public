@@ -355,7 +355,15 @@ def download_file(request, path=''):
     url= DE_HOST + 'terrain/secured/fileio/download'
     params={'path': path}
 
-    de_response = send_request('GET', url=url, params=params)
+    # with open('massive-body', 'r+b') as f:
+    #     # requests.post('http://some.url/streamed', data=f
+    #     headers = {'X-Iplant-De-Jwt': create_jwt_token()}
+    #     import pdb; pdb.set_trace()
+    #     resp=requests.get(url, data=f, params=params, headers=headers)
+    # de_response = send_request('GET', url=url, params=params, data=f)
+
+    de_response = send_request('GET', url=url, params=params, stream=True)
+    # de_response = send_request('GET', url=url, params=params, stream=True)
 
     if de_response.status_code != 200:
         # return de_response.raw
@@ -605,7 +613,7 @@ def create_jwt_token():
     return encoded_jwt
 
 
-def send_request(http_method, url=None, params=None, payload=None):
+def send_request(http_method, url=None, params=None, stream=False, payload=None):
     encoded_jwt = create_jwt_token()
     headers = {'X-Iplant-De-Jwt': encoded_jwt}
 
@@ -616,7 +624,7 @@ def send_request(http_method, url=None, params=None, payload=None):
     if payload:
         headers['Content-Type'] = 'application/json'
     if http_method.upper() == 'GET':
-        response = requests.get(url, params=params, headers=headers)
+        response = requests.get(url, params=params, headers=headers, stream=stream)
     elif http_method.upper() == 'POST':
         data = json.dumps(payload)
         response = requests.post(url, data=data, params=params, headers=headers)
