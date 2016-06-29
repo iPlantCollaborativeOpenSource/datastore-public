@@ -90,7 +90,7 @@ def get_metadata(request, id):
         de_meta = de_response.json()
 
         try:
-            template_meta = de_meta['metadata']['templates'][0]['avus']
+            template_meta = de_meta['avus']
         except IndexError: #there is no template metadata
             template_meta=[]
 
@@ -382,4 +382,5 @@ def send_request(http_method, url=None, params=None, stream=False, payload=None)
         response = requests.delete(url, headers=headers)
 
     logger.info('{} - response time: {}'.format(url, response.elapsed))
+
     return response
