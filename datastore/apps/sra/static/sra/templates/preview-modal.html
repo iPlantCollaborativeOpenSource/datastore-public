@@ -1,0 +1,93 @@
+<div class="modal-header">
+    <h3 class="modal-title">{{file_name}}</h3>
+</div>
+<div class="modal-body">
+    <h4 ng-if="data.metadata.template.length || data.metadata.irods.length"> Metadata </h4>
+    <ul>
+        <li class="list-group-item" ng-repeat="meta in data.metadata.template">
+            <dd>{{meta.attr}}</dd>
+            <dt>{{meta.value}}</dt>
+        </li>
+        <li class="list-group-item" ng-repeat="meta in data.metadata.irods">
+            <dd>{{meta.attr}}</dd>
+            <dt>{{meta.value}}</dt>
+        </li>
+    </ul>
+    <h4>File information</h4>
+    <ul>
+        <li>
+            <dd>File Path</dd>
+            <dt>{{data.path}}</dt>
+        </li>
+        <li>
+            <dd>File Size</dd>
+            <dt>{{data['file-size-readable']}}</dt>
+        </li>
+        <li>
+            <dd>Created</dd>
+            <dt>{{data['date-created']}}</dt>
+        </li>
+        <li>
+            <dd>Last Modified</dd>
+            <dt>{{data['date-modified']}}</dt>
+        </li>
+    </ul>
+
+    <h4> File Preview </h4>
+    <div ng-if="data.isPreviewable == 'yes'">
+        <p>Preview may truncate file. Download to view entire file.</p>
+        <!-- <pre id="file_preview" ng-class="{'brush:{{data.brush}} syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview || 'Loading'}}</pre> -->
+        <pre syntax-highlighter id="file_preview">{{data.file_preview || 'Loading'}}</pre>
+        <!-- <pre syntax-highlighter id="file_preview" class="xml syntaxhighlighter brush:xml">{{data.file_preview || 'Loading'}}</pre> -->
+    </div>
+    <div ng-if="data.isPreviewable == 'no'">
+        <p>Preview not available</p>
+    </div>
+</div>
+<div class="modal-footer">
+    <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
+    <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
+    <!-- <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button> -->
+    <div id="download_button">
+        <!-- <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']" uib-popover-html="recaptchaPopover" popover-placement="bottom">Download test recaptcha</button> -->
+        <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']">Download</button>
+
+        <form action="?" method="GET" id="download_form">
+            <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
+            <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
+        </form>
+    </div>
+
+    <div ng-if="!data['downloadable']">
+        <div>
+            Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:
+            <div>Public Access (No account required)
+                <ul>
+                    <li>iCommands</li>
+                    <li>iDrop</li>
+                    <li>Cyberduck</li>
+                    <li>
+                        <a target="_blank" href="http://www.cyverse.org/learning-center/manage-data">More Information</a>
+                    </li>
+                </ul>
+            </div>
+            <div>CyVerse Users (Requires CyVerse account)
+                <ul>
+                    <li>
+                        <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder=/iplant/home/shared/commons_repo/curated/Duitama_rice_variation_2015/">Discovery Environment (DE)</a>
+                    </li>
+                </ul>
+            </div>
+            <dl>
+                <dt>Path:</dt>
+                <dd>
+                    <input value="{{file_path}}" type="text">
+                </dd>
+                <dt>File Name:</dt>
+                <dd>
+                    <input value="{{file_name}}" type="text">
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>

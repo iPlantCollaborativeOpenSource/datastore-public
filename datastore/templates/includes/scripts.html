@@ -1,3 +1,32 @@
+{% load staticfiles %}
+
+
+<script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'vendor/angular/angular.min.js' %}"></script>
+<script src="{% static 'vendor/angular-route/angular-route.min.js' %}"></script>
+<script src="{% static 'vendor/angular-cookies/angular-cookies.min.js' %}"></script>
+<script src="{% static 'vendor/angular-animate/angular-animate.min.js' %}"></script>
+<script src="{% static 'vendor/angular-bootstrap/ui-bootstrap-tpls.js' %}"></script>
+<script src="{% static 'djng/js/django-angular.min.js' %}"></script>
+<script src="{% static 'sra/js/datastore.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shCore.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushCss.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushJava.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushPerl.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushPhp.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushPlain.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushPython.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushRuby.js' %}"></script>
+<script src="{% static 'sra/syntaxhighlighter/scripts/shBrushXml.js' %}"></script>
+
+<script type="text/javascript">
+    var root = "{{ root }}";
+    var root_name = "{{ root_name }}";
+    var metadata_prefix = "{{ metadata_prefix }}";
+    var csrftoken = "{% csrf_token %}"
+</script>
+
 {% if GOOGLE_ANALYTICS_PROPERTY_ID %}
 <script>
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

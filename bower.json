@@ -8,18 +8,16 @@
   "license": "MIT",
   "homepage": "",
   "dependencies": {
-    "bootstrap": "~3.3.5",
     "jquery": "~2.1.4",
+    "bootstrap": "~3.3.5",
     "bootstrap-datepicker": "~1.4.1",
     "modernizer": "~2.8.2",
-    "angular": "~1.4.8",
-    "angular-translate": "~2.4.0",
-    "angular-cookies": "~1.4.0",
-    "angular-resource": "~1.4.0",
-    "bootswatch-dist": "3.3.0-paper",
-    "filesaver": "230de7d142",
-    "ngstorage": "0.3.10",
-    "underscore": "1.8.3",
-    "angular-bootstrap": "~0.14.3"
+    "angular": "~1.5.7",
+    "angular-bootstrap": "~1.3.3",
+    "angular-cookies": "~1.5.7",
+    "angular-resource": "~1.5.7",
+    "angular-route": "^1.5.7",
+    "angular-translate": "~2.11.1",
+    "underscore": "1.8.3"
   }
 }

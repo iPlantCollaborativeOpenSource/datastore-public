@@ -40,12 +40,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'datastore.apps.sra',
-    'djangular',
+    'djng',
     'pipeline',
 )
 
 MIDDLEWARE_CLASSES = (
-    'djangular.middleware.DjangularUrlMiddleware',
+    'djng.middleware.AngularUrlMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -73,6 +73,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'datastore.context_processors.google_analytics',
                 'datastore.context_processors.idc_mirrors_version',
+                'datastore.apps.sra.context_processors.sra',
             ],
         },
     },

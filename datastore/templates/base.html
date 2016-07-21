@@ -10,8 +10,7 @@
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
     <link rel="canonical" href="{{ request.get_full_path }}">
     {% include "includes/styles.html" %}
-    {% block extra_styles %}{% endblock %}
-    {% block head_extra %}{% endblock %}
+    <base href="{% url 'home' %}">
 </head>
 
 <body>
@@ -19,10 +18,5 @@
   {% block content %}{% endblock %}
   {% include "includes/footer.html" %}
   {% include "includes/scripts.html" %}
-  {% block extra_scripts %}{% endblock %}
 </body>
 </html>
-
-{% block scripts %}
-    <!-- <script src="{%static 'vendor/angular/angular.min.js' %}"></script> -->
-{% endblock %}

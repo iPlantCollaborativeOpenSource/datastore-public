@@ -1,173 +1,33 @@
-<div class="main-container container">
-  <div class="content" ng-controller="DatastoreCtrl">
-  {{data.msg}}
-    <div id="breadcrumbs">
-      <ul class="clearfix">
-        <li ng-class="{'file': crumb.type == 'file'}" ng-repeat="crumb in data.breadcrumbs">
-          <a ng-href="/browse{{crumb.path}}" ng-click="browse(crumb.path)">{{crumb.name}}</a>
-        </li>
-      </ul>
-    </div>
-    <!-- <div id="file-scroller"> -->
+<div class="content">
+
+    {{data.msg}}
+
+    <div id="breadcrumbs" ng-include="'/static/sra/templates/breadcrumbs.html'"></div>
+
     <div id="file-scroller">
-      <div id="file-scroller-inner" class="clearfix">
-
-
-
-
-      <script type="text/ng-template" id="preview_modal.html">
-        <div class="modal-header">
-            <h3 class="modal-title">{{file_name}}</h3>
-        </div>
-        <div class="modal-body">
-            <h4 ng-if="data.metadata.template.length || data.metadata.irods.length"> Metadata </h4>
+        <div id="file-scroller-inner" class="clearfix">
             <ul>
                 <li class="list-group-item" ng-repeat="meta in data.metadata.template">
-                  <dd>{{meta.attr}}</dd>
-                  <dt>{{meta.value}}</dt>
+                    <dd>{{meta.attr}}</dd>
+                    <dt>{{meta.value}}</dt>
                 </li>
                 <li class="list-group-item" ng-repeat="meta in data.metadata.irods">
-                  <dd>{{meta.attr}}</dd>
-                  <dt>{{meta.value}}</dt>
+                    <dd>{{meta.attr}}</dd>
+                    <dt>{{meta.value}}</dt>
                 </li>
             </ul>
-            <h4>File information</h4>
-            <ul>
-              <li>
-                <dd>File Path</dd>
-                <dt>{{data.path}}</dt>
-              </li>
-              <li>
-                <dd>File Size</dd>
-                <dt>{{data['file-size-readable']}}</dt>
-              </li>
-              <li>
-                <dd>Created</dd>
-                <dt>{{data['date-created']}}</dt>
-              </li>
-              <li>
-                <dd>Last Modified</dd>
-                <dt>{{data['date-modified']}}</dt>
-              </li>
+            <ul class="clearfix node-list" ng-if="data.collection.id">
+                <li class="dir" ng-repeat="folder in data.collection.folders">
+                    <a ng-href="/browse{{ folder.path }}" >{{ folder.label }}</a>
+                </li>
+                <li class="file" ng-repeat="file in data.collection.files">
+                    <a ng-href="browse{{ file.path }}" ng-click="modal(file.path, file.label)">{{ file.label }} ({{file['file-size']}})</a>
+                </li>
             </ul>
 
-            <h4> File Preview </h4>
-            <div ng-if="data.isPreviewable == 'yes'">
-              <p>Preview may truncate file. Download to view entire file.</p>
-              <!-- <pre id="file_preview" ng-class="{'brush:{{data.brush}} syntaxhighlighter': data.file_preview.length >= 0}">{{data.file_preview || 'Loading'}}</pre> -->
-              <pre syntax-highlighter id="file_preview">{{data.file_preview || 'Loading'}}</pre>
-              <!-- <pre syntax-highlighter id="file_preview" class="xml syntaxhighlighter brush:xml">{{data.file_preview || 'Loading'}}</pre> -->
-            </div>
-            <div ng-if="data.isPreviewable == 'no'">
-              <p>Preview not available</p>
-            </div>
+            <a id="load_more" class="btn btn-default file-info-button" ng-if="data.collection.more_data" ng-click="load_more(data.collection.path)">
+                Load More
+            </a>
         </div>
-        <div class="modal-footer">
-          <!-- <button class="btn btn-primary" type="button" ng-click="ok()">OK</button> -->
-          <!-- <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> -->
-          <!-- <button type="button" class="btn btn-default" ng-click="download(file_path)" ng-disabled="!data['downloadable']">Download</button> -->
-          <div id="download_button">
-            <!-- <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']" uib-popover-html="recaptchaPopover" popover-placement="bottom">Download test recaptcha</button> -->
-            <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie(file_path)" ng-disabled="!data['downloadable']">Download</button>
-
-            <form action="?" method="GET" id="download_form">
-              <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
-              <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
-            </form>
-          </div>
-
-          <div ng-if="!data['downloadable']">
-            <div>
-              Due to the size of this file, it cannot be downloaded from this page. Use one of the following methods:
-              <div>Public Access (No account required)
-                <ul>
-                  <li>iCommands</li>
-                  <li>iDrop</li>
-                  <li>Cyberduck</li>
-                  <li>
-                    <a target="_blank" href="http://www.cyverse.org/learning-center/manage-data">More Information</a>
-                  </li>
-                </ul>
-              </div>
-              <div>CyVerse Users (Requires CyVerse account)
-                <ul>
-                  <li>
-                    <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder=/iplant/home/shared/commons_repo/curated/Duitama_rice_variation_2015/">Discovery Environment (DE)</a>
-                  </li>
-                </ul>
-              </div>
-              <dl>
-                <dt>Path:</dt>
-                <dd>
-                  <input value="{{file_path}}" type="text">
-                </dd>
-                <dt>File Name:</dt>
-                <dd>
-                  <input value="{{file_name}}" type="text">
-                </dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </script>
-
-
-
-
-
-
-
-        <ul>
-            <li class="list-group-item" ng-repeat="meta in data.metadata.template">
-              <dd>{{meta.attr}}</dd>
-              <dt>{{meta.value}}</dt>
-            </li>
-            <li class="list-group-item" ng-repeat="meta in data.metadata.irods">
-              <dd>{{meta.attr}}</dd>
-              <dt>{{meta.value}}</dt>
-            </li>
-        </ul>
-        <ul class="clearfix node-list" ng-if="data.collection.id">
-          <!-- <div ng-if="folders"> -->
-            <li class="dir" ng-repeat="folder in data.collection.folders">
-              <a ng-href="/browse{{ folder.path }}" ng-click="browse(folder.path, id=folder.id)" ><!-- <span class="glyphicon glyphicon-folder-close"></span>  -->{{ folder.label }}</a>
-            </li>
-          <!-- </div> -->
-          <!-- <div ng-if="files"> -->
-            <li class="file" ng-repeat="file in data.collection.files">
-              <a ng-href="browse{{ file.path }}" ng-click="modal(file.path, file.label)">{{ file.label }} ({{file['file-size']}})</a>
-            </li>
-          <!-- </div> -->
-        </ul>
-
-<!--         <div ng-if="data.type == 'file'">
-          <ul class="file-properties">
-          {{data}}
-            <li>{{data.label}}</li>
-            <li>{{data.file-size}} B</li>
-            <li>{{data.id}}</li>
-          </ul>
-
-        </div> -->
-
-        <a id="load_more" class="btn btn-default file-info-button" ng-if="data.collection.more_data" ng-click="load_more(data.collection.path)">
-          Load More
-        </a>
-      </div>
     </div>
-  </div>
 </div>
-
-<script type="text/javascript">
-window.recaptcha_callback = function recaptcha_callback(response) {
-    var d = new Date();
-    d.setTime(d.getTime() + (365*24*60*60*1000));
-    var expires = "expires="+d.toUTCString();
-    document.cookie = 'recaptcha_status=verified; ' + expires;
-
-    var el = document.querySelector('.g-recaptcha'),
-    $el = angular.element(el),
-    $scope = $el.scope();
-    $scope.download($scope.file_path)
-}
-</script>

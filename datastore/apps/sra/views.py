@@ -5,8 +5,7 @@ import urllib
 import jwt
 import markdown
 import requests
-from datetime import date
-from os.path import basename, splitext
+from os.path import splitext
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, StreamingHttpResponse
 from django.http import JsonResponse
@@ -26,18 +25,12 @@ def _check_path(path):
     return path
 
 
-def home(request, path=''):
-    context = {
-        'root': sra_settings.irods['path'],
-        'root_name': basename(sra_settings.irods['path']),
-        'metadata_prefix': sra_settings.datastore['metadata_prefix'],
-        'year': date.today().year,
-    }
-    return render(request, 'sra/home.html', context);
+def home(request, **kwargs):
+    return render(request, 'sra/home.html');
 
 
 def get_file_or_folder(request, path, page=1):
-    path =_check_path(path)
+    path = _check_path(path)
 
     cache_key = path + '_page_' + str(page)
     cache_value = cache.get(cache_key)
@@ -69,7 +62,7 @@ def get_file_or_folder(request, path, page=1):
 
 
 def get_metadata(request, id):
-    url= sra_settings.DE_API_HOST + '/terrain/secured/filesystem/' + str(id) + '/metadata'
+    url = sra_settings.DE_API_HOST + '/terrain/secured/filesystem/' + str(id) + '/metadata'
     de_response = send_request('GET', url=url)
 
     if de_response.status_code == 200:
@@ -93,12 +86,14 @@ def get_metadata(request, id):
 
     return metadata
 
+
 def get_collection(request, path, page=1, id=None):
-    path =_check_path(path)
+
+    path = _check_path(path)
 
     if id:
         cache_key = 'collection_and_meta_' + path + '_page_' + str(page)
-    else: #need cache with metadata
+    else:  # need cache with metadata
         cache_key = 'collection_' + path + '_page_' + str(page)
     collection = cache.get(cache_key)
     logger.info('cache_key: {} ---- cache_value: {}'.format(cache_key, collection))
@@ -123,7 +118,7 @@ def get_collection(request, path, page=1, id=None):
             return HttpResponse(de_response.reason + ' -- ' + de_response.content, status=de_response.status_code)
 
         collection = de_response.json()
-        metadata={}
+        metadata = {}
 
         if id:
             metadata=get_metadata(request, id)
@@ -147,7 +142,7 @@ def get_collection(request, path, page=1, id=None):
 
 
 def serve_file(request, path=''):
-    path =_check_path(path)
+    path = _check_path(path)
 
     url= sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
     params={
@@ -167,7 +162,7 @@ def serve_file(request, path=''):
 
 def download_file(request, path=''):
     path = _check_path(path)
-    url= sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
+    url = sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
     params={'path': path}
 
     de_response = send_request('GET', url=url, params=params, stream=True)
@@ -184,8 +179,8 @@ def download_file(request, path=''):
 
 def markdown_view(request, path=''):
     path = _check_path(path)
-    url= sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
-    params={'path': path}
+    url = sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
+    params ={'path': path}
 
     de_response = send_request('GET', url=url, params=params)
 
@@ -353,6 +348,7 @@ def send_request(http_method, url=None, params=None, stream=False, payload=None)
 
     logger.info('url: {0}'.format(url))
     logger.info('params: {0}'.format(params))
+    logger.info('payload: {0}'.format(payload))
     logger.info('jwt: {0}'.format(encoded_jwt))
 
     if payload:
