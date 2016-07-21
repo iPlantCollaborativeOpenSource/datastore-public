@@ -346,13 +346,14 @@ def create_jwt_token():
         "email": 'test@email.com'
     }
 
-    with open('privkey.pem', 'r') as priv_key:
-        shared_key = priv_key.read()
+    with open(sra_settings.DE_API_KEY_PATH, 'r') as api_key:
+        shared_key = api_key.read()
 
     from cryptography.hazmat.primitives.serialization import load_pem_private_key
     from cryptography.hazmat.backends import default_backend
 
-    key = load_pem_private_key(shared_key, sra_settings.PASSPHRASE, default_backend())
+    key = load_pem_private_key(shared_key,
+                               sra_settings.DE_API_KEY_PASSPHRASE, default_backend())
 
     jwt_string = jwt.encode(payload, key, algorithm='RS256')
     encoded_jwt = urllib.quote_plus(jwt_string)  # url-encode the jwt string

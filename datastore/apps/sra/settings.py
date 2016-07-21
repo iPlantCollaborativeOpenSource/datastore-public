@@ -17,4 +17,5 @@ datastore = {
 }
 
 #DE API JWWT
-PASSPHRASE=os.getenv('PASSPHRASE')
+DE_API_KEY_PATH = os.getenv('DE_API_KEY_PATH', 'privKey.pem')
+DE_API_KEY_PASSPHRASE = os.getenv('DE_API_KEY_PASSPHRASE', 'mirrors')
