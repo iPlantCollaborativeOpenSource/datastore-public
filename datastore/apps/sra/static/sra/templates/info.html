@@ -135,7 +135,7 @@
           <!-- </div> -->
           <!-- <div ng-if="files"> -->
             <li class="file" ng-repeat="file in data.collection.files">
-              <a ng-click="modal(file.path, file.label)">{{ file.label }} ({{file['file-size']}})</a>
+              <a ng-href="browse{{ file.path }}" ng-click="modal(file.path, file.label)">{{ file.label }} ({{file['file-size']}})</a>
             </li>
           <!-- </div> -->
         </ul>
