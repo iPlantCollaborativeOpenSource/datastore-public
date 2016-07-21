@@ -1,37 +1,22 @@
+import json
+import logging
+import time
+import urllib
+import jwt
+import markdown
+import requests
+from datetime import date
+from os.path import basename, splitext
 from django.core.cache import cache
-from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, StreamingHttpResponse
 from django.http import JsonResponse
-
-from os.path import basename, splitext
-from os import O_RDONLY
-import logging
-from datetime import date
-from calendar import timegm
-
-import markdown
-import urllib
-import urllib2
-import json
-import jwt
-import requests
-import time
-
-from irods.collection import iRODSCollection, iRODSDataObject
-from irods.data_object import iRODSDataObjectFileRaw
-from irods.exception import DataObjectDoesNotExist, CollectionDoesNotExist
-from irods.manager.collection_manager import CollectionManager
-from irods.models import Collection, CollectionMeta
-from .api import DataStoreSession
-from .content_types import content_types
-from .file_iterable import FileIterable
-from . import settings as sra_settings
-
+from django.shortcuts import render
+import settings as sra_settings
 
 logger = logging.getLogger(__name__)
 
-CACHE_EXPIRATION = 900 #15 minutes
-DE_HOST='https://everdene.iplantcollaborative.org/'
+CACHE_EXPIRATION = 900  # 15 minutes
+
 
 def _check_path(path):
     path = str(path)
@@ -39,6 +24,7 @@ def _check_path(path):
         path = path[:-1]
     path = urllib.unquote(path).decode('utf8')
     return path
+
 
 def home(request, path=''):
     context = {
@@ -57,7 +43,7 @@ def get_file_or_folder(request, path, page=1):
     cache_value = cache.get(cache_key)
     logger.info('{} - cache value:{}'.format(cache_key, cache_value))
     if not cache_value:
-        url = DE_HOST + 'terrain/secured/filesystem/stat'
+        url = sra_settings.DE_API_HOST + '/terrain/secured/filesystem/stat'
         payload = {'paths': [str(path)]}
 
         de_response = send_request('POST', url=url, payload=payload)
@@ -83,7 +69,7 @@ def get_file_or_folder(request, path, page=1):
 
 
 def get_metadata(request, id):
-    url= DE_HOST + 'terrain/secured/filesystem/' + str(id) + '/metadata'
+    url= sra_settings.DE_API_HOST + '/terrain/secured/filesystem/' + str(id) + '/metadata'
     de_response = send_request('GET', url=url)
 
     if de_response.status_code == 200:
@@ -122,7 +108,7 @@ def get_collection(request, path, page=1, id=None):
         page=int(page)
         offset = PER_PAGE * (page - 1)
 
-        url= DE_HOST + 'terrain/secured/filesystem/paged-directory'
+        url= sra_settings.DE_API_HOST + '/terrain/secured/filesystem/paged-directory'
         params={
             'path': path,
             'limit': PER_PAGE,
@@ -163,7 +149,7 @@ def get_collection(request, path, page=1, id=None):
 def serve_file(request, path=''):
     path =_check_path(path)
 
-    url= DE_HOST + 'terrain/secured/fileio/download'
+    url= sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
     params={
         'path': path,
         'chunk-size': 8000,
@@ -181,7 +167,7 @@ def serve_file(request, path=''):
 
 def download_file(request, path=''):
     path = _check_path(path)
-    url= DE_HOST + 'terrain/secured/fileio/download'
+    url= sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
     params={'path': path}
 
     de_response = send_request('GET', url=url, params=params, stream=True)
@@ -198,7 +184,7 @@ def download_file(request, path=''):
 
 def markdown_view(request, path=''):
     path = _check_path(path)
-    url= DE_HOST + 'terrain/secured/fileio/download'
+    url= sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
     params={'path': path}
 
     de_response = send_request('GET', url=url, params=params)
@@ -234,7 +220,7 @@ def legacy_redirect(request, path=''):
 
     path = _check_path(path)
 
-    url = DE_HOST + 'terrain/secured/filesystem/stat'
+    url = sra_settings.DE_API_HOST + '/terrain/secured/filesystem/stat'
     payload = {'paths': [str(path)]}
 
     de_response = send_request('POST', url=url, payload=payload)
@@ -331,7 +317,7 @@ def search(request):
             ]}
         })
 
-    url = DE_HOST + 'terrain/secured/filesystem/index'
+    url = sra_settings.DE_API_HOST + '/terrain/secured/filesystem/index'
     params = {'q': query}
 
     resp = send_request('GET', url, params)
