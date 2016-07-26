@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="main-container container">
-        <div ng-view></div>
+        <div ng-controller="DcrMainCtrl" ng-include="'{% static "sra/templates/info.html" %}'"></div>
     </div>
 
     <script type="text/javascript">

@@ -1,33 +1,84 @@
 <div class="content">
 
-    {{data.msg}}
+    <dcr-breadcrumbs dcr-item="model.item", on-click="browse(item)"></dcr-breadcrumbs>
 
-    <div id="breadcrumbs" ng-include="'/static/sra/templates/breadcrumbs.html'"></div>
+    <div class="alert alert-danger" ng-if="model.err">
+        {{ err }}
+    </div>
 
-    <div id="file-scroller">
-        <div id="file-scroller-inner" class="clearfix">
-            <ul>
-                <li class="list-group-item" ng-repeat="meta in data.metadata.template">
-                    <dd>{{meta.attr}}</dd>
-                    <dt>{{meta.value}}</dt>
-                </li>
-                <li class="list-group-item" ng-repeat="meta in data.metadata.irods">
-                    <dd>{{meta.attr}}</dd>
-                    <dt>{{meta.value}}</dt>
-                </li>
-            </ul>
-            <ul class="clearfix node-list" ng-if="data.collection.id">
-                <li class="dir" ng-repeat="folder in data.collection.folders">
-                    <a ng-href="/browse{{ folder.path }}" >{{ folder.label }}</a>
-                </li>
-                <li class="file" ng-repeat="file in data.collection.files">
-                    <a ng-href="browse{{ file.path }}" ng-click="modal(file.path, file.label)">{{ file.label }} ({{file['file-size']}})</a>
-                </li>
-            </ul>
+    <h2 ng-if="model.item">
+        <span>{{ model.item.label }}</span>
+        <button class="btn btn-default btn-xs" uib-popover-template="'local/dcr-item-info.html'" popover-placement="bottom" popover-trigger="outsideClick" popover-title="{{ model.item.label }}">
+            <i class="fa fa-info"></i>
+            <span class="sr-only">More information</span>
+        </button>
+    </h2>
 
-            <a id="load_more" class="btn btn-default file-info-button" ng-if="data.collection.more_data" ng-click="load_more(data.collection.path)">
-                Load More
-            </a>
+    <div ng-if="model.metadata">
+        <ul class="list-group">
+            <li class="list-group-item" ng-repeat="meta in model.metadata.avus">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <b>{{ meta.attr }}</b>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ meta.value }}
+                    </div>
+                </div>
+            </li>
+            <li class="list-group-item" ng-repeat="meta in model.metadata['irods-avus']">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <b>{{ meta.attr }}</b>
+                    </div>
+                    <div class="col-sm-9">
+                        {{ meta.value }}
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div style="min-height: 300px;" id="directory-contents">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <tr ng-repeat="folder in model.collection.folders">
+                    <td>
+                        <a ng-href="/browse{{ folder.path }}" ng-click="browse(folder)">
+                            <i class="fa fa-folder"></i> {{ folder.label }}
+                            <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                        </a>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr ng-repeat="file in model.collection.files">
+                    <td>
+                        <a ng-href="#preview-{{ file.id }}" ng-click="preview(file)">
+                            <i class="fa fa-file-o"></i> {{ file.label }}
+                        </a>
+                    </td>
+                    <td>
+                        ({{ file['file-size']|bytes }})
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
+
+    <nav aria-label="Directory paging" ng-if="model.pagination.show">
+        <ul uib-pagination total-items="model.pagination.total" items-per-page="model.pagination.pageSize" ng-model="model.pagination.current" ng-change="pageChanged()"></ul>
+    </nav>
+
+    <script type="text/ng-template" id="local/dcr-item-info.html">
+        <table class="table">
+            <tr>
+                <td><b>Created</b></td>
+                <td>{{ model.item['date-created']|date:"medium" }}</td>
+            </tr>
+            <tr>
+                <td><b>Updated</b></td>
+                <td>{{ model.item['date-modified']|date:"medium" }}</td>
+            </tr>
+        </table>
+    </script>
 </div>

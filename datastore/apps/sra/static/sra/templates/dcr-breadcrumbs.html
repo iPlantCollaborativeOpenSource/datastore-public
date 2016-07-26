@@ -1,0 +1,8 @@
+<ul class="breadcrumb">
+    <li ng-repeat="link in links">
+        <a ng-if="!$last" ng-href="/browse{{ link.path }}" ng-click="onClick({'$event': $event, 'item': link})">
+            <i class="fa fa-folder"></i> {{ link.label }}
+        </a>
+        <span ng-if="$last"><i class="fa fa-folder-open"></i> {{ link.label }}</span>
+    </li>
+</ul>

@@ -5,11 +5,13 @@ import urllib
 import jwt
 import markdown
 import requests
+from requests import HTTPError
 from os.path import splitext
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, StreamingHttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
+from datastore.libs.terrain.client import TerrainClient
 import settings as sra_settings
 
 logger = logging.getLogger(__name__)
@@ -26,7 +28,56 @@ def _check_path(path):
 
 
 def home(request, **kwargs):
-    return render(request, 'sra/home.html');
+    return render(request, 'sra/home.html')
+
+
+def api_stat(request, path):
+    cache_key = '{}:{}'.format(urllib.quote_plus(path), 'stat')
+    path_stat = cache.get(cache_key)
+    if path_stat is None:
+        try:
+            tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+            path_stat = tc.get_file_or_folder(path)
+            path_stat = path_stat['paths'][path]
+            cache.set(cache_key, path_stat, CACHE_EXPIRATION)
+        except HTTPError as e:
+            logger.exception('Failed to stat path', extra={'path': path})
+            return HttpResponseBadRequest('Failed to stat path',
+                                          content_type='application/json')
+    return JsonResponse(path_stat)
+
+
+def api_metadata(request, item_id):
+    cache_key = '{}:{}'.format(item_id, 'metadata')
+    metadata = cache.get(cache_key)
+    if metadata is None:
+        try:
+            tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+            metadata = tc.get_metadata(item_id)
+            cache.set(cache_key, metadata, CACHE_EXPIRATION)
+        except HTTPError as e:
+            logger.exception('Failed to retrieve metadata', extra={'id': item_id})
+            return HttpResponseBadRequest('Failed to retrieve metadata',
+                                          content_type='application/json')
+    return JsonResponse(metadata)
+
+
+def api_list_item(request, path):
+    path = _check_path(path)
+    page = request.GET.get('page', 0)
+    cache_key = '{}:{}:{}'.format(urllib.quote_plus(path), 'list_page', page)
+    logger.info(cache_key)
+    list_resp = cache.get(cache_key)
+    if list_resp is None:
+        try:
+            tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+            list_resp = tc.get_contents(path, page=page)
+            cache.set(cache_key, list_resp, CACHE_EXPIRATION)
+        except HTTPError as e:
+            logger.exception('Failed to list contents for path', extra={'path': path})
+            return HttpResponseBadRequest('Failed to list contents',
+                                          content_type='application/json')
+    return JsonResponse(list_resp)
 
 
 def get_file_or_folder(request, path, page=1):
@@ -36,55 +87,40 @@ def get_file_or_folder(request, path, page=1):
     cache_value = cache.get(cache_key)
     logger.info('{} - cache value:{}'.format(cache_key, cache_value))
     if not cache_value:
-        url = sra_settings.DE_API_HOST + '/terrain/secured/filesystem/stat'
-        payload = {'paths': [str(path)]}
+        tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+        try:
+            stat_response = tc.get_file_or_folder(path)
+            item = stat_response['paths'][path]
+            metadata = tc.get_metadata(item['id'])
+            if item['type'] == 'dir':
+                contents = tc.get_contents(item['path'])
+            else:
+                contents = None
 
-        de_response = send_request('POST', url=url, payload=payload)
-
-        if de_response.status_code != 200:
-            # return de_response.raw
-            return HttpResponse(de_response.reason + ' -- ' + de_response.content, status=de_response.status_code)
-
-        data = de_response.json()['paths'][path]
-        metadata = get_metadata(request, data['id'])
-
-        collection = {}
-        if data['type'] == 'dir':
-            collection = get_collection(request, path, int(page))
-
-        cache_value = data
-        cache_value['metadata'] = metadata
-        cache_value['collection'] = collection
-
-        cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+            cache_value = item
+            cache_value['metadata'] = metadata
+            cache_value['collection'] = contents
+            cache.set(cache_key, cache_value, CACHE_EXPIRATION)
+        except:
+            logger.exception('unable to perform request')
+            return HttpResponseBadRequest('Unable to perform request',
+                                          content_type='application/json')
 
     return JsonResponse(cache_value)
 
 
 def get_metadata(request, id):
-    url = sra_settings.DE_API_HOST + '/terrain/secured/filesystem/' + str(id) + '/metadata'
-    de_response = send_request('GET', url=url)
+    tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+    try:
+        metadata = tc.get_metadata(id)
 
-    if de_response.status_code == 200:
-        de_meta = de_response.json()
-
-        try:
-            template_meta = de_meta['avus']
-        except IndexError: #there is no template metadata
-            template_meta=[]
-
-        irods_meta = de_meta['irods-avus']
-
-    else: #something is wrong with DE metadata endpoint
-        irods_meta=[{"attr": "Error", "value": de_response.reason}]
-        template_meta=[]
-
-    metadata = {
-        'irods': irods_meta,
-        'template': template_meta,
-    }
-
-    return metadata
+        metadata['irods'] = metadata.get('irods-avus', [])
+        metadata['template'] = metadata.get('avus', [])
+        return JsonResponse(metadata)
+    except:
+        logger.exception('Failed to retrieve metadata', extra={'id': id})
+        return HttpResponseBadRequest('Unable to perform request',
+                                      content_type='application/json')
 
 
 def get_collection(request, path, page=1, id=None):
@@ -134,6 +170,9 @@ def get_collection(request, path, page=1, id=None):
             return JsonResponse(cache_value)
 
         cache.set(cache_key, collection, CACHE_EXPIRATION)
+
+    logger.debug('HERE')
+    logger.debug(request.is_ajax())
 
     if 'djng_url_kwarg_id' in request.GET or 'djng_url_kwarg_page' in request.GET: #this function was called by get_file_or_folder
         return JsonResponse(collection)
