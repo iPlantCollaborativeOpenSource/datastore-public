@@ -53,6 +53,7 @@
     </div>
 
     <div ng-if="!model.downloadEnabled" class="alert alert-info">
+        <h4><i class="fa fa-cloud-download"></i> Download</h4>
         <p>
             Due to the size of this file, it cannot be downloaded from this page.
             Please use one of the following methods:
@@ -65,14 +66,18 @@
                     <li>iDrop</li>
                     <li>Cyberduck</li>
                     <li>
-                        <a target="_blank" href="http://www.cyverse.org/learning-center/manage-data">More Information</a>
+                        <a target="_blank" href="http://www.cyverse.org/learning-center/manage-data">
+                            More Information <i class="fa fa-external-link"></i>
+                        </a>
                     </li>
                 </ul>
             </li>
             <li>CyVerse Users (requires CyVerse account)
                 <ul>
                     <li>
-                        <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.file.path }}">Discovery Environment (DE)</a>
+                        <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.file.parent_path }}">
+                            Discovery Environment (DE) <i class="fa fa-external-link"></i></a>
+                        </a>
                     </li>
                 </ul>
             </li>
@@ -80,7 +85,7 @@
         <dl>
             <dt>Path:</dt>
             <dd>
-                <input value="{{ model.file.path }}" type="text" class="form-control">
+                <input value="{{ model.file.parent_path }}" type="text" class="form-control">
             </dd>
             <dt>File Name:</dt>
             <dd>
