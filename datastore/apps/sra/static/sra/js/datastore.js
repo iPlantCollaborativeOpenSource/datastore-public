@@ -92,7 +92,8 @@ if (!Array.prototype.map) {
         .config(['$httpProvider', '$locationProvider', config]);
 
     app.value('TerrainConfig', {
-        'DIR_PAGE_SIZE': 100
+        'DIR_PAGE_SIZE': 100,
+        'MAX_DOWNLOAD_SIZE': 2147483648
     });
 
     app.factory('DcrFileService', ['$http', 'djangoUrl', function($http, djangoUrl) {
@@ -112,12 +113,16 @@ if (!Array.prototype.map) {
             return $http.get(djangoUrl.reverse('api_list_item', {'path': path}), {'params': {'page': page}});
         };
 
+        service.previewFile = function(path) {
+            return $http.get(djangoUrl.reverse('api_preview_file', {'path': path}));
+        };
+
         return service;
 
     }]);
 
-    app.controller('DcrMainCtrl', ['$scope', '$location', '$anchorScroll', 'TerrainConfig', 'DcrFileService', '$uibModal',
-        function($scope, $location, $anchorScroll, TerrainConfig, DcrFileService, $uibModal) {
+    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$anchorScroll', 'TerrainConfig', 'DcrFileService', '$uibModal',
+        function($scope, $q, $location, $anchorScroll, TerrainConfig, DcrFileService, $uibModal) {
 
             $scope.browse = function(item) {
                 item.loading = true;
@@ -129,6 +134,30 @@ if (!Array.prototype.map) {
                         var page = +searchObj.page || 0;
                         $scope.getContents(item.path, page);
                     });
+            };
+
+            $scope.preview = function(file) {
+                file.loading = true;
+                $q.all([
+                    DcrFileService.getItem(file.path),
+                    DcrFileService.getItemMetadata(file.id)
+                ]).then(function(values) {
+                    console.log(values);
+                    file.loading = false;
+                    $uibModal.open({
+                        templateUrl: '/static/sra/templates/preview-modal.html',
+                        controller: 'ModalInstanceCtrl',
+                        size: 'lg',
+                        resolve: {
+                            file: function () {
+                                return values[0].data;
+                            },
+                            metadata: function() {
+                                return values[1].data;
+                            }
+                        }
+                    });
+                });
             };
 
             $scope.getItem = function(path) {
@@ -462,43 +491,42 @@ if (!Array.prototype.map) {
         return service;
     }]);
 
-    app.controller('ModalInstanceCtrl', ['$http', 'djangoUrl', '$uibModalInstance', '$cookies', 'file_path', 'file_name', 'data', '$scope', '$rootScope', 'datastoreFactory', '$sce', function ($http, djangoUrl, $uibModalInstance, $cookies, file_path, file_name, data, $scope, $rootScope, datastoreFactory, $sce) {
-        $scope.data = {};
-        $scope.data = data;
-        $scope.file_path = file_path;
-        $scope.file_name = file_name;
-        console.log('ModalInstanceCtrl scope', $scope);
+    app.controller('ModalInstanceCtrl', ['$scope', '$cookies', '$sce', '$uibModalInstance', 'DcrFileService', 'TerrainConfig', 'file', 'metadata',
+        function ($scope, $cookies, $sce, $uibModalInstance, DcrFileService, TerrainConfig, file, metadata) {
+            $scope.model = {
+                file: file,
+                metadata: metadata
+            };
 
-        $scope.download = function(path){
-            $uibModalInstance.close();
+            $scope.model.downloadEnabled = $scope.model.file['file-size'] < TerrainConfig.MAX_DOWNLOAD_SIZE;
 
-            var url = 'download'+ path;
-            var link = document.createElement('a');
-            link.setAttribute('download', $scope.file_name);
-            link.setAttribute('href', url);
-            link.setAttribute('target', '_self');
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            console.log('downloading', path)
-        };
+            $scope.download = function() {
+                $uibModalInstance.close();
+                var url = 'download' + $scope.model.file.path;
+                var link = document.createElement('a');
+                link.setAttribute('download', $scope.model.file.label);
+                link.setAttribute('href', url);
+                link.setAttribute('target', '_self');
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
 
-        $scope.preview = function(path){
-            datastoreFactory.serve_file(path).then(
-                function(resp) {
-                    console.log('serve_file response', resp);
-                    $scope.data.file_preview = resp.data;
-                    $rootScope.$broadcast('previewLoaded');
-                },
-                function(data) {
-                    console.log('serve_file error data', data);
-                    $scope.data.msg = data.data
-                }
-            )
-        };
+            $scope.preview = function(path) {
+                DcrFileService.previewFile(path).then(
+                    function(resp) {
+                        console.log('serve_file response', resp);
+                        $scope.model.preview = resp.data;
+                        $scope.$broadcast('previewLoaded');
+                    },
+                    function(data) {
+                        console.log('serve_file error data', data);
+                        $scope.err = data.data
+                    }
+                )
+            };
 
-        $scope.isPreviewable = function(filename){
             var BrushSources = {
                 'php': 'shBrushPhp',
                 'js': 'shBrushJScript',
@@ -509,50 +537,38 @@ if (!Array.prototype.map) {
                 'eml': 'shBrushXml',
                 'xml': 'shBrushXml'
             };
+            var ext = $scope.model.file.label.split('.').pop();
+            if (ext in BrushSources) {
+                $scope.model.previewable = true;
+                $scope.model.brush = ext;
+                $scope.preview($scope.model.file.path);
+            } else if ($scope.model.file['content-type'].substring(0, 4) === 'text') {
+                $scope.model.previewable = true;
+                $scope.model.brush = 'plain';
+                $scope.preview($scope.model.file.path);
+            } else {
+                $scope.model.previewable = false;
+            }
 
-            var ext = filename.split('.').pop();
-
-            if (ext in BrushSources || $scope.data['content-type'].substring(0, 4) == 'text'){
-                $scope.data.isPreviewable = 'yes';
-                if (ext in BrushSources) {
-                    $scope.data.brush = ext;
+            $scope.check_recaptcha_cookie = function() {
+                if ($cookies.get('recaptcha_status') != 'verified') {
+                    $('#download_button').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
                 } else {
-                    $scope.data.brush = 'text';
+                    $scope.download();
+                    $('#download_button').popover('hide');
                 }
-                $scope.preview($scope.data.path);
-                console.log('ModalInstanceCtrl scope after checking previewable', $scope)
-            } else {
-                $scope.data.isPreviewable = 'no'
-            }
-        };
-
-        $scope.isPreviewable($scope.data['label']);
-
-
-        $scope.check_recaptcha_cookie = function(path) {
-            $scope.download_path = '/download' + path;
-
-            if ($cookies.get('recaptcha_status') != 'verified') {
-
-                $('#download_button').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
-            } else {
-                $scope.download(path);
-                $('#download_button').popover('hide');
-
-            }
-
-            if ($('#recaptcha').html()) {
-                grecaptcha.reset();
-            }
-        };
-    }]);
+                if ($('#recaptcha').html()) {
+                    grecaptcha.reset();
+                }
+            };
+        }]);
 
     app.directive('syntaxHighlighter', function () {
         return {
-            link:function ($scope, element, attrs) {
-                $scope.$watch('data.file_preview', function(value) {
-                    console.log('saw $scope.data.file_preview change');
-                    var brush='brush:' + $scope.data.brush;
+            link:function ($scope, element) {
+                $scope.$watch('model.preview', function(value) {
+                    console.log('saw $scope.model.file_preview change');
+                    var brush='brush:' + $scope.model.brush;
                     $(element).addClass(brush);
                     if (value) {
                         SyntaxHighlighter.highlight({}, element[0]);

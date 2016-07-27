@@ -8,10 +8,12 @@
 
     <h2 ng-if="model.item">
         <span>{{ model.item.label }}</span>
+        <!--
         <button class="btn btn-default btn-xs" uib-popover-template="'local/dcr-item-info.html'" popover-placement="bottom" popover-trigger="outsideClick" popover-title="{{ model.item.label }}">
             <i class="fa fa-info"></i>
             <span class="sr-only">More information</span>
         </button>
+        -->
     </h2>
 
     <div ng-if="model.metadata">
@@ -46,8 +48,8 @@
                     <td>
                         <a ng-href="/browse{{ folder.path }}" ng-click="browse(folder)">
                             <i class="fa fa-folder"></i> {{ folder.label }}
-                            <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
                         </a>
+                        <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
                     </td>
                     <td></td>
                 </tr>
@@ -56,6 +58,7 @@
                         <a ng-href="#preview-{{ file.id }}" ng-click="preview(file)">
                             <i class="fa fa-file-o"></i> {{ file.label }}
                         </a>
+                        <span ng-if="file.loading"><i class="fa fa-spinner fa-spin"></i></span>
                     </td>
                     <td>
                         ({{ file['file-size']|bytes }})

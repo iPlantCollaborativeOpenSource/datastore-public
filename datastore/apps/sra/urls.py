@@ -13,7 +13,7 @@ urlpatterns = patterns(
     url(r'^api/load_more/(?P<path>.*)/page/(?P<page>\d*)/?$', 'get_collection', name='load_more'),
 
     url(r'^serve/(?P<path>.*)$', 'serve_file', name='serve'),
-    url(r'^download/(?P<path>.*)$', 'download_file', name='download'),
+    url(r'^download/(?P<path>.*)$', 'download_file_anon', name='download'),
     url(r'^markdown/(?P<path>.*)$', 'markdown_view', name='markdown'),
 
     url(r'^search/metadata/?$', 'search_metadata'),
@@ -22,6 +22,7 @@ urlpatterns = patterns(
     url(r'^api/stat/(?P<path>.*)/?$', 'api_stat', name='api_stat'),
     url(r'^api/metadata/(?P<item_id>.*)/?$', 'api_metadata', name='api_metadata'),
     url(r'^api/list/(?P<path>.*)/?$', 'api_list_item', name='api_list_item'),
+    url(r'^api/preview/(?P<path>.*)/?$', 'api_preview_file', name='api_preview_file'),
 
     # legacy support
     url(r'^(?P<path>.+)$', 'legacy_redirect'),

@@ -55,17 +55,17 @@ class TerrainClient(object):
                 kwargs['data'] = json.dumps(data)
         kwargs['headers'] = headers
         response = requests.request(method, url, **kwargs)
-        return response.json()
+        return response
 
     def get_file_or_folder(self, path):
-        url = '{0}//terrain/secured/filesystem/stat'.format(settings.TERRAIN_API_HOST)
+        url = '{0}/terrain/secured/filesystem/stat'.format(settings.TERRAIN_API_HOST)
         payload = {'paths': [str(path)]}
-        return self.send_request('POST', url, data=payload)
+        return self.send_request('POST', url, data=payload).json()
 
     def get_metadata(self, id):
         url = '{0}/terrain/secured/filesystem/{1}/metadata'.format(
             settings.TERRAIN_API_HOST, str(id))
-        return self.send_request('GET', url)
+        return self.send_request('GET', url).json()
 
     def get_contents(self, path, **kwargs):
         url = '{0}/terrain/secured/filesystem/paged-directory'.format(
@@ -81,4 +81,8 @@ class TerrainClient(object):
             'sort-col': TerrainClient.SORT_COL,
             'sort-dir': TerrainClient.SORT_DIR,
         }
-        return self.send_request('GET', url, params=params)
+        return self.send_request('GET', url, params=params).json()
+
+    def download(self, params):
+        url = '{0}/terrain/secured/fileio/download'.format(settings.TERRAIN_API_HOST)
+        return self.send_request('GET', url=url, params=params, stream=True)

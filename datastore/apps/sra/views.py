@@ -12,6 +12,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.http import JsonResponse
 from django.shortcuts import render
 from datastore.libs.terrain.client import TerrainClient
+from datastore.libs.anon_files.client import AnonFilesClient
 import settings as sra_settings
 
 logger = logging.getLogger(__name__)
@@ -78,6 +79,28 @@ def api_list_item(request, path):
             return HttpResponseBadRequest('Failed to list contents',
                                           content_type='application/json')
     return JsonResponse(list_resp)
+
+
+def api_preview_file(request, path):
+    try:
+        af = AnonFilesClient()
+        response = af.download(path, headers={'Range': 'bytes=0-8192'})
+        return StreamingHttpResponse(response.content)
+    except HTTPError as e:
+        logger.exception('Failed to preview file', extra={'path': path})
+        return HttpResponseBadRequest('Failed to preview file',
+                                      content_type='application/json')
+
+
+def download_file_anon(request, path):
+    try:
+        af = AnonFilesClient()
+        response = af.download(path)
+        return StreamingHttpResponse(response.content)
+    except HTTPError as e:
+        logger.exception('Failed to preview file', extra={'path': path})
+        return HttpResponseBadRequest('Failed to preview file',
+                                      content_type='application/json')
 
 
 def get_file_or_folder(request, path, page=1):
@@ -183,8 +206,8 @@ def get_collection(request, path, page=1, id=None):
 def serve_file(request, path=''):
     path = _check_path(path)
 
-    url= sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
-    params={
+    url = sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
+    params = {
         'path': path,
         'chunk-size': 8000,
         'start': 0
