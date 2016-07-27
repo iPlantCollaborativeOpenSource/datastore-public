@@ -26,6 +26,9 @@
 - name: Install memcached
   yum: name=memcached state=present
 
+- name: Enable memcached
+  service: name=memcached enabled=yes state=started
+
 - name: Install the 'Development tools' package group
   yum: name="@Development tools" state=present
 
