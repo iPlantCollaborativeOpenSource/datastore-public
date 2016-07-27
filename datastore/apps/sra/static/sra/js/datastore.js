@@ -39,6 +39,7 @@
         if (id){
           datastoreFactory.get_collection(real_path, id).then(
             function(resp) {
+              console.log('browse get_collection response', resp)
               $scope.data = resp.data
               $scope.data.page = 1
 
@@ -146,11 +147,11 @@
 
       $scope.$on('$locationChangeSuccess', function ($event, newUrl, oldUrl, newState, oldState) {
         if (newUrl !== oldUrl) {
-          console.log('location change success', $event)
-          console.log('newUrl', newUrl)
-          console.log('oldUrl', oldUrl)
-          console.log('newState', newState)
-          console.log('oldState', oldState)
+          // console.log('location change success', $event)
+          // console.log('newUrl', newUrl)
+          // console.log('oldUrl', oldUrl)
+          // console.log('newState', newState)
+          // console.log('oldState', oldState)
           $scope.data = newState;
         }
       });

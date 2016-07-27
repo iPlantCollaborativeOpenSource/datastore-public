@@ -53,7 +53,7 @@ def home(request, path=''):
 def get_file_or_folder(request, path, page=1):
     path =_check_path(path)
 
-    cache_key = path + '_page_' + str(page)
+    cache_key = urllib.quote_plus(path + '_page_' + str(page))
     cache_value = cache.get(cache_key)
     logger.info('{} - cache value:{}'.format(cache_key, cache_value))
     if not cache_value:
@@ -83,37 +83,48 @@ def get_file_or_folder(request, path, page=1):
 
 
 def get_metadata(request, id):
-    url= DE_HOST + 'terrain/secured/filesystem/' + str(id) + '/metadata'
-    de_response = send_request('GET', url=url)
+    cache_key = urllib.quote_plus('collection_id_' + id)
+    metadata = cache.get(cache_key)
+    if not metadata:
+        url= DE_HOST + 'terrain/secured/filesystem/' + str(id) + '/metadata'
+        de_response = send_request('GET', url=url)
 
-    if de_response.status_code == 200:
-        de_meta = de_response.json()
+        if de_response.status_code == 200:
+            de_meta = de_response.json()
 
-        try:
-            template_meta = de_meta['avus']
-        except IndexError: #there is no template metadata
+            try:
+                template_meta = de_meta['avus']
+            except IndexError: #there is no template metadata
+                template_meta=[]
+
+            irods_meta = de_meta['irods-avus']
+
+        else: #something is wrong with DE metadata endpoint
+            irods_meta=[{"attr": "Error", "value": de_response.reason}]
             template_meta=[]
 
-        irods_meta = de_meta['irods-avus']
-
-    else: #something is wrong with DE metadata endpoint
-        irods_meta=[{"attr": "Error", "value": de_response.reason}]
-        template_meta=[]
-
-    metadata = {
-        'irods': irods_meta,
-        'template': template_meta,
-    }
-
+        metadata = {
+            'irods': irods_meta,
+            'template': template_meta,
+        }
+        cache.set(cache_key, metadata, CACHE_EXPIRATION)
     return metadata
+
+
+def download_metadata(request, id):
+    metadata = get_metadata(request, id)
+    flat_metadata = metadata['irods'].copy()
+    flat_metadata.update(metadata['template'])
+
+    return StreamingHttpResponse(flat_metadata, content_type=de_response.headers['Content-Type'])
 
 def get_collection(request, path, page=1, id=None):
     path =_check_path(path)
 
     if id:
-        cache_key = 'collection_and_meta_' + path + '_page_' + str(page)
-    else: #need cache with metadata
-        cache_key = 'collection_' + path + '_page_' + str(page)
+        cache_key = urllib.quote_plus('collection_and_meta_' + path + '_page_' + str(page))
+    else: #just getting next page of collection
+        cache_key = urllib.quote_plus('collection_' + path + '_page_' + str(page))
     collection = cache.get(cache_key)
     logger.info('cache_key: {} ---- cache_value: {}'.format(cache_key, collection))
     if not collection:
@@ -316,20 +327,44 @@ def search(request):
     #         }
     #     }}) #should we use DE api or irods?
 
+    # query=json.dumps(
+    #     {"bool":
+    #         {"must":[
+    #             {"nested":
+    #                 {"path":"metadata",
+    #                  "query":
+    #                     {"query_string":
+    #                         {"query": "*" + search_term + "*",
+    #                          "fields":["metadata.value"]}
+    #                     }
+    #                 }
+    #             }
+    #         ]}
+    #     })
+
     query=json.dumps(
-        {"bool":
-            {"must":[
-                {"nested":
-                    {"path":"metadata",
-                     "query":
-                        {"query_string":
-                            {"query": "*" + search_term + "*",
-                             "fields":["metadata.value"]}
+        {"query":
+            {"bool":
+                 {"should":[
+                    {"wildcard":
+                        {"path":
+                            {"value": "*" + search_term + "*"}
+                        }
+                    },
+                    {"wildcard":
+                        {"label":
+                            {"value": "*" + search_term + "*"}
+                        }
+                    },
+                    {"wildcard":
+                        {"metadata.value":
+                            {"value": "*" + search_term + "*"}
                         }
                     }
-                }
-            ]}
-        })
+                 ]}
+            }
+        }
+    )
 
     url = DE_HOST + 'terrain/secured/filesystem/index'
     params = {'q': query}

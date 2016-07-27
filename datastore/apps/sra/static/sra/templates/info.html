@@ -33,6 +33,13 @@
                 </li>
             </ul>
             <h4>File information</h4>
+            <!-- <div>CyVerse Users (Requires CyVerse account) -->
+                <!-- <ul> -->
+                  <!-- <li> -->
+                    <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&folder={{file_path}}">View in Discovery Environment (Requires CyVerse account)</a>
+                  <!-- </li> -->
+                <!-- </ul> -->
+              <!-- </div> -->
             <ul>
               <li>
                 <dd>File Path</dd>
@@ -90,13 +97,13 @@
                   </li>
                 </ul>
               </div>
-              <div>CyVerse Users (Requires CyVerse account)
+              <!-- <div>CyVerse Users (Requires CyVerse account)
                 <ul>
                   <li>
                     <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder=/iplant/home/shared/commons_repo/curated/Duitama_rice_variation_2015/">Discovery Environment (DE)</a>
                   </li>
                 </ul>
-              </div>
+              </div> -->
               <dl>
                 <dt>Path:</dt>
                 <dd>
@@ -117,7 +124,12 @@
 
 
 
-
+        <h4 ng-if="data.metadata.template.length || data.metadata.irods.length"> Metadata </h4>
+        <ul>
+         <li>
+           <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&folder={{data.path}}">View folder in Discovery Environment (Requires CyVerse account)</a>
+         </li>
+       </ul>
         <ul>
             <li class="list-group-item" ng-repeat="meta in data.metadata.template">
               <dd>{{meta.attr}}</dd>
