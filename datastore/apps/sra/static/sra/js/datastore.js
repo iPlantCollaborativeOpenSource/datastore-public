@@ -274,9 +274,9 @@ if (!Array.prototype.map) {
                     function(resp) {
                         $scope.model.preview = resp.data;
                     },
-                    function(data) {
-                        console.log('Preview error', data);
-                        $scope.err = data.data
+                    function(err) {
+                        console.log('Preview error', err);
+                        $scope.err = err.data
                     }
                 )
             };
