@@ -129,7 +129,7 @@ if (!Array.prototype.map) {
     app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$anchorScroll', 'TerrainConfig', 'DcrFileService', '$uibModal',
         function($scope, $q, $location, $anchorScroll, TerrainConfig, DcrFileService, $uibModal) {
 
-            $scope.browse = function($event, item) {
+            $scope.browse = function($event, item, page) {
                 if (item.loading) {
                     return;
                 }
@@ -137,6 +137,8 @@ if (!Array.prototype.map) {
                 if ($event) {
                     $event.preventDefault();
                 }
+
+                page = page || 0;
 
                 item.loading = true;
                 $scope.getItem(item.path)
@@ -147,8 +149,6 @@ if (!Array.prototype.map) {
 
                         /* get contents */
                         $scope.model.collection = null;
-                        var searchObj = $location.search();
-                        var page = +searchObj.page || 0;
 
                         $q.all([$scope.getMetadata(item.id), $scope.getContents(item.path, page)])
                             .then(function() {
@@ -156,7 +156,7 @@ if (!Array.prototype.map) {
                                 $location
                                     .state(angular.copy($scope.model))
                                     .path('/browse' + $scope.model.item.path)
-                                    .search({});
+                                    .search('page', page ? page : null);
                             });
                     });
             };
@@ -266,7 +266,7 @@ if (!Array.prototype.map) {
                         /* update $location */
                         $location
                             .state(angular.copy($scope.model))
-                            .search({'page': load_page});
+                            .search('page', load_page);
                     });
             };
 
@@ -288,9 +288,10 @@ if (!Array.prototype.map) {
                 initialPath = initialPath.slice(7);
             }
 
-            $scope.browse(undefined, {'path': initialPath});
-
             var searchObj = $location.search();
+
+            $scope.browse(undefined, {'path': initialPath}, +searchObj.page);
+
             if (searchObj && searchObj.pf_id && searchObj.pf_path) {
                 $scope.preview(undefined, {
                     'id': searchObj.pf_id,
