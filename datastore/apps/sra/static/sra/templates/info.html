@@ -1,6 +1,6 @@
 <div class="content">
 
-    <dcr-breadcrumbs dcr-item="model.item", on-click="browse(item)"></dcr-breadcrumbs>
+    <dcr-breadcrumbs dcr-item="model.item" on-click="browse($event, item)"></dcr-breadcrumbs>
 
     <div class="alert alert-danger" ng-if="model.err">
         {{ err }}
@@ -46,7 +46,7 @@
             <table class="table table-bordered table-striped">
                 <tr ng-repeat="folder in model.collection.folders">
                     <td>
-                        <a ng-href="/browse{{ folder.path }}" ng-click="browse(folder)">
+                        <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
                             <i class="fa fa-folder"></i> {{ folder.label }}
                         </a>
                         <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
@@ -55,7 +55,7 @@
                 </tr>
                 <tr ng-repeat="file in model.collection.files">
                     <td>
-                        <a ng-href="#preview-{{ file.id }}" ng-click="preview(file)">
+                        <a ng-href="#preview-{{ file.id }}" ng-click="preview($event, file)">
                             <i class="fa fa-file-o"></i> {{ file.label }}
                         </a>
                         <span ng-if="file.loading"><i class="fa fa-spinner fa-spin"></i></span>

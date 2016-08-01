@@ -129,25 +129,45 @@ if (!Array.prototype.map) {
     app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$anchorScroll', 'TerrainConfig', 'DcrFileService', '$uibModal',
         function($scope, $q, $location, $anchorScroll, TerrainConfig, DcrFileService, $uibModal) {
 
-            $scope.browse = function(item) {
+            $scope.browse = function($event, item) {
                 if (item.loading) {
                     return;
+                }
+
+                if ($event) {
+                    $event.preventDefault();
                 }
 
                 item.loading = true;
                 $scope.getItem(item.path)
                     .then(function(item) {
-                        $scope.getMetadata(item.id);
 
+                        /* get metadata */
+                        $scope.model.metadata = null;
+
+                        /* get contents */
+                        $scope.model.collection = null;
                         var searchObj = $location.search();
                         var page = +searchObj.page || 0;
-                        $scope.getContents(item.path, page);
+
+                        $q.all([$scope.getMetadata(item.id), $scope.getContents(item.path, page)])
+                            .then(function() {
+                                /* update $location */
+                                $location
+                                    .state(angular.copy($scope.model))
+                                    .path('/browse' + $scope.model.item.path)
+                                    .search({});
+                            });
                     });
             };
 
-            $scope.preview = function(file) {
+            $scope.preview = function($event, file) {
                 if (file.loading) {
                     return;
+                }
+
+                if ($event) {
+                    $event.preventDefault();
                 }
 
                 file.loading = true;
@@ -156,7 +176,12 @@ if (!Array.prototype.map) {
                     DcrFileService.getItemMetadata(file.id)
                 ]).then(function(values) {
                     file.loading = false;
-                    $uibModal.open({
+                    $location
+                        .state(angular.copy($scope.model))
+                        .search('pf_id', file.id)
+                        .search('pf_path', file.path)
+                        .replace();
+                    var modalInstance = $uibModal.open({
                         templateUrl: '/static/sra/templates/preview-modal.html',
                         controller: 'ModalInstanceCtrl',
                         size: 'lg',
@@ -169,6 +194,22 @@ if (!Array.prototype.map) {
                             }
                         }
                     });
+                    modalInstance.result.then(
+                        function() {
+                            $location
+                                .state(angular.copy($scope.model))
+                                .search('pf_id', null)
+                                .search('pf_path', null)
+                                .replace();
+                        },
+                        function() {
+                            $location
+                                .state(angular.copy($scope.model))
+                                .search('pf_id', null)
+                                .search('pf_path', null)
+                                .replace();
+                        }
+                    );
                 });
             };
 
@@ -197,7 +238,6 @@ if (!Array.prototype.map) {
             };
 
             $scope.getContents = function(path, page) {
-                $location.search('page', page);
                 return DcrFileService.getListItem(path, page).then(
                     function(resp) {
                         $scope.model.collection = resp.data;
@@ -217,14 +257,20 @@ if (!Array.prototype.map) {
             };
 
             $scope.pageChanged = function() {
-                $scope.getContents($scope.model.item.path, $scope.model.pagination.current - 1)
+                var load_page = $scope.model.pagination.current - 1;
+                $scope.getContents($scope.model.item.path, load_page)
                     .then(function() {
+                        /* scroll to top of listing */
                         $anchorScroll('directory-contents');
+
+                        /* update $location */
+                        $location
+                            .state(angular.copy($scope.model))
+                            .search({'page': load_page});
                     });
             };
 
             $scope.model = {
-                path: $location.path(),
                 pagination: {
                     show: false,
                     pageSize: TerrainConfig.DIR_PAGE_SIZE,
@@ -233,15 +279,31 @@ if (!Array.prototype.map) {
                 }
             };
 
-            if ($scope.model.path === '/') {
-                $scope.model.path = '/iplant/home/shared';
+            var initialPath = $location.path();
+            if (initialPath === '/') {
+                initialPath = '/iplant/home/shared';
                 $location.path('/browse/iplant/home/shared');
             }
-            else if ($scope.model.path.indexOf('/browse') === 0) {
-                $scope.model.path = $scope.model.path.slice(7);
+            else if (initialPath.indexOf('/browse') === 0) {
+                initialPath = initialPath.slice(7);
             }
 
-            $scope.browse({'path': $scope.model.path});
+            $scope.browse(undefined, {'path': initialPath});
+
+            var searchObj = $location.search();
+            if (searchObj && searchObj.pf_id && searchObj.pf_path) {
+                $scope.preview(undefined, {
+                    'id': searchObj.pf_id,
+                    'path': searchObj.pf_path
+                });
+            }
+
+            $scope.$on('$locationChangeSuccess', function($event, newUrl, oldUrl, newState, oldState) {
+               if (newState && newUrl !== oldUrl) {
+                   $scope.model = newState;
+               }
+            });
+
         }]);
 
 
