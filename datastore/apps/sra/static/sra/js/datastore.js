@@ -95,7 +95,8 @@ if (!Array.prototype.map) {
 
     app.value('TerrainConfig', {
         'DIR_PAGE_SIZE': 100,
-        'MAX_DOWNLOAD_SIZE': 2147483648
+        'MAX_DOWNLOAD_SIZE': 2147483648,
+        'MAX_PREVIEW_SIZE': 8192
     });
 
 
@@ -250,6 +251,8 @@ if (!Array.prototype.map) {
                 file: file,
                 metadata: metadata
             };
+
+            $scope.config = TerrainConfig;
 
             $scope.model.downloadEnabled = $scope.model.file['file-size'] < TerrainConfig.MAX_DOWNLOAD_SIZE;
             var parent_path = $scope.model.file.path.split('/');
