@@ -124,7 +124,7 @@ def api_list_item(request, path):
 def api_preview_file(request, path):
     try:
         af = AnonFilesClient()
-        response = af.download(path, headers={'Range': 'bytes=0-8192'})
+        response = af.download(path, stream=True, headers={'Range': 'bytes=0-8192'})
         return StreamingHttpResponse(response.content)
     except HTTPError as e:
         logger.exception('Failed to preview file', extra={'path': path})
@@ -135,8 +135,8 @@ def api_preview_file(request, path):
 def download_file_anon(request, path):
     try:
         af = AnonFilesClient()
-        response = af.download(path)
-        return StreamingHttpResponse(response.content)
+        redirect_url = af.download_url(path)
+        return HttpResponseRedirect(redirect_to=redirect_url)
     except HTTPError as e:
         logger.exception('Failed to preview file', extra={'path': path})
         return HttpResponseBadRequest('Failed to preview file',
