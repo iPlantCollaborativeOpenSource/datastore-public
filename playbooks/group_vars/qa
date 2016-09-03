@@ -1,4 +1,4 @@
-primary_hostname: datacommons-qa.cyverse.org
+primary_hostname: marybell.iplantc.org
 
 dc_version: master
 irods_host: qairods.iplantc.org

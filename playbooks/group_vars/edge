@@ -1,4 +1,4 @@
-primary_hostname: datacommons-edge.cyverse.org
+primary_hostname: rodney.iplantc.org
 
 dc_version: edge
 irods_host: data.iplantcollaborative.org
