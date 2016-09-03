@@ -5,7 +5,11 @@ upstream django {
 server {
     listen 80 default_server;
 
-    server_name {{ server_hostname }};
+    server_name {{ primary_hostname }};
+
+    if ($host != "{{ primary_hostname }}") {
+        rewrite ^(.*)$ https://{{ primary_hostname }}$1;
+    }
 
     charset utf-8;
 

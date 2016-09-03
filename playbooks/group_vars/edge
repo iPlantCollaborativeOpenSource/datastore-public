@@ -1,4 +1,6 @@
-dc_version: DE/angular
+primary_hostname: datacommons-edge.cyverse.org
+
+dc_version: edge
 irods_host: data.iplantcollaborative.org
 irods_port: 1247
 irods_zone: iplant
@@ -8,5 +10,4 @@ irods_password:
 
 terrain_api_host: https://everdene.iplantcollaborative.org
 terrain_api_key_path: /etc/ssl/terrain_api/terrain_api_key.pem
-
 anon_files_api_host: https://de.iplantcollaborative.org/anon-files
