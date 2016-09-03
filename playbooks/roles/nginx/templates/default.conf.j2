@@ -8,7 +8,7 @@ server {
     server_name {{ primary_hostname }};
 
     if ($host != "{{ primary_hostname }}") {
-        rewrite ^(.*)$ https://{{ primary_hostname }}$1;
+        rewrite ^(.*)$ http://{{ primary_hostname }}$1;
     }
 
     charset utf-8;
