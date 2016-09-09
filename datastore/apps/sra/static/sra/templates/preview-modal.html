@@ -53,15 +53,28 @@
         </li>
     </ul>
 
-    <div id="download_button" ng-if="model.downloadEnabled" class="text-right">
-        <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie()">
-            <i class="fa fa-cloud-download"></i> Download
-        </button>
+    <div id="download_button" ng-if="model.downloadEnabled">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="text-center">
+                <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie()">
+                    <i class="fa fa-cloud-download"></i> Download
+                </button>
 
-        <form action="?" method="GET" id="download_form">
-            <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
-            <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
-        </form>
+                <form action="?" method="GET" id="download_form">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
+                    <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
+                </form>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="text-center">
+                    <a class="btn btn-primary" target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.file.parent_path }}">
+                        Open in the Discovery Environment <i class="fa fa-external-link"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div ng-if="!model.downloadEnabled">
@@ -85,7 +98,7 @@
             </div>
             <div class="col-sm-6">
                 <p>
-                    Registered CyVerse users also can download from the Discovery Environment (DE).
+                    Registered CyVerse users can download from the Discovery Environment (DE).
                 </p>
                 <p class="text-center">
                     <a class="btn btn-primary" target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.file.parent_path }}">
