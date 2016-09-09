@@ -18,13 +18,25 @@
         <li class="list-group-item">
             <div class="row">
                 <div class="col-sm-3"><b>File Path</b></div>
-                <div class="col-sm-9">{{ model.file.path }}</div>
+                <div class="col-sm-9">{{ model.file.parent_path }}</div>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-sm-3"><b>File Name</b></div>
+                <div class="col-sm-9">{{ model.file.label }}</div>
             </div>
         </li>
         <li class="list-group-item">
             <div class="row">
                 <div class="col-sm-3"><b>File Size</b></div>
                 <div class="col-sm-9">{{ model.file['file-size']|bytes }}</div>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-sm-3"><b>Checksum</b></div>
+                <div class="col-sm-9">md5: {{ model.file.md5 }}</div>
             </div>
         </li>
         <li class="list-group-item">
@@ -52,46 +64,36 @@
         </form>
     </div>
 
-    <div ng-if="!model.downloadEnabled" class="alert alert-info">
-        <h4><i class="fa fa-cloud-download"></i> Download</h4>
-        <p>
-            Due to the size of this file, it cannot be downloaded from this page.
-            Please use one of the following methods:
-        </p>
-
-        <ul class="list-unstyled">
-            <li>Public Access (No account required)
-                <ul>
-                    <li>iCommands</li>
-                    <li>iDrop</li>
-                    <li>Cyberduck</li>
-                    <li>
-                        <a target="_blank" href="http://www.cyverse.org/learning-center/manage-data">
-                            More Information <i class="fa fa-external-link"></i>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-            <li>CyVerse Users (requires CyVerse account)
-                <ul>
-                    <li>
-                        <a target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.file.parent_path }}">
-                            Discovery Environment (DE) <i class="fa fa-external-link"></i></a>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-        <dl>
-            <dt>Path:</dt>
-            <dd>
-                <input value="{{ model.file.parent_path }}" type="text" class="form-control">
-            </dd>
-            <dt>File Name:</dt>
-            <dd>
-                <input value="{{ model.file.label }}" type="text" class="form-control">
-            </dd>
-        </dl>
+    <div ng-if="!model.downloadEnabled">
+        <div class="alert alert-info">
+            <h4><i class="fa fa-cloud-download"></i> Download</h4>
+            <p>
+                Due to the size of this file, it cannot be downloaded from this page.
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <p>
+                    To download without a CyVerse account follow the instructions detailed on
+                    <a href="https://wiki.cyverse.org/wiki/display/DS/Downloading+Data+Files+Without+a+User+Account">this page</a>.
+                </p>
+                <p class="text-center">
+                    <a class="btn btn-primary" target="_blank" href="https://wiki.cyverse.org/wiki/display/DS/Downloading+Data+Files+Without+a+User+Account">
+                        Go to Download Instructions <i class="fa fa-external-link"></i>
+                    </a>
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                    Registered CyVerse users also can download from the Discovery Environment (DE).
+                </p>
+                <p class="text-center">
+                    <a class="btn btn-primary" target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.file.parent_path }}">
+                        Go to the Discovery Environment <i class="fa fa-external-link"></i>
+                    </a>
+                </p>
+            </div>
+        </div>
     </div>
 
     <hr>
