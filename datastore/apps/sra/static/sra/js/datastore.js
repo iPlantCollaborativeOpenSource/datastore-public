@@ -322,6 +322,10 @@ if (!Array.prototype.map) {
             parent_path.pop();
             $scope.model.file.parent_path = parent_path.join('/');
 
+            $scope.close = function() {
+                $uibModalInstance.close();
+            };
+
             $scope.download = function() {
                 $uibModalInstance.close();
                 var url = djangoUrl.reverse('download', {path: $scope.model.file.path});
