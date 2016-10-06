@@ -93,6 +93,18 @@ if (!Array.prototype.map) {
         .config(['$httpProvider', '$locationProvider', config]);
 
 
+    app.value('BrushSources', {
+        'php': 'shBrushPhp',
+        'js': 'shBrushJScript',
+        'css': 'shBrushCss',
+        'py': 'shBrushPython',
+        'plain': 'shBrushPlain',
+        'fasta': 'shBrushFasta',
+        'eml': 'shBrushXml',
+        'xml': 'shBrushXml'
+    });
+
+
     app.value('TerrainConfig', {
         'DIR_PAGE_SIZE': 100,
         'MAX_DOWNLOAD_SIZE': 2147483648,
@@ -100,25 +112,73 @@ if (!Array.prototype.map) {
     });
 
 
-    app.factory('DcrFileService', ['$http', 'djangoUrl', function($http, djangoUrl) {
+    app.factory('DcrFileService', ['$http', 'djangoUrl', 'TerrainConfig', 'BrushSources', function($http, djangoUrl, TerrainConfig, BrushSources) {
 
         var service = {};
 
         service.getItem = function(path) {
-            return $http.get(djangoUrl.reverse('api_stat', {'path': path}));
+            return $http.get(djangoUrl.reverse('api_stat', {'path': path})).then(
+                function (resp) {
+                    var item = resp.data;
+                    if (item.type === 'file') {
+                        item.ext = item.label.split('.').pop();
+                        item.downloadEnabled = item['file-size'] < TerrainConfig.MAX_DOWNLOAD_SIZE;
+
+                        var parent_path = item.path.split('/');
+                        parent_path.pop();
+                        item.parent_path = parent_path.join('/');
+
+                        if (item.ext in BrushSources) {
+                            item.previewable = true;
+                            item.brush = item.ext;
+                        }
+                        else if (item['content-type'].substring(0, 4) === 'text') {
+                            item.previewable = true;
+                            item.brush = 'plain';
+                        }
+                        else {
+                            item.previewable = false;
+                        }
+                    }
+                    return item;
+                });
         };
 
         service.getItemMetadata = function(itemId) {
-            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}));
+            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}))
+                .then(
+                    function (resp) {
+                        return resp.data;
+                    });
         };
 
         service.getListItem = function(path, page) {
             page = page || 0;
-            return $http.get(djangoUrl.reverse('api_list_item', {'path': path}), {'params': {'page': page}});
+            return $http.get(djangoUrl.reverse('api_list_item', {'path': path}), {'params': {'page': page}})
+                .then(
+                    function (resp) {
+                        return resp.data;
+                    });
         };
 
         service.previewFile = function(path) {
-            return $http.get(djangoUrl.reverse('api_preview_file', {'path': path}));
+            return $http.get(djangoUrl.reverse('api_preview_file', {'path': path}))
+                .then(
+                    function (resp) {
+                        return resp.data;
+                    });
+        };
+
+        service.download = function(file) {
+            var url = djangoUrl.reverse('download', {path: file.path});
+            var link = document.createElement('a');
+            link.setAttribute('download', file.label);
+            link.setAttribute('href', url);
+            link.setAttribute('target', '_self');
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         };
 
         return service;
@@ -126,8 +186,21 @@ if (!Array.prototype.map) {
     }]);
 
 
-    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$anchorScroll', 'TerrainConfig', 'DcrFileService', '$uibModal',
-        function($scope, $q, $location, $anchorScroll, TerrainConfig, DcrFileService, $uibModal) {
+    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrFileService',
+        function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrFileService) {
+
+            $scope.config = TerrainConfig;
+
+            $scope.model = {
+                item: {},
+                collection: {},
+                pagination: {
+                    show: false,
+                    pageSize: TerrainConfig.DIR_PAGE_SIZE,
+                    total: 0,
+                    current: 1
+                }
+            };
 
             $scope.browse = function($event, item, page) {
                 if (item.loading) {
@@ -141,106 +214,49 @@ if (!Array.prototype.map) {
                 page = page || 0;
 
                 item.loading = true;
-                $scope.getItem(item.path)
+                DcrFileService.getItem(item.path)
                     .then(function(item) {
+                        $scope.model.item = item;
 
-                        /* get metadata */
+                        var promises = [];
+
+                        /* reset metadata */
                         $scope.model.metadata = null;
+                        promises.push(
+                            DcrFileService.getItemMetadata(item.id).then(function (result) {
+                                $scope.model.metadata = result;
+                            })
+                        );
 
-                        /* get contents */
+                        /* reset contents */
                         $scope.model.collection = null;
-
-                        $q.all([$scope.getMetadata(item.id), $scope.getContents(item.path, page)])
-                            .then(function() {
-                                /* update $location */
-                                $location
-                                    .state(angular.copy($scope.model))
-                                    .path('/browse' + $scope.model.item.path)
-                                    .search('page', page ? page : null);
-                            });
-                    });
-            };
-
-            $scope.preview = function($event, file) {
-                if (file.loading) {
-                    return;
-                }
-
-                if ($event) {
-                    $event.preventDefault();
-                }
-
-                file.loading = true;
-                $q.all([
-                    DcrFileService.getItem(file.path),
-                    DcrFileService.getItemMetadata(file.id)
-                ]).then(function(values) {
-                    file.loading = false;
-                    $location
-                        .state(angular.copy($scope.model))
-                        .search('pf_id', file.id)
-                        .search('pf_path', file.path)
-                        .replace();
-                    var modalInstance = $uibModal.open({
-                        templateUrl: '/static/sra/templates/preview-modal.html',
-                        controller: 'ModalInstanceCtrl',
-                        size: 'lg',
-                        resolve: {
-                            file: function () {
-                                return values[0].data;
-                            },
-                            metadata: function() {
-                                return values[1].data;
-                            }
+                        $scope.model.pagination.show = false;
+                        if (item.type === 'dir') {
+                            promises.push($scope.getContents(item.path, page));
                         }
-                    });
-                    modalInstance.result.then(
-                        function() {
+
+                        /* reset preview */
+                        $scope.model.preview = null;
+                        if (item.previewable) {
+                            promises.push($scope.preview(item.path));
+                        }
+
+                        $q.all(promises).then(function () {
+                            /* update $location */
                             $location
                                 .state(angular.copy($scope.model))
-                                .search('pf_id', null)
-                                .search('pf_path', null)
-                                .replace();
-                        },
-                        function() {
-                            $location
-                                .state(angular.copy($scope.model))
-                                .search('pf_id', null)
-                                .search('pf_path', null)
-                                .replace();
-                        }
-                    );
-                });
-            };
+                                .path('/browse' + $scope.model.item.path)
+                                .search('page', page ? page : null);
+                        });
 
-            $scope.getItem = function(path) {
-                return DcrFileService.getItem(path).then(
-                    function(resp) {
-                        $scope.model.item = resp.data;
-                        return resp.data;
-                    },
-                    function(err) {
-                        $scope.model.err = err;
-                    }
-                );
-            };
-
-            $scope.getMetadata = function(item_id) {
-                return DcrFileService.getItemMetadata(item_id).then(
-                    function(resp) {
-                        $scope.model.metadata = resp.data;
-                        return resp.data;
-                    },
-                    function(err) {
-                        $scope.model.err = err;
-                    }
-                );
+                        $anchorScroll();
+                    });
             };
 
             $scope.getContents = function(path, page) {
                 return DcrFileService.getListItem(path, page).then(
-                    function(resp) {
-                        $scope.model.collection = resp.data;
+                    function(results) {
+                        $scope.model.collection = results;
                         if ($scope.model.collection.total > TerrainConfig.DIR_PAGE_SIZE) {
                             $scope.model.pagination.show = true;
                             $scope.model.pagination.total = $scope.model.collection.total;
@@ -248,7 +264,7 @@ if (!Array.prototype.map) {
                         } else {
                             $scope.model.pagination.show = false;
                         }
-                        return resp.data;
+                        return results;
                     },
                     function(err) {
                         $scope.model.err = err;
@@ -270,15 +286,36 @@ if (!Array.prototype.map) {
                     });
             };
 
-            $scope.model = {
-                pagination: {
-                    show: false,
-                    pageSize: TerrainConfig.DIR_PAGE_SIZE,
-                    total: 0,
-                    current: 1
+            $scope.download = function() {
+                DcrFileService.download($scope.model.item);
+            };
+
+            $scope.preview = function(path) {
+                DcrFileService.previewFile(path).then(
+                    function(preview) {
+                        $scope.model.preview = preview;
+                        return preview;
+                    },
+                    function(err) {
+                        console.log('Preview error', err);
+                        $scope.err = err.data
+                    }
+                )
+            };
+
+            $scope.check_recaptcha_cookie = function() {
+                if ($cookies.get('recaptcha_status') != 'verified') {
+                    $('#download_button').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
+                } else {
+                    $scope.download();
+                    $('#download_button').popover('hide');
+                }
+                if ($('#recaptcha').html()) {
+                    grecaptcha.reset();
                 }
             };
 
+            // Initial load
             var initialPath = $location.path();
             if (initialPath === '/') {
                 initialPath = '/iplant/home/shared';
@@ -299,7 +336,7 @@ if (!Array.prototype.map) {
                 });
             }
 
-            $scope.$on('$locationChangeSuccess', function($event, newUrl, oldUrl, newState, oldState) {
+            $scope.$on('$locationChangeSuccess', function($event, newUrl, oldUrl, newState) {
                if (newState && newUrl !== oldUrl) {
                    $scope.model = newState;
                }
@@ -308,102 +345,20 @@ if (!Array.prototype.map) {
         }]);
 
 
-    app.controller('ModalInstanceCtrl', ['$scope', '$cookies', '$sce', '$uibModalInstance', 'djangoUrl', 'DcrFileService', 'TerrainConfig', 'file', 'metadata',
-        function ($scope, $cookies, $sce, $uibModalInstance, djangoUrl, DcrFileService, TerrainConfig, file, metadata) {
-            $scope.model = {
-                file: file,
-                metadata: metadata
-            };
-
-            $scope.config = TerrainConfig;
-
-            $scope.model.downloadEnabled = $scope.model.file['file-size'] < TerrainConfig.MAX_DOWNLOAD_SIZE;
-            var parent_path = $scope.model.file.path.split('/');
-            parent_path.pop();
-            $scope.model.file.parent_path = parent_path.join('/');
-
-            $scope.close = function() {
-                $uibModalInstance.close();
-            };
-
-            $scope.download = function() {
-                $uibModalInstance.close();
-                var url = djangoUrl.reverse('download', {path: $scope.model.file.path});
-                var link = document.createElement('a');
-                link.setAttribute('download', $scope.model.file.label);
-                link.setAttribute('href', url);
-                link.setAttribute('target', '_self');
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-
-            $scope.preview = function(path) {
-                DcrFileService.previewFile(path).then(
-                    function(resp) {
-                        $scope.model.preview = resp.data;
-                    },
-                    function(err) {
-                        console.log('Preview error', err);
-                        $scope.err = err.data
-                    }
-                )
-            };
-
-            var BrushSources = {
-                'php': 'shBrushPhp',
-                'js': 'shBrushJScript',
-                'css': 'shBrushCss',
-                'py': 'shBrushPython',
-                'plain': 'shBrushPlain',
-                'fasta': 'shBrushFasta',
-                'eml': 'shBrushXml',
-                'xml': 'shBrushXml'
-            };
-
-            var ext = $scope.model.file.label.split('.').pop();
-
-            if (ext in BrushSources) {
-                $scope.model.previewable = true;
-                $scope.model.brush = ext;
-                $scope.preview($scope.model.file.path);
-            }
-            else if ($scope.model.file['content-type'].substring(0, 4) === 'text') {
-                $scope.model.previewable = true;
-                $scope.model.brush = 'plain';
-                $scope.preview($scope.model.file.path);
-            }
-            else {
-                $scope.model.previewable = false;
-            }
-
-            $scope.check_recaptcha_cookie = function() {
-                if ($cookies.get('recaptcha_status') != 'verified') {
-                    $('#download_button').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
-                } else {
-                    $scope.download();
-                    $('#download_button').popover('hide');
-                }
-                if ($('#recaptcha').html()) {
-                    grecaptcha.reset();
-                }
-            };
-        }]);
-
-
     app.directive('dcrBreadcrumbs', function() {
         function makeLinks(item) {
-            var currentPath = item.path;
-            var pathParts = currentPath.split('/');
-            var base = pathParts.slice(0, 3).join('/');
-            var crumbs = pathParts.slice(3);
-            return crumbs.map(function(o, idx, list) {
-                return {
-                    'label': o,
-                    'path': base + '/' + list.slice(0, idx + 1).join('/')
-                };
-            });
+            if (item && item.path) {
+                var currentPath = item.path;
+                var pathParts = currentPath.split('/');
+                var base = pathParts.slice(0, 3).join('/');
+                var crumbs = pathParts.slice(3);
+                return crumbs.map(function (o, idx, list) {
+                    return {
+                        'label': o,
+                        'path': base + '/' + list.slice(0, idx + 1).join('/')
+                    };
+                });
+            }
         }
 
         return {
@@ -414,7 +369,7 @@ if (!Array.prototype.map) {
                 onClick: '&onClick'
             },
             link: function(scope) {
-                scope.$watch('dcrItem', function(newValue, oldValue) {
+                scope.$watch('dcrItem', function(newValue) {
                     if (newValue) {
                         scope.links = makeLinks(newValue);
                     }
@@ -429,7 +384,7 @@ if (!Array.prototype.map) {
         return {
             link:function (scope, element) {
                 scope.$watch('model.preview', function(value) {
-                    var brush = 'brush:' + scope.model.brush;
+                    var brush = 'brush:' + scope.model.item.brush;
                     element.addClass(brush);
                     if (value) {
                         SyntaxHighlighter.highlight({}, element[0]);

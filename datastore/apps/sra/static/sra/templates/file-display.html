@@ -1,0 +1,118 @@
+<ul class="list-group">
+    <li class="list-group-item" ng-repeat="meta in model.metadata.avus">
+        <div class="row">
+            <div class="col-sm-3"><b>{{ meta.attr }}</b></div>
+            <div class="col-sm-9">{{ meta.value }}</div>
+        </div>
+    </li>
+    <li class="list-group-item" ng-repeat="meta in model.metadata['irods-avus']">
+        <div class="row">
+            <div class="col-sm-3"><b>{{ meta.attr }}</b></div>
+            <div class="col-sm-9">{{ meta.value }}</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-sm-3"><b>File Path</b></div>
+            <div class="col-sm-9">{{ model.item.parent_path }}</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-sm-3"><b>File Name</b></div>
+            <div class="col-sm-9">{{ model.item.label }}</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-sm-3"><b>File Size</b></div>
+            <div class="col-sm-9">{{ model.item['file-size']|bytes }}</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-sm-3"><b>Checksum</b></div>
+            <div class="col-sm-9">md5: {{ model.item.md5 }}</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-sm-3"><b>Created</b></div>
+            <div class="col-sm-9">{{ model.item['date-created']|date:"medium" }}</div>
+        </div>
+    </li>
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-sm-3"><b>Last Modified</b></div>
+            <div class="col-sm-9">{{ model.item['date-modified']|date:"medium" }}</div>
+        </div>
+    </li>
+</ul>
+
+<div id="download_button" ng-if="model.item.downloadEnabled">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="text-center">
+                <button type="button" class="btn btn-primary" ng-click="check_recaptcha_cookie()">
+                    <i class="fa fa-cloud-download"></i> Download
+                </button>
+
+                <form action="?" method="GET" id="download_form">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="QxKAxVRIIjP3RQEVMNwsLcvobkZ0q6mX">
+                    <div id="recaptcha" class="g-recaptcha" data-sitekey="6LerigwTAAAAABUYsV5WQoBBTZS58d7LfgE7I1yt" data-size="compact" data-callback="recaptcha_callback"></div>
+                </form>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="text-center">
+                <a class="btn btn-primary" target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.item.parent_path }}">
+                    Open in the Discovery Environment <i class="fa fa-external-link"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div ng-if="!model.item.downloadEnabled">
+    <div class="alert alert-info">
+        <h4><i class="fa fa-cloud-download"></i> Download</h4>
+        <p>
+            Due to the size of this file, it cannot be downloaded from this page.
+        </p>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <p>
+                To download without a CyVerse account follow the instructions detailed on
+                <a target="_blank" href="https://wiki.cyverse.org/wiki/display/DS/Downloading+Data+Files+Without+a+User+Account">this page</a>.
+            </p>
+            <p class="text-center">
+                <a class="btn btn-primary" target="_blank" href="https://wiki.cyverse.org/wiki/display/DS/Downloading+Data+Files+Without+a+User+Account">
+                    Go to Download Instructions <i class="fa fa-external-link"></i>
+                </a>
+            </p>
+        </div>
+        <div class="col-sm-6">
+            <p>
+                Registered CyVerse users can download from the Discovery Environment (DE).
+            </p>
+            <p class="text-center">
+                <a class="btn btn-primary" target="_blank" href="https://de.iplantcollaborative.org/de/?type=data&amp;folder={{ model.item.parent_path }}">
+                    Go to the Discovery Environment <i class="fa fa-external-link"></i>
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<div ng-if="model.item.previewable">
+    <p class="alert alert-info" ng-if="model.item['file-size'] > config.MAX_PREVIEW_SIZE">Previews are limited to the first 8kB. Download to view entire file.</p>
+    <p class="text-center" ng-if="! model.preview">Loading preview <i class="fa fa-spinner fa-spin"></i></p>
+    <pre syntax-highlighter id="file_preview" ng-if="model.preview">{{ model.preview }}</pre>
+</div>
+
+<div ng-if="! model.item.previewable" class="jumbotron text-center">
+    <p>Preview not available</p>
+</div>

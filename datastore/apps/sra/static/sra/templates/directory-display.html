@@ -1,0 +1,55 @@
+<div ng-if="model.metadata">
+    <ul class="list-group">
+        <li class="list-group-item" ng-repeat="meta in model.metadata.avus">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b>{{ meta.attr }}</b>
+                </div>
+                <div class="col-sm-9">
+                    {{ meta.value }}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-repeat="meta in model.metadata['irods-avus']">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b>{{ meta.attr }}</b>
+                </div>
+                <div class="col-sm-9">
+                    {{ meta.value }}
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div style="min-height: 300px;" id="directory-contents">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <tr ng-repeat="folder in model.collection.folders">
+                <td>
+                    <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
+                        <i class="fa fa-folder"></i> {{ folder.label }}
+                    </a>
+                    <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                </td>
+                <td></td>
+            </tr>
+            <tr ng-repeat="file in model.collection.files">
+                <td>
+                    <a ng-href="/browse{{ file.path }}" ng-click="browse($event, file)">
+                        <i class="fa fa-file-o"></i> {{ file.label }}
+                    </a>
+                    <span ng-if="file.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                </td>
+                <td>
+                    ({{ file['file-size']|bytes }})
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<nav aria-label="Directory paging" ng-if="model.pagination.show">
+    <ul uib-pagination total-items="model.pagination.total" items-per-page="model.pagination.pageSize" ng-model="model.pagination.current" ng-change="pageChanged()"></ul>
+</nav>
