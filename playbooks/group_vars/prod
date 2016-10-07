@@ -1,6 +1,6 @@
 primary_hostname: datacommons.cyverse.org
 
-dc_version: v2.0.1
+dc_version: v2.1.0
 irods_host: data.iplantcollaborative.org
 irods_port: 1247
 irods_zone: iplant
