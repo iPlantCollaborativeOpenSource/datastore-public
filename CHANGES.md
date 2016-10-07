@@ -1,6 +1,19 @@
 Changelog
 =========
 
+2.1.0
+-----
+
+Fixes:
+
+- Fix robots.txt to allow bots to index DCR.
+
+Enhancements:
+
+- Files are now directly addressable via their path; Clicking on a file
+  no longer opens a dialog, instead displays the file metadata, download
+  options, and preview full page.
+
 2.0.1
 -----
 
