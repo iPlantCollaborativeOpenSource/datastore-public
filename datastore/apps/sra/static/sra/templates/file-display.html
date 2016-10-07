@@ -110,7 +110,7 @@
 <div ng-if="model.item.previewable">
     <p class="alert alert-info" ng-if="model.item['file-size'] > config.MAX_PREVIEW_SIZE">Previews are limited to the first 8kB. Download to view entire file.</p>
     <p class="text-center" ng-if="! model.preview">Loading preview <i class="fa fa-spinner fa-spin"></i></p>
-    <pre syntax-highlighter id="file_preview" ng-if="model.preview">{{ model.preview }}</pre>
+    <div syntax-highlighter id="file_preview" class="file-preview-wrapper" ng-if="model.preview">{{ model.preview }}</div>
 </div>
 
 <div ng-if="! model.item.previewable" class="jumbotron text-center">

@@ -387,7 +387,7 @@ if (!Array.prototype.map) {
                     var brush = 'brush:' + scope.model.item.brush;
                     element.addClass(brush);
                     if (value) {
-                        SyntaxHighlighter.highlight({}, element[0]);
+                        SyntaxHighlighter.highlight({toolbar: false, 'class-name': 'file-preview-wrapper'}, element[0]);
                     }
                 });
             }
