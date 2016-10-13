@@ -225,3 +225,8 @@
     flex: 1;
     margin: 0;
 }
+
+.file-preview-wrapper {
+    border: 1px solid #ddd;
+    padding:  1px;
+}
