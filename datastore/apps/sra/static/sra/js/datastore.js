@@ -198,7 +198,9 @@ if (!Array.prototype.map) {
                     show: false,
                     pageSize: TerrainConfig.DIR_PAGE_SIZE,
                     total: 0,
-                    current: 1
+                    current: 1,
+                    item_start: 0,
+                    item_end: 0
                 }
             };
 
@@ -257,6 +259,15 @@ if (!Array.prototype.map) {
                 return DcrFileService.getListItem(path, page).then(
                     function(results) {
                         $scope.model.collection = results;
+                        if ($scope.model.collection.total > 0) {
+                            var offset = page * TerrainConfig.DIR_PAGE_SIZE;
+                            $scope.model.pagination.item_start = offset + 1;
+                            if (offset + TerrainConfig.DIR_PAGE_SIZE > $scope.model.collection.total) {
+                                $scope.model.pagination.item_end = $scope.model.collection.total;
+                            } else {
+                                $scope.model.pagination.item_end = offset + TerrainConfig.DIR_PAGE_SIZE;
+                            }
+                        }
                         if ($scope.model.collection.total > TerrainConfig.DIR_PAGE_SIZE) {
                             $scope.model.pagination.show = true;
                             $scope.model.pagination.total = $scope.model.collection.total;

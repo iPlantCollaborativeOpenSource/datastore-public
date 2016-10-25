@@ -53,3 +53,7 @@
 <nav aria-label="Directory paging" ng-if="model.pagination.show">
     <ul uib-pagination total-items="model.pagination.total" items-per-page="model.pagination.pageSize" ng-model="model.pagination.current" ng-change="pageChanged()"></ul>
 </nav>
+
+<div>
+    Displaying {{model.pagination.item_start}}-{{model.pagination.item_end}} of {{model.collection.total}} items
+</div>
