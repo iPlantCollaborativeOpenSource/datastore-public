@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="main-container container">
+        <div ng-controller="DcrMainCtrl" ng-include="'{% static "sra/templates/main.html" %}'"></div>
+    </div>
+
+    <script type="text/javascript">
+        window.recaptcha_callback = function recaptcha_callback(response) {
+            var d = new Date();
+            d.setTime(d.getTime() + (365*24*60*60*1000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = 'recaptcha_status=verified; ' + expires;
+
+            var el = document.querySelector('.g-recaptcha');
+            var $el = angular.element(el);
+            var $scope = $el.scope();
+            $scope.download($scope.file_path)
+        };
+    </script>
+{% endblock %}

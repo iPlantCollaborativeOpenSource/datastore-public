@@ -5,7 +5,7 @@ urlpatterns = patterns(
 
     # view urls
     url(r'^$', 'home', name='home'),
-    url(r'^browse/(?P<path>.*)/?$', 'home'),
+    url(r'^browse/(?P<path>.*)/?$', 'landing_page'),
     url(r'^download/(?P<path>.*)$', 'download_file_anon', name='download'),
 
     # api urls

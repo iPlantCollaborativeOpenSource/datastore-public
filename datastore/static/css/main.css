@@ -109,3 +109,14 @@ footer .nav > li > a:hover {
     z-index: 9999;
     background-color: fuchsia;
 }
+
+div #DCR_button {
+    float:left;
+    width: 15%;
+    height: 200px;
+}
+
+div #community_button {
+    width: 15%;
+    height: 200px;
+}

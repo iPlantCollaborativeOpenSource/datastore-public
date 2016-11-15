@@ -31,6 +31,8 @@ def _check_path(path):
 def home(request, **kwargs):
     return render(request, 'sra/home.html')
 
+def landing_page(request, **kwargs):
+    return render(request, 'sra/landing.html')
 
 def legacy_redirect(request, path=''):
     """
