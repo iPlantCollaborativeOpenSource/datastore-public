@@ -185,6 +185,34 @@ if (!Array.prototype.map) {
 
     }]);
 
+    app.controller('HomeCtrl', ['$scope',function($scope) {
+        $scope.data={
+            descriptionTitle: 'Tip:',
+            description: 'Hover over an option for more information.'
+        };
+
+        $scope.mouseOver = function(data) {
+            if (data == 'shared') {
+                $scope.data={
+                    descriptionTitle: 'Shared Data:',
+                    description: 'All public data in the CyVerse shared data folder. This data is provided by collaborators for public access. Public data do not have permanent identifiers and their location and contents may change.'
+                };
+            } else if (data == 'dcr') {
+                $scope.data={
+                    descriptionTitle: 'Data Commons Repository:',
+                    description: 'All data that has been given a permanent identifier by CyVerse (DOI or ARK).'
+                };
+            }
+        };
+
+        $scope.mouseLeave = function() {
+            $scope.data={
+                descriptionTitle: 'Tip:',
+                description: 'Hover over an option for more information.'
+            };
+        };
+    }]);
+
 
     app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrFileService',
         function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrFileService) {

@@ -110,13 +110,27 @@ footer .nav > li > a:hover {
     background-color: fuchsia;
 }
 
-div #DCR_button {
-    float:left;
-    width: 15%;
-    height: 200px;
+.subheading {
+    content:' ';
+    display:block;
+    border-bottom:1px solid black;
+    padding-bottom: 1px;
 }
 
-div #community_button {
-    width: 15%;
-    height: 200px;
+.subsection {
+    display:block;
+    padding-bottom: 1px;
+    display: flex;
+}
+
+.actions-box {
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-right: 10px;
+}
+
+.tip-box {
+    border-left: 1px solid black;
+    padding-left: 10px;
+    word-wrap: break-word;
 }
