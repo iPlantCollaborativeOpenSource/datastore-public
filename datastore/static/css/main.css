@@ -134,3 +134,21 @@ footer .nav > li > a:hover {
     padding-left: 10px;
     word-wrap: break-word;
 }
+
+#data-commons-icon {
+    height: 80px;
+    float: left;
+    display: inline-block;
+    margin-right: 5px;
+    margin-bottom: 25px
+}
+
+#data-commons-heading {
+    display: inline-block;
+    width: 100%
+    margin-bottom: 10px;
+}
+
+#data-commons-block {
+    display: inline-block;
+}

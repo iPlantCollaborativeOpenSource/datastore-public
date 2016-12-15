@@ -4,21 +4,25 @@
 {% block content %}
 <div class="main-container container" ng-controller="HomeCtrl">
     <section>
-        <img class="float-xs-left mx-auto" src="{% static 'img/logo.jpg' %}">
         <div id="home-content">
-            <h1>Data Commons</h1>
-            <p>
-                The Data Commons (DC) provides services within the CyVerse to manage, organize, preserve, publish, discover, and reuse data.
-            </p>
-            <p>
-                You can use this portal to browse all Public Data (data shared by CyVerse researchers that is not curated and may not be permanent) and the Data Commons Repository (curated and with permanent identifiers).
-            </p>
-            <p>
-                Using our pipelines, you can easily publish data to the NCBI SRA and to our Data Commons Repository. Click the links below for more info.
-            </p>
-            <p>
-                Data Commons features such as data management and publication are available through the <a href="https://de.cyverse.org/de/" target="_blank">Discovery Environment</a>.
-            </p>
+            <div>
+                <small><img id="data-commons-icon" class="float-xs-left img-responsive" src="{% static 'img/DataCommons_black.png' %}"></small>
+                <h1 id="data-commons-heading">Data Commons</h1>
+            </div>
+            <div id="data-commons-block">
+                <p>
+                    The Data Commons (DC) provides services within the CyVerse to manage, organize, preserve, publish, discover, and reuse data.
+                </p>
+                <p>
+                    You can use this portal to browse all Public Data (data shared by CyVerse researchers that is not curated and may not be permanent) and the Data Commons Repository (curated and with permanent identifiers).
+                </p>
+                <p>
+                    Using our pipelines, you can easily publish data to the NCBI SRA and to our Data Commons Repository. Click the links below for more info.
+                </p>
+                <p>
+                    Data Commons features such as data management and publication are available through the <a href="https://de.cyverse.org/de/" target="_blank">Discovery Environment</a>.
+                </p>
+            </div>
         </div>
     </section>
     <section>
