@@ -152,3 +152,7 @@ footer .nav > li > a:hover {
 #data-commons-block {
     display: inline-block;
 }
+
+#user-agreement-block {
+    margin-top: 15px
+}
