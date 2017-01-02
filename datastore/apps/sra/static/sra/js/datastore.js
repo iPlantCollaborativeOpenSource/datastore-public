@@ -186,29 +186,39 @@ if (!Array.prototype.map) {
     }]);
 
     app.controller('HomeCtrl', ['$scope',function($scope) {
+        var defaultTitle = 'Tip:';
+        var defaultDescription = 'Hover over an option for more information.';
+
         $scope.data={
-            descriptionTitle: 'Tip:',
-            description: 'Hover over an option for more information.'
+            browseDescriptionTitle: defaultTitle,
+            browseDescription: defaultDescription,
+            publishDescriptionTitle: defaultTitle,
+            publishDescription: defaultDescription,
         };
 
         $scope.mouseOver = function(data) {
             if (data == 'shared') {
-                $scope.data={
-                    descriptionTitle: 'Shared Data:',
-                    description: 'All public data in the CyVerse shared data folder. This data is provided by collaborators for public access. Public data do not have permanent identifiers and their location and contents may change.'
-                };
+                $scope.data.browseDescriptionTitle = 'Community Shared Data:';
+                $scope.data.browseDescription = "These data are provided by community collaborators for public access. Community Shared data are not curated by the Data Commons and don't have permanent identifiers. Their location and contents may change."
+
             } else if (data == 'dcr') {
-                $scope.data={
-                    descriptionTitle: 'Data Commons Repository:',
-                    description: 'All data that has been given a permanent identifier by CyVerse (DOI or ARK).'
-                };
+                $scope.data.browseDescriptionTitle = 'Data Commons Repository:';
+                $scope.data.browseDescription = "All data that have been given a permanent identifier (DOI or ARK) by CyVerse. These data are stable and contents will not change.";
+            } else if (data == 'ncbi') {
+                $scope.data.publishDescriptionTitle = 'NCBI-SRA:';
+                $scope.data.publishDescription = "Instructions on how to publish data to NCBI's Sequence Read Archive via the Data Commons."
+            } else if (data == 'dcrPublish') {
+                $scope.data.publishDescriptionTitle = 'Data Commons Repository:';
+                $scope.data.publishDescription = "Instructions on how to request a permanent identifier and publish data to the Data Commons Repository.";
             }
         };
 
         $scope.mouseLeave = function() {
             $scope.data={
-                descriptionTitle: 'Tip:',
-                description: 'Hover over an option for more information.'
+                browseDescriptionTitle: defaultTitle,
+                browseDescription: defaultDescription,
+                publishDescriptionTitle: defaultTitle,
+                publishDescription: defaultDescription,
             };
         };
     }]);

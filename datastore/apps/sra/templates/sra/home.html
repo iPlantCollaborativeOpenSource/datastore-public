@@ -11,16 +11,13 @@
             </div>
             <div id="data-commons-block">
                 <p>
-                    The Data Commons (DC) provides services within the CyVerse to manage, organize, preserve, publish, discover, and reuse data.
+                    The Data Commons provides services to manage, organize, preserve, publish, discover, and reuse data.
                 </p>
                 <p>
-                    You can use this portal to browse all Public Data (data shared by CyVerse researchers that is not curated and may not be permanent) and the Data Commons Repository (curated and with permanent identifiers).
+                    You can browse Community Shared Data and the Data Commons Repository.
                 </p>
                 <p>
-                    Using our pipelines, you can easily publish data to the NCBI SRA and to our Data Commons Repository. Click the links below for more info.
-                </p>
-                <p>
-                    Data Commons features such as data management and publication are available through the <a href="https://de.cyverse.org/de/" target="_blank">Discovery Environment</a>.
+                   Using our pipelines, you can easily publish data to the NCBI and to our Data Commons Repository. Click the links below for more information.
                 </p>
             </div>
         </div>
@@ -30,7 +27,7 @@
         <div class="subsection">
             <div class="actions-box">
                 <a class="btn btn-primary" target="_blank" href="/browse/iplant/home/shared/" ng-mouseover="mouseOver('shared')" ng-mouseleave="mouseLeave()">
-                    Public Data <i class="fa"></i>
+                    Community Shared Data <i class="fa"></i>
                 </a>
                 <a class="btn btn-primary" target="_blank" href="/browse/iplant/home/shared/commons_repo/curated/" ng-mouseover="mouseOver('dcr')" ng-mouseleave="mouseLeave()">
                     Data Commons Repository <i class="fa"></i>
@@ -38,8 +35,8 @@
             </div>
             {% verbatim %}
                 <div id="description" class="tip-box">
-                    <dt>{{data.descriptionTitle}}</dt>
-                    <dd>{{data.description}}</dd>
+                    <dt>{{data.browseDescriptionTitle}}</dt>
+                    <dd>{{data.browseDescription}}</dd>
                 </div>
             {% endverbatim %}
         </div>
@@ -47,14 +44,20 @@
         <h2 class="subheading">Publish Data</h2>
         <div class="subsection">
             <div class="actions-box">
-                <a class="btn btn-primary" target="_blank" href="https://wiki.cyverse.org/wiki/pages/viewpage.action?pageId=20351132">NCBI-SRA <i class="fa fa-external-link"></i>
+                <a class="btn btn-primary" target="_blank" href="https://wiki.cyverse.org/wiki/pages/viewpage.action?pageId=20351132" ng-mouseover="mouseOver('ncbi')" ng-mouseleave="mouseLeave()">NCBI-SRA <i class="fa fa-external-link"></i>
                 </a>
-                <a class="btn btn-primary" target="_blank" href="https://wiki.cyverse.org/wiki/display/DC/Requesting+a+Permanent+Identifier+in+the+CyVerse+Data+Commons+Repository">
+                <a class="btn btn-primary" target="_blank" href="https://wiki.cyverse.org/wiki/display/DC/Requesting+a+Permanent+Identifier+in+the+CyVerse+Data+Commons+Repository" ng-mouseover="mouseOver('dcrPublish')" ng-mouseleave="mouseLeave()">
                     Data Commons Repository <i class="fa fa-external-link"></i>
                 </a>
             </div>
+            {% verbatim %}
+                <div id="description" class="tip-box">
+                    <dt>{{data.publishDescriptionTitle}}</dt>
+                    <dd>{{data.publishDescription}}</dd>
+                </div>
+            {% endverbatim %}
         </div>
-        <div id="user-agreement-block" class="text-center">By using the Data Commons you agree to the terms of our <a href="wheredoesthisgo?">User Agreement</a></div>
+        <div id="user-agreement-block" class="text-center">By using the Data Commons you agree to the terms of our <a target="_blank" href="https://wiki.cyverse.org/wiki/display/DC/Data+Commons+User+Agreement">User Agreement</a></div>
     </section>
 </div>
 {% endblock %}
