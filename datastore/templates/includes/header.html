@@ -4,7 +4,8 @@
     <div class="container-fluid">
       <div class="navbar-header">
         <a href="/" target="_self" class="navbar-brand">
-          <img src="{% static 'img/cyverse_cmyk-01.png' %}" alt="CyVerse Data Commons">
+          <img id="data-commons-icon" class="float-xs-left img-responsive" src="{% static 'img/DataCommons_NavyBlue.png' %}">
+          <h1 class="page-logo-title">Data Commons</h1>
         </a>
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
           <span class="sr-only">Toggle navigation</span>
@@ -15,11 +16,14 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="http://www.cyverse.org">CyVerse Home</a></li>
           <li><a href="http://www.cyverse.org/data-store">Data Store</a></li>
           <li><a href="http://www.cyverse.org/discovery-environment">Discovery Environment</a></li>
           <li><a href="http://www.cyverse.org/atmosphere">Atmosphere</a></li>
-          <li><a href="https://pods.iplantcollaborative.org/wiki/display/DS/Sharing+Data+with+the+Public+in+the+Community+Data+Directory+and+Mirrors+Site">About</a></li>
+          <li>
+            <a href="http://www.cyverse.org" target="_self">
+              <img id="cyverse-icon" src="{% static 'img/cyverse_icon_rgb.png' %}" alt="CyVerse Data Commons">
+            </a>
+          </li>
         </ul>
       </div>
     </div>
