@@ -262,9 +262,35 @@ if (!Array.prototype.map) {
 
                         /* reset metadata */
                         $scope.model.metadata = null;
+                        $scope.model.display = null;
                         promises.push(
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
                                 $scope.model.metadata = result;
+
+                                /* get specific metadata for display */
+                                function search(attr){
+                                    var myArray = $scope.model.metadata.avus
+                                    for (var i=0; i < myArray.length; i++) {
+                                        if (myArray[i].attr === attr) {
+                                            if (myArray[i].value){ //sometimes metadata keys appear twice
+                                                return myArray[i].value;
+                                            }
+                                        }
+                                    }
+                                    return null
+                                }
+
+                                if ($scope.model.metadata.avus.length) {
+                                    $scope.model.display = {};
+                                    $scope.model.display.showMoreButton = 'show more';
+                                    $scope.model.display.description = search('Description')
+                                    $scope.model.display.title = search('datacite.title')
+                                    $scope.model.display.creator = search('datacite.creator')
+                                    $scope.model.display.publicationyear = search('datacite.publicationyear')
+                                    $scope.model.display.Identifier = search('Identifier')
+                                    $scope.model.display.identifierType = search('identifierType')
+                                }
+
                             })
                         );
 
@@ -287,6 +313,9 @@ if (!Array.prototype.map) {
                                 .state(angular.copy($scope.model))
                                 .path('/browse' + $scope.model.item.path)
                                 .search('page', page ? page : null);
+
+                            $scope.expandMetadata = false;
+                            console.log('$scope', $scope)
                         });
 
                         $anchorScroll();
@@ -363,6 +392,15 @@ if (!Array.prototype.map) {
                     grecaptcha.reset();
                 }
             };
+
+            $scope.metadataToggle = function() {
+                $scope.expandMetadata = !$scope.expandMetadata;
+                if ($scope.expandMetadata) {
+                    $scope.model.display.showMoreButton = 'show less'
+                } else {
+                    $scope.model.display.showMoreButton = 'show more'
+                }
+            }
 
             // Initial load
             var initialPath = $location.path();

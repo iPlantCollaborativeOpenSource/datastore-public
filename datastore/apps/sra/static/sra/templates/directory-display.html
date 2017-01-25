@@ -1,6 +1,17 @@
-<div ng-if="model.metadata">
+<div ng-if="model.display">
+    <h3>{{model.display.title}}</h3>
+    <p>{{model.display.description}}</p>
+    <em>{{model.display.creator}} ({{model.display.publicationyear}})</em>
+    <p> {{model.display.identifierType}}: {{model.display.Identifier}}</p>
+
+    <button type="button" class="btn btn-primary" ng-click="metadataToggle()">
+        {{model.display.showMoreButton}}
+    </button>
+</div>
+
+<div ng-show="expandMetadata" ng-if="model.metadata">
     <ul class="list-group">
-        <li class="list-group-item" ng-repeat="meta in model.metadata.avus">
+        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata.avus">
             <div class="row">
                 <div class="col-sm-3">
                     <b>{{ meta.attr }}</b>
@@ -10,7 +21,7 @@
                 </div>
             </div>
         </li>
-        <li class="list-group-item" ng-repeat="meta in model.metadata['irods-avus']">
+        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata['irods-avus']">
             <div class="row">
                 <div class="col-sm-3">
                     <b>{{ meta.attr }}</b>
