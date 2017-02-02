@@ -289,6 +289,14 @@ if (!Array.prototype.map) {
                                     $scope.model.display.publicationyear = search('datacite.publicationyear')
                                     $scope.model.display.Identifier = search('Identifier')
                                     $scope.model.display.identifierType = search('identifierType')
+
+                                    var rights = search('Rights')
+                                    console.log('rights', rights)
+                                    if (rights === 'ODC PDDL') {
+                                        $scope.model.display.rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at: http://www.opendatacommons.org/licenses/pddl/1.0/'
+                                    } else if (rights === 'CC0') {
+                                        $scope.model.display.rights = 'CC0 icon'
+                                    }
                                 }
 
                             })
