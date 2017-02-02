@@ -7,7 +7,7 @@ prettytable==0.7.2
 PyJWT==1.4.1
 python-memcached==1.57
 requests==2.8.1
-six==1.9.0
+six
 slimit
 supervisor==3.0b2
 uWSGI==2.0.12
