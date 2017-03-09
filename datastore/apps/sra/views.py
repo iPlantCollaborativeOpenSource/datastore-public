@@ -14,6 +14,7 @@ from django.shortcuts import render
 from datastore.libs.terrain.client import TerrainClient
 from datastore.libs.anon_files.client import AnonFilesClient
 import settings as sra_settings
+from datastore.apps.sra.dictionary import data_dictionary
 
 logger = logging.getLogger(__name__)
 
@@ -90,19 +91,34 @@ def api_stat(request, path):
     return JsonResponse(path_stat)
 
 
-def api_metadata(request, item_id):
+def api_metadata(request, item_id, download=False):
     cache_key = '{}:{}'.format(item_id, 'metadata')
-    metadata = cache.get(cache_key)
+    # metadata = cache.get(cache_key)
+    metadata = None #For testing
     if metadata is None:
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
             metadata = tc.get_metadata(item_id)
-            cache.set(cache_key, metadata, CACHE_EXPIRATION)
+
+            result = []
+            for item in metadata['avus']:
+                my_dict={}
+                # if item.get('attr') == 'relatedIdentifierType':
+                #   my_dict['display']=my_dict['attr']=item.get('value')
+                #   my_dict['value']=metadata['RelatedIdentifier']
+                # else:
+                my_dict['attr']=item.get('attr')
+                my_dict['value']=item.get('value')
+                my_dict['label'] = data_dictionary.get(my_dict['attr'])
+                result.append(my_dict)
+            avus={'avus':result}
+            cache.set(cache_key, avus, CACHE_EXPIRATION)
+
         except HTTPError as e:
             logger.exception('Failed to retrieve metadata', extra={'id': item_id})
             return HttpResponseBadRequest('Failed to retrieve metadata',
                                           content_type='application/json')
-    return JsonResponse(metadata)
+    return JsonResponse(avus)
 
 
 def api_list_item(request, path):

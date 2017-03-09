@@ -1,5 +1,11 @@
 <div ng-if="model.display">
-    <h3>{{model.display.title}}</h3>
+    <div>
+        <h3>{{model.display.title}}</h3>
+        <button type="button" class="btn btn-primary" ng-click="metadataDownload(model.item.id)">
+            Download Metadata
+        </button>
+    </div>
+
     <p>{{model.display.description}}</p>
     <em>{{model.display.creator}} ({{model.display.publicationyear}})</em>
     <p> {{model.display.identifierType}}: {{model.display.Identifier}}</p>
@@ -15,14 +21,14 @@
         <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata.avus">
             <div class="row">
                 <div class="col-sm-3">
-                    <b>{{ meta.attr }}</b>
+                    <b >{{meta.display ? meta.display : meta.attr}}</b>
                 </div>
                 <div class="col-sm-9">
                     {{ meta.value }}
                 </div>
             </div>
         </li>
-        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata['irods-avus']">
+<!--         <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata['irods-avus']">
             <div class="row">
                 <div class="col-sm-3">
                     <b>{{ meta.attr }}</b>
@@ -31,7 +37,7 @@
                     {{ meta.value }}
                 </div>
             </div>
-        </li>
+        </li> -->
     </ul>
 </div>
 

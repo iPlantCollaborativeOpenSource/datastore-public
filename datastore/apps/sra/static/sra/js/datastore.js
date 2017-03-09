@@ -144,8 +144,8 @@ if (!Array.prototype.map) {
                 });
         };
 
-        service.getItemMetadata = function(itemId) {
-            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}))
+        service.getItemMetadata = function(itemId, download=false) {
+            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}), {'download': download})
                 .then(
                     function (resp) {
                         return resp.data;
@@ -408,6 +408,19 @@ if (!Array.prototype.map) {
                 } else {
                     $scope.model.display.showMoreButton = 'show more'
                 }
+            }
+
+            $scope.metadataDownload = function(id) {
+                DcrFileService.getItemMetadata(id, true).then(function (result) {
+                    console.log('result', result)
+                    // // var metadataJson = angular.toJson(result.avus);
+                    var metadataJson = JSON.stringify(result.avus, null, 4);
+                    var blob = new Blob([metadataJson], { type:"application/json;charset=utf-8;" });
+                    var downloadLink = angular.element('<a></a>');
+                    downloadLink.attr('href',window.URL.createObjectURL(blob));
+                    downloadLink.attr('download', $scope.model.item.label + '_metadata.json');
+                    downloadLink[0].click();
+                })
             }
 
             // Initial load
