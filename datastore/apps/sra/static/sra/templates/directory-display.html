@@ -1,15 +1,15 @@
-<div ng-if="model.display">
+<div ng-if="model.display.hasMetadata">
     <div>
-        <h3>{{model.display.title}}</h3>
+        <h3>{{model.metadata['Title'].value}}</h3>
         <button type="button" class="btn btn-primary" ng-click="metadataDownload(model.item.id)">
             Download Metadata
         </button>
     </div>
 
-    <p>{{model.display.description}}</p>
-    <em>{{model.display.creator}} ({{model.display.publicationyear}})</em>
-    <p> {{model.display.identifierType}}: {{model.display.Identifier}}</p>
-    <p><strong>{{model.display.rights}}</strong></p>
+    <p>{{model.metadata['Description'].value}}</p>
+    <em>{{model.metadata['Creator'].value}} ({{model.metadata['Publication Year'].value}})</em>
+    <p> {{model.metadata['identifierType'].value}}: {{model.metadata['Identifier'].value}}</p>
+    <p><strong>{{model.display.Rights}}</strong></p>
 
     <button type="button" class="btn btn-primary" ng-click="metadataToggle()">
         {{model.display.showMoreButton}}
@@ -18,10 +18,10 @@
 
 <div ng-show="expandMetadata" ng-if="model.metadata">
     <ul class="list-group">
-        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata.avus">
+        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata">
             <div class="row">
                 <div class="col-sm-3">
-                    <b >{{meta.display ? meta.display : meta.attr}}</b>
+                    <b >{{meta.label ? meta.label : meta.attr}}</b>
                 </div>
                 <div class="col-sm-9">
                     {{ meta.value }}

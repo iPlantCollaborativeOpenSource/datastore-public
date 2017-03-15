@@ -269,7 +269,7 @@ if (!Array.prototype.map) {
 
                                 /* get specific metadata for display */
                                 function search(attr){
-                                    var myArray = $scope.model.metadata.avus
+                                    var myArray = $scope.model.metadata
                                     for (var i=0; i < myArray.length; i++) {
                                         if (myArray[i].attr === attr) {
                                             if (myArray[i].value){ //sometimes metadata keys appear twice
@@ -280,22 +280,26 @@ if (!Array.prototype.map) {
                                     return null
                                 }
 
-                                if ($scope.model.metadata.avus.length) {
-                                    $scope.model.display = {};
-                                    $scope.model.display.showMoreButton = 'show more';
-                                    $scope.model.display.description = search('Description')
-                                    $scope.model.display.title = search('datacite.title')
-                                    $scope.model.display.creator = search('datacite.creator')
-                                    $scope.model.display.publicationyear = search('datacite.publicationyear')
-                                    $scope.model.display.Identifier = search('Identifier')
-                                    $scope.model.display.identifierType = search('identifierType')
+                                if (Object.keys($scope.model.metadata).length) {
+                                    $scope.model.display = {
+                                        'showMoreButton': 'show more',
+                                        'hasMetadata': true
+                                    };
+                                    // $scope.model.display.showMoreButton = 'show more';
+                                    // $scope.model.display.description = search('Description')
+                                    // $scope.model.display.title = search('datacite.title')
+                                    // $scope.model.display.creator = search('datacite.creator')
+                                    // $scope.model.display.publicationyear = search('datacite.publicationyear')
+                                    // $scope.model.display.Identifier = search('Identifier')
+                                    // $scope.model.display.identifierType = search('identifierType')
 
-                                    var rights = search('Rights')
-                                    console.log('rights', rights)
-                                    if (rights === 'ODC PDDL') {
-                                        $scope.model.display.rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at: http://www.opendatacommons.org/licenses/pddl/1.0/'
-                                    } else if (rights === 'CC0') {
-                                        $scope.model.display.rights = 'CC0 icon'
+                                    // var rights = search('Rights')
+                                    // console.log('rights', rights)
+
+                                    if ($scope.model.metadata.Rights === 'ODC PDDL') {
+                                        $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at: http://www.opendatacommons.org/licenses/pddl/1.0/'
+                                    } else if ($scope.model.metadata.Rights === 'CC0') {
+                                        $scope.model.display.Rights = 'CC0 icon'
                                     }
                                 }
 
@@ -414,7 +418,7 @@ if (!Array.prototype.map) {
                 DcrFileService.getItemMetadata(id, true).then(function (result) {
                     console.log('result', result)
                     // // var metadataJson = angular.toJson(result.avus);
-                    var metadataJson = JSON.stringify(result.avus, null, 4);
+                    var metadataJson = JSON.stringify(result, null, 4);
                     var blob = new Blob([metadataJson], { type:"application/json;charset=utf-8;" });
                     var downloadLink = angular.element('<a></a>');
                     downloadLink.attr('href',window.URL.createObjectURL(blob));

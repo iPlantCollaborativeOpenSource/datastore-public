@@ -5,6 +5,6 @@ data_dictionary = {
     'creatorAffiliation': 'Creator Affiliation',
     'datacite.publisher': 'Publisher',
     'datacite.resourcetype': 'Resource Type',
-    'contributorName': 'Contributor',
+    'contributorName': 'Contributor Name',
     'contributorType': 'Contributor Type'
 }
