@@ -169,7 +169,7 @@ if (!Array.prototype.map) {
                     });
         };
 
-        service.download = function(file) {
+        service.downloadFile = function(file) {
             var url = djangoUrl.reverse('download', {path: file.path});
             var link = document.createElement('a');
             link.setAttribute('download', file.label);
@@ -376,8 +376,8 @@ if (!Array.prototype.map) {
                     });
             };
 
-            $scope.download = function() {
-                DcrFileService.download($scope.model.item);
+            $scope.downloadFile = function() {
+                DcrFileService.downloadFile($scope.model.item);
             };
 
             $scope.preview = function(path) {
@@ -397,7 +397,7 @@ if (!Array.prototype.map) {
                 if ($cookies.get('recaptcha_status') != 'verified') {
                     $('#download_button').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
                 } else {
-                    $scope.download();
+                    $scope.downloadFile();
                     $('#download_button').popover('hide');
                 }
                 if ($('#recaptcha').html()) {
@@ -415,8 +415,6 @@ if (!Array.prototype.map) {
             }
 
             $scope.getCitation = function(style) {
-                console.log('style', style);
-
                 if ($scope.model.display.citationFormat === style) {
                     // toggle citation display
                     $scope.model.display.citation = null;
@@ -433,14 +431,6 @@ if (!Array.prototype.map) {
                     ' year = {' + $scope.model.metadata["Publication Year"].value + '} \n' +
                     ' note = {' + $scope.model.metadata.Description.value + '} \n' +
                     '}';
-                    // $scope.model.display.citation =
-                    // '@misc{dataset, <br />' +
-                    // '&emsp; author = {' + $scope.model.metadata.Creator.value + '} <br />' +
-                    // '&emsp; title = {' + $scope.model.metadata.Title.value + '} <br />' +
-                    // '&emsp; year = {' + $scope.model.metadata["Publication Year"].value + '} <br />' +
-                    // '&emsp; note = {' + $scope.model.metadata.Description.value + '} <br />' +
-                    // '}';
-                    // $scope.model.display.citationHTML = $sce.trustAsHtml($scope.model.display.citation.replace(/\n/g,"<br>"));
                 } else if (style =='Endnote'){
                     $scope.model.display.citation =
                     '%0 Generic \n' +
@@ -451,15 +441,11 @@ if (!Array.prototype.map) {
             }
 
             $scope.downloadCitation = function(style) {
-                console.log('downloadCitation scope', $scope)
                 var citationFormat={
                     'BibTeX': 'bib',
                     'Endnote': 'enw'
                 }
-                // $scope.citation(style);
-                var citation = $scope.model.display.citation
-                // citation.replace(/<br\s*[\/]?>/gi, "\r\n")
-                var blob = new Blob([citation]);
+                var blob = new Blob([$scope.model.display.citation]);
                 var downloadLink = angular.element('<a></a>');
                 downloadLink.attr('href',window.URL.createObjectURL(blob));
                 downloadLink.attr('download', $scope.model.item.label + 'citation.' + citationFormat[style]);
@@ -467,7 +453,7 @@ if (!Array.prototype.map) {
             }
 
 
-            $scope.metadataDownload = function(id) {
+            $scope.downloadMetadata = function(id) {
                 DcrFileService.getItemMetadata(id, true).then(function (result) {
                     console.log('result', result)
                     // // var metadataJson = angular.toJson(result.avus);

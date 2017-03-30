@@ -1,7 +1,7 @@
 <div ng-if="model.display.hasMetadata">
     <div>
         <h3>{{model.metadata['Title'].value}}</h3>
-        <button type="button" class="btn btn-primary" ng-click="metadataDownload(model.item.id)">
+        <button type="button" class="btn btn-primary" ng-click="downloadMetadata(model.item.id)">
             Download Metadata
         </button>
     </div>
