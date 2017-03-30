@@ -8,7 +8,10 @@
 
     <p>{{model.metadata['Description'].value}}</p>
     <em>{{model.metadata['Creator'].value}} ({{model.metadata['Publication Year'].value}})</em>
-    <p> {{model.metadata['identifierType'].value}}: {{model.metadata['Identifier'].value}}</p>
+
+    <p ng-if="model.metadata['identifierType'].value && model.metadata['Identifier'].value"> {{model.metadata['identifierType'].value}}: {{model.metadata['Identifier'].value}}</p>
+
+    <p ng-if="model.metadata['alternateIdentifierType'].value && model.metadata['AlternateIdentifier'].value"> {{model.metadata['alternateIdentifierType'].value}}: {{model.metadata['AlternateIdentifier'].value}}</p>
     <p ng-bind-html="model.display.Rights"><p>
 
     <div>
