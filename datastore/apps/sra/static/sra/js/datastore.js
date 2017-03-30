@@ -224,8 +224,8 @@ if (!Array.prototype.map) {
     }]);
 
 
-    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', '$sce', 'TerrainConfig', 'DcrFileService',
-        function($scope, $q, $location, $cookies, $anchorScroll, $sce, TerrainConfig, DcrFileService) {
+    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrFileService',
+        function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrFileService) {
 
             $scope.config = TerrainConfig;
 
@@ -297,9 +297,9 @@ if (!Array.prototype.map) {
                                     // console.log('rights', rights)
 
                                     if ($scope.model.metadata.Rights.value === 'ODC PDDL') {
-                                        $scope.model.display.Rights = $sce.trustAsHtml('This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>')
+                                        $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
-                                        $scope.model.display.Rights = $sce.trustAsHtml('<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.')
+                                        $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
                                     }
                                 }
 
