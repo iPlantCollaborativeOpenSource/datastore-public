@@ -89,7 +89,7 @@ if (!Array.prototype.map) {
     }
 
 
-    var app = angular.module('Datastore', ['djng.urls', 'ui.bootstrap', 'ngCookies'])
+    var app = angular.module('Datastore', ['djng.urls', 'ui.bootstrap', 'ngCookies', 'ngSanitize'])
         .config(['$httpProvider', '$locationProvider', config]);
 
 
@@ -224,8 +224,8 @@ if (!Array.prototype.map) {
     }]);
 
 
-    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrFileService',
-        function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrFileService) {
+    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', '$sce', 'TerrainConfig', 'DcrFileService',
+        function($scope, $q, $location, $cookies, $anchorScroll, $sce, TerrainConfig, DcrFileService) {
 
             $scope.config = TerrainConfig;
 
@@ -296,10 +296,10 @@ if (!Array.prototype.map) {
                                     // var rights = search('Rights')
                                     // console.log('rights', rights)
 
-                                    if ($scope.model.metadata.Rights === 'ODC PDDL') {
-                                        $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at: http://www.opendatacommons.org/licenses/pddl/1.0/'
-                                    } else if ($scope.model.metadata.Rights === 'CC0') {
-                                        $scope.model.display.Rights = 'CC0 icon'
+                                    if ($scope.model.metadata.Rights.value === 'ODC PDDL') {
+                                        $scope.model.display.Rights = $sce.trustAsHtml('This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>')
+                                    } else if ($scope.model.metadata.Rights.value === 'CC0') {
+                                        $scope.model.display.Rights = $sce.trustAsHtml('<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.')
                                     }
                                 }
 
@@ -413,6 +413,59 @@ if (!Array.prototype.map) {
                     $scope.model.display.showMoreButton = 'show more'
                 }
             }
+
+            $scope.getCitation = function(style) {
+                console.log('style', style);
+
+                if ($scope.model.display.citationFormat === style) {
+                    // toggle citation display
+                    $scope.model.display.citation = null;
+                    $scope.model.display.citationFormat = null;
+                    return
+                }
+
+                $scope.model.display.citationFormat = style
+                if (style =='BibTeX'){
+                    $scope.model.display.citation =
+                    '@misc{dataset, \n' +
+                    ' author = {' + $scope.model.metadata.Creator.value + '} \n' +
+                    ' title = {' + $scope.model.metadata.Title.value + '} \n' +
+                    ' year = {' + $scope.model.metadata["Publication Year"].value + '} \n' +
+                    ' note = {' + $scope.model.metadata.Description.value + '} \n' +
+                    '}';
+                    // $scope.model.display.citation =
+                    // '@misc{dataset, <br />' +
+                    // '&emsp; author = {' + $scope.model.metadata.Creator.value + '} <br />' +
+                    // '&emsp; title = {' + $scope.model.metadata.Title.value + '} <br />' +
+                    // '&emsp; year = {' + $scope.model.metadata["Publication Year"].value + '} <br />' +
+                    // '&emsp; note = {' + $scope.model.metadata.Description.value + '} <br />' +
+                    // '}';
+                    // $scope.model.display.citationHTML = $sce.trustAsHtml($scope.model.display.citation.replace(/\n/g,"<br>"));
+                } else if (style =='Endnote'){
+                    $scope.model.display.citation =
+                    '%0 Generic \n' +
+                    '%A ' + $scope.model.metadata.Creator.value + '\n' +
+                    '%T ' + $scope.model.metadata.Title.value + '\n' +
+                    '%D ' + $scope.model.metadata["Publication Year"].value + '\n';
+                }
+            }
+
+            $scope.downloadCitation = function(style) {
+                console.log('downloadCitation scope', $scope)
+                var citationFormat={
+                    'BibTeX': 'bib',
+                    'Endnote': 'enw'
+                }
+                // $scope.citation(style);
+                var citation = $scope.model.display.citation
+                // citation.replace(/<br\s*[\/]?>/gi, "\r\n")
+                var blob = new Blob([citation]);
+                var downloadLink = angular.element('<a></a>');
+                downloadLink.attr('href',window.URL.createObjectURL(blob));
+                downloadLink.attr('download', $scope.model.item.label + 'citation.' + citationFormat[style]);
+                downloadLink[0].click();
+            }
+
 
             $scope.metadataDownload = function(id) {
                 DcrFileService.getItemMetadata(id, true).then(function (result) {

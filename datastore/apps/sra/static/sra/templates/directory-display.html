@@ -9,7 +9,27 @@
     <p>{{model.metadata['Description'].value}}</p>
     <em>{{model.metadata['Creator'].value}} ({{model.metadata['Publication Year'].value}})</em>
     <p> {{model.metadata['identifierType'].value}}: {{model.metadata['Identifier'].value}}</p>
-    <p><strong>{{model.display.Rights}}</strong></p>
+    <p ng-bind-html="model.display.Rights"><p>
+
+    <div>
+        <p>Export Formats:
+            <button type="button" class="btn btn-link" ng-click="getCitation('BibTeX')">BibTeX</button>
+            <button type="button" class="btn btn-link" ng-click="getCitation('Endnote')">Endnote</button>
+        </p>
+        <div id="citation" ng-if="model.display.citationFormat">
+            <div class="dropdown">
+              <button class="btn btn-link" type="button" ng-click="downloadCitation(model.display.citationFormat)">Download As {{model.display.citationFormat}}
+             <!--  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Download As {{model.display.citationFormat}}
+              <span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                <li><a href="#" ng-click="downloadCitation('BibTeX')">BibTeX</a></li>
+                <li><a href="#" ng-click="downloadCitation('Endnote')">Endnote</a></li>
+              </ul> -->
+            </div>
+
+            <pre ng-bind-html="model.display.citation"></pre>
+        </div>
+    </div>
 
     <button type="button" class="btn btn-primary" ng-click="metadataToggle()">
         {{model.display.showMoreButton}}
