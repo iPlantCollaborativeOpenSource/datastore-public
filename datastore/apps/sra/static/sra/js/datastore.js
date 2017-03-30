@@ -428,6 +428,7 @@ if (!Array.prototype.map) {
                     '@misc{dataset, \n' +
                     ' author = {' + $scope.model.metadata.Creator.value + '} \n' +
                     ' title = {' + $scope.model.metadata.Title.value + '} \n' +
+                    ' publisher = {' + $scope.model.metadata.Publisher.value + '} \n' +
                     ' year = {' + $scope.model.metadata["Publication Year"].value + '} \n' +
                     ' note = {' + $scope.model.metadata.Description.value + '} \n' +
                     '}';
@@ -436,6 +437,7 @@ if (!Array.prototype.map) {
                     '%0 Generic \n' +
                     '%A ' + $scope.model.metadata.Creator.value + '\n' +
                     '%T ' + $scope.model.metadata.Title.value + '\n' +
+                    '%I ' + $scope.model.metadata.Publisher.value + '\n' +
                     '%D ' + $scope.model.metadata["Publication Year"].value + '\n';
                 }
             }
