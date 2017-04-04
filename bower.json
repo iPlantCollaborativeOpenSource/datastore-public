@@ -4,7 +4,7 @@
   "authors": [
     "Marjo Poindexter <marjo@tacc.utexas.edu>"
   ],
-  "description": "DesignSafe-CI Portal",
+  "description": "Data Commons Portal",
   "license": "MIT",
   "homepage": "",
   "dependencies": {
