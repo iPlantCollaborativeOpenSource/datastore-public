@@ -93,8 +93,7 @@ def api_stat(request, path):
 
 def api_metadata(request, item_id, download=False):
     cache_key = '{}:{}'.format(item_id, 'metadata')
-    # result = cache.get(cache_key)
-    result = None #For testing
+    result = cache.get(cache_key)
     if result is None:
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
