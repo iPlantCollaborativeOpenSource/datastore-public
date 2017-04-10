@@ -123,7 +123,7 @@ def api_metadata(request, item_id, download=False):
                 my_dict['label'] = label
                 my_dict['value'] = item.get('value')
 
-                if label in result:
+                if label in result and result[label]['value']:
                     result[label]['value'] += ', {}'.format(my_dict['value'])
                 else:
                     result[label] = my_dict
