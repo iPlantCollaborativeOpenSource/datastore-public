@@ -41,23 +41,133 @@
 
 <div ng-show="expandMetadata" ng-if="model.metadata">
     <ul class="list-group">
-        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata">
+        <li class="list-group-item" ng-repeat="meta in model.display.sortedMetadata">
             <div class="row">
                 <div class="col-sm-3">
-                    <b >{{meta.label ? meta.label : meta.attr}}</b>
+                    <b >{{meta.key}}</b>
                 </div>
                 <div class="col-sm-9">
                     {{ meta.value }}
                 </div>
             </div>
         </li>
-<!--         <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.metadata['irods-avus']">
+        <!-- <li class="list-group-item" ng-if="model.metadata['Identifier'].value">
             <div class="row">
                 <div class="col-sm-3">
-                    <b>{{ meta.attr }}</b>
+                    <b >{{model.metadata['identifierType'].value}}</b>
                 </div>
                 <div class="col-sm-9">
-                    {{ meta.value }}
+                    {{model.metadata['Identifier'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Creator'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Creator</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Creator'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Title'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Title</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Title'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Publisher'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Publisher</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Publisher'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Publication Year'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Publication Year</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Publication Year'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Resource Type General'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Resource Type General</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Resource Type General'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Resource Type'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Resource Type</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Resource Type'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Description'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Description</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Description'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Subject'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >Subject</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Subject'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Contributor Name'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >{{model.metadata['Contributor Type'].value}} </b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Contributor Name'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Alternate Identifier'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >{{model.metadata['Alternate Identifier Type'].value}}</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Alternate Identifier'].value}}
+                </div>
+            </div>
+        </li>
+        <li class="list-group-item" ng-if="model.metadata['Related Identifier'].value">
+            <div class="row">
+                <div class="col-sm-3">
+                    <b >{{model.metadata['Related Identifier Type'].value}}</b>
+                </div>
+                <div class="col-sm-9">
+                    {{model.metadata['Related Identifier'].value}}
                 </div>
             </div>
         </li> -->

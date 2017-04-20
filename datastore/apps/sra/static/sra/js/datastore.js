@@ -266,15 +266,13 @@ if (!Array.prototype.map) {
                         promises.push(
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
                                 $scope.model.metadata = result;
-
+                                console.log($scope.model.metadata)
                                 /* get specific metadata for display */
                                 function search(attr){
                                     var myArray = $scope.model.metadata
                                     for (var i=0; i < myArray.length; i++) {
                                         if (myArray[i].attr === attr) {
-                                            if (myArray[i].value){ //sometimes metadata keys appear twice
-                                                return myArray[i].value;
-                                            }
+                                            return myArray[i].value;
                                         }
                                     }
                                     return null
@@ -302,6 +300,186 @@ if (!Array.prototype.map) {
                                         $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
                                     }
                                 }
+
+                                var metadataOrder = [
+                                    {'key':'Identifier Type', 'value':'Identifier'},
+                                    'Creator',
+                                    'Title',
+                                    'Publisher',
+                                    'Publication Year',
+                                    'Resource Type General',
+                                    'Resource Type',
+                                    'Description',
+                                    'Subject',
+                                    {'key':'Contributor Type', 'value':'Contributor'},
+                                    {'key':'Alternate Identifier Type', 'value':'Alternate Identifier'},
+                                    {'key':'Related Identifier Type', 'value':'Related Identifier'},
+                                    'Relation Type',
+                                    'Size',
+                                    'Format',
+                                    'Version',
+                                    'Rights',
+                                    'Rights URI',
+                                    'Funding Reference',
+                                    'Funder Name',
+                                    'Award Number',
+                                ]
+
+                                var copy = Object.assign([], $scope.model.metadata);
+                                $scope.model.display.sortedMetadata = []
+
+                                for (var i=0; i < metadataOrder.length; i++) {
+                                    if (typeof metadataOrder[i] === 'object') {
+                                        var key = metadataOrder[i]['key']
+                                        var value = metadataOrder[i]['value']
+                                        if (typeof $scope.model.metadata[key] != 'undefined'
+                                            && typeof $scope.model.metadata[value] != 'undefined') {
+                                            $scope.model.display.sortedMetadata.push(
+                                                {'key':$scope.model.metadata[key].value,
+                                                'value':$scope.model.metadata[value].value}
+                                            )
+                                            delete copy[key]
+                                            delete copy[value]
+                                        }
+                                    } else {
+                                        if (typeof $scope.model.metadata[metadataOrder[i]] != 'undefined') {
+                                            key=$scope.model.metadata[metadataOrder[i]].label
+                                            value=$scope.model.metadata[metadataOrder[i]].value
+                                            $scope.model.display.sortedMetadata.push(
+                                                {'key': key, 'value': value}
+                                            )
+                                            delete copy[key]
+                                        }
+                                    }
+                                }
+
+                                for (var i=0; i < Object.keys(copy).length; i++) { //display any other metadata
+                                    var meta = copy[Object.keys(copy)[i]]
+                                    if (meta.value) {
+                                        $scope.model.display.sortedMetadata.push(
+                                            {'key': meta.label, 'value': meta.value})
+                                    }
+                                }
+
+                                // // $scope.model.display.sortedMetadata.push($scope.model.metadata['Identifier Type'].value: $scope.model.metadata['Identifier'].value)
+                                // // $scope.model.display.sortedMetadata.push(pushObj($scope.model.metadata['Identifier Type'].value, $scope.model.metadata['Identifier'].value))
+
+                                // if (typeof $scope.model.metadata['Identifier Type'] != 'undefined'
+                                //     && typeof $scope.model.metadata['Identifier'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Identifier Type'].value,
+                                //             $scope.model.metadata['Identifier'].value)
+                                //     delete copy['Identifier Type']
+                                //     delete copy['Identifier']
+                                // }
+                                // if (typeof $scope.model.metadata['Creator'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Creator'].label,
+                                //             $scope.model.metadata['Creator'].value)
+                                //     delete copy['Creator']
+                                // }
+                                // if (typeof $scope.model.metadata['Title'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Title'].label,
+                                //             $scope.model.metadata['Title'].value)
+                                //     delete copy['Title']
+                                // }
+                                // if (typeof $scope.model.metadata['Publisher'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Publisher'].label,
+                                //             $scope.model.metadata['Publisher'].value)
+                                //     delete copy['Publisher']
+                                // }
+                                // if (typeof $scope.model.metadata['Publication Year'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Publication Year'].label,
+                                //             $scope.model.metadata['Publication Year'].value)
+                                //     delete copy['Publication Year']
+                                // }
+                                // if (typeof $scope.model.metadata['Resource Type General'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Resource Type General'].label,
+                                //             $scope.model.metadata['Resource Type General'].value)
+                                //     delete copy['Resource Type General']
+                                // }
+                                // if (typeof $scope.model.metadata['Resource Type'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Resource Type'].label,
+                                //             $scope.model.metadata['Resource Type'].value)
+                                //     delete copy['Resource Type']
+                                // }
+                                // if (typeof $scope.model.metadata['Description'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Description'].label,
+                                //             $scope.model.metadata['Description'].value)
+                                //     delete copy['Description']
+                                // }
+                                // if (typeof $scope.model.metadata['Subject'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Subject'].label,
+                                //             $scope.model.metadata['Subject'].value)
+                                //     delete copy['Subject']
+                                // }
+                                // if (typeof $scope.model.metadata['Contributor Type'] != 'undefined'
+                                //     && typeof $scope.model.metadata['Contributor'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Contributor Type'].value,
+                                //             $scope.model.metadata['Contributor'].value)
+                                //     delete copy['Contributor Type']
+                                //     delete copy['Contributor']
+                                // }
+                                // if (typeof $scope.model.metadata['Alternate Identifier Type'] != 'undefined'
+                                //     && typeof $scope.model.metadata['Alternate Identifier'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Alternate Identifier Type'].value,
+                                //             $scope.model.metadata['Alternate Identifier'].value)
+                                //     delete copy['Alternate Identifier Type']
+                                //     delete copy['Alternate Identifier']
+                                // }
+                                // if (typeof $scope.model.metadata['Related Identifier Type'] != 'undefined'
+                                //     && $scope.model.metadata['Related Identifier'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Related Identifier Type'].value,
+                                //             $scope.model.metadata['Related Identifier'].value)
+                                //     delete copy['Related Identifier Type']
+                                //     delete copy['Related Identifier']
+                                // }
+                                // if (typeof $scope.model.metadata['Relation Type'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Relation Type'].label,
+                                //             $scope.model.metadata['Relation Type'].value)
+                                //     delete copy['Relation Type']
+                                // }
+                                // if (typeof $scope.model.metadata['Size'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Size'].label,
+                                //             $scope.model.metadata['Size'].value)
+                                //     delete copy['Size']
+                                // }
+                                // if (typeof $scope.model.metadata['Format'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Format'].label,
+                                //             $scope.model.metadata['Format'].value)
+                                //     delete copy['Format']
+                                // }
+                                // if (typeof $scope.model.metadata['Version'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Version'].label,
+                                //             $scope.model.metadata['Version'].value)
+                                //     delete copy['Version']
+                                // }
+                                // if (typeof $scope.model.metadata['Rights'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Rights'].label,
+                                //             $scope.model.metadata['Rights'].value)
+                                //     delete copy['Rights']
+                                // }
+                                // if (typeof $scope.model.metadata['Rights URI'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Rights URI'].label,
+                                //             $scope.model.metadata['Rights URI'].value)
+                                //     delete copy['Rights URI']
+                                // }
+                                // if (typeof $scope.model.metadata['Funding Reference'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Funding Reference'].label,
+                                //             $scope.model.metadata['Funding Reference'].value)
+                                //     delete copy['Funding Reference']
+                                // }
+                                // if (typeof $scope.model.metadata['Funder Name'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Funder Name'].label,
+                                //             $scope.model.metadata['Funder Name'].value)
+                                //     delete copy['Funder Name']
+                                // }
+                                // if (typeof $scope.model.metadata['Award Number'] != 'undefined') {
+                                //     pushObj($scope.model.metadata['Award Number'].label,
+                                //             $scope.model.metadata['Award Number'].value)
+                                //     delete copy['Award Number']
+                                // }
+
+                                // console.log('copy', copy)
+                                // console.log('$scope.model.display.sortedMetadata', $scope.model.display.sortedMetadata)
 
                             })
                         );
