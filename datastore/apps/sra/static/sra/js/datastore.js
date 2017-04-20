@@ -266,7 +266,7 @@ if (!Array.prototype.map) {
                         promises.push(
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
                                 $scope.model.metadata = result;
-                                console.log($scope.model.metadata)
+
                                 /* get specific metadata for display */
                                 function search(attr){
                                     var myArray = $scope.model.metadata
@@ -504,8 +504,6 @@ if (!Array.prototype.map) {
 
             $scope.downloadMetadata = function(id) {
                 DcrFileService.getItemMetadata(id, true).then(function (result) {
-                    console.log('result', result)
-                    // // var metadataJson = angular.toJson(result.avus);
                     var metadataJson = JSON.stringify(result, null, 4);
                     var blob = new Blob([metadataJson], { type:"application/json;charset=utf-8;" });
                     var downloadLink = angular.element('<a></a>');
