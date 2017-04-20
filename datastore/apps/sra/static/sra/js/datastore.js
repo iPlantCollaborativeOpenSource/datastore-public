@@ -303,7 +303,7 @@ if (!Array.prototype.map) {
                                     'Subject',
                                     {'key':'Contributor Type', 'value':'Contributor'},
                                     {'key':'Alternate Identifier Type', 'value':'Alternate Identifier'},
-                                    {'key':'Related Identifier Type', 'value':'Related Identifier'},
+                                    {'Additional Label': 'Related Identifier', 'key':'Related Identifier Type', 'value':'Related Identifier'},
                                     'Relation Type',
                                     'Size',
                                     'Format',
@@ -322,11 +322,22 @@ if (!Array.prototype.map) {
                                     if (typeof metadataOrder[i] === 'object') {
                                         var key = metadataOrder[i]['key']
                                         var value = metadataOrder[i]['value']
+                                        var label, displayValue
                                         if (typeof $scope.model.metadata[key] != 'undefined'
-                                            && typeof $scope.model.metadata[value] != 'undefined') {
+                                            && typeof $scope.model.metadata[value] != 'undefined'
+                                            && $scope.model.metadata[key].value != ''
+                                            && $scope.model.metadata[value].value != '') {
+
+                                            if (typeof metadataOrder[i]['Additional Label'] != 'undefined'){
+                                                label = metadataOrder[i]['Additional Label']
+                                                displayValue = $scope.model.metadata[key].value + ': ' + $scope.model.metadata[value].value
+                                            } else {
+                                                label = $scope.model.metadata[key].value
+                                                displayValue = $scope.model.metadata[key].value
+                                            }
                                             $scope.model.display.sortedMetadata.push(
-                                                {'key':$scope.model.metadata[key].value,
-                                                'value':$scope.model.metadata[value].value}
+                                                {'key':label,
+                                                'value': displayValue}
                                             )
                                             delete copy[key]
                                             delete copy[value]

@@ -37,7 +37,7 @@
 
 <div ng-show="expandMetadata" ng-if="model.metadata">
     <ul class="list-group">
-        <li class="list-group-item" ng-repeat="meta in model.display.sortedMetadata">
+        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.display.sortedMetadata">
             <div class="row">
                 <div class="col-sm-3">
                     <b >{{meta.key}}</b>
