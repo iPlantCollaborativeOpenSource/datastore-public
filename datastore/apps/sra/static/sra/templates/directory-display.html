@@ -22,12 +22,6 @@
         <div id="citation" ng-if="model.display.citationFormat">
             <div class="dropdown">
               <button class="btn btn-link" type="button" ng-click="downloadCitation(model.display.citationFormat)">Download As {{model.display.citationFormat}}
-             <!--  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Download As {{model.display.citationFormat}}
-              <span class="caret"></span></button>
-              <ul class="dropdown-menu">
-                <li><a href="#" ng-click="downloadCitation('BibTeX')">BibTeX</a></li>
-                <li><a href="#" ng-click="downloadCitation('Endnote')">Endnote</a></li>
-              </ul> -->
             </div>
 
             <pre ng-bind-html="model.display.citation"></pre>
@@ -51,126 +45,6 @@
                 </div>
             </div>
         </li>
-        <!-- <li class="list-group-item" ng-if="model.metadata['Identifier'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >{{model.metadata['identifierType'].value}}</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Identifier'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Creator'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Creator</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Creator'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Title'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Title</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Title'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Publisher'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Publisher</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Publisher'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Publication Year'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Publication Year</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Publication Year'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Resource Type General'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Resource Type General</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Resource Type General'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Resource Type'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Resource Type</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Resource Type'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Description'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Description</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Description'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Subject'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >Subject</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Subject'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Contributor Name'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >{{model.metadata['Contributor Type'].value}} </b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Contributor Name'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Alternate Identifier'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >{{model.metadata['Alternate Identifier Type'].value}}</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Alternate Identifier'].value}}
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" ng-if="model.metadata['Related Identifier'].value">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b >{{model.metadata['Related Identifier Type'].value}}</b>
-                </div>
-                <div class="col-sm-9">
-                    {{model.metadata['Related Identifier'].value}}
-                </div>
-            </div>
-        </li> -->
     </ul>
 </div>
 
