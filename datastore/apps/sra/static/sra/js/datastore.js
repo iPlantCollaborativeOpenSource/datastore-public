@@ -333,7 +333,7 @@ if (!Array.prototype.map) {
                                                 displayValue = $scope.model.metadata[key].value + ': ' + $scope.model.metadata[value].value
                                             } else {
                                                 label = $scope.model.metadata[key].value
-                                                displayValue = $scope.model.metadata[key].value
+                                                displayValue = $scope.model.metadata[value].value
                                             }
                                             $scope.model.display.sortedMetadata.push(
                                                 {'key':label,
