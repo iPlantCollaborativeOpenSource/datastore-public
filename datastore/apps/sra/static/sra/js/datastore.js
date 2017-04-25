@@ -265,7 +265,61 @@ if (!Array.prototype.map) {
                         $scope.model.display = null;
                         promises.push(
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
-                                $scope.model.metadata = result;
+                                $scope.model.metadataRaw = result;
+                                console.log('$scope.model.metadataRaw', $scope.model.metadataRaw)
+
+                                var data_dictionary = {
+                                    'alternateIdentifierType': 'Alternate Identifier Type',
+                                    'AlternateIdentifier': 'Alternate Identifier',
+                                    'awardNumber': 'Award Number',
+                                    'creatorAffiliation': 'Creator Affiliation',
+                                    'contributorType': 'Contributor Type',
+                                    'contributorName': 'Contributor',
+                                    'datacite.creator': 'Creator',
+                                    'datacite.publicationyear': 'Publication Year',
+                                    'datacite.publisher': 'Publisher',
+                                    'datacite.resourcetype': 'Resource Type General',
+                                    'datacite.title': 'Title',
+                                    'Description': 'Description',
+                                    'Format': 'Format',
+                                    'fundingReference': 'Funding Reference',
+                                    'fundingName': 'Funder Name',
+                                    'identifierType': 'Identifier Type',
+                                    'IdentifierType': 'Identifier Type',
+                                    'Identifier': 'Identifier',
+                                    'relatedIdentifierType': 'Related Identifier Type',
+                                    'RelatedIdentifierType': 'Related Identifier Type',
+                                    'RelatedIdentifier': 'Related Identifier',
+                                    'relationType': 'Relation Type',
+                                    'ResourceType': 'Resource Type',
+                                    'Rights': 'Rights',
+                                    'RightsURL': 'Rights URI',
+                                    'Size': 'Size',
+                                    'Subject': 'Subject',
+                                    'Version': 'Version'
+                                }
+
+                                var contributors = []
+                                $scope.model.metadata = {}
+                                for (var i=0; i < $scope.model.metadataRaw.length; i++) {
+                                    var attr = $scope.model.metadataRaw[i].attr
+                                    var value = $scope.model.metadataRaw[i].value
+                                    var label
+
+                                    if (typeof data_dictionary[attr] != 'undefined'){
+                                        label = data_dictionary[attr]
+                                    } else {
+                                        label = attr
+                                    }
+
+                                    if (label == 'Contributor Type' || label == 'Contributor') {
+                                        contributors.push({'attr': attr, 'label':label, 'value':value})
+                                    } else if (!(label in $scope.model.metadata)){
+                                        $scope.model.metadata[label] = {'attr': attr, 'label': label, 'value': value}
+                                    } else if ($scope.model.metadata[label]['value']) {
+                                        $scope.model.metadata[label]['value'] = $scope.model.metadata[label]["value"] + ', ' + value
+                                    }
+                                }
 
                                 /* get specific metadata for display */
                                 function search(attr){
@@ -289,76 +343,83 @@ if (!Array.prototype.map) {
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
                                         $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
                                     }
-                                }
 
-                                var metadataOrder = [
-                                    {'key':'Identifier Type', 'value':'Identifier'},
-                                    'Creator',
-                                    'Title',
-                                    'Publisher',
-                                    'Publication Year',
-                                    'Resource Type General',
-                                    'Resource Type',
-                                    'Description',
-                                    'Subject',
-                                    {'key':'Contributor Type', 'value':'Contributor'},
-                                    {'key':'Alternate Identifier Type', 'value':'Alternate Identifier'},
-                                    {'Additional Label': 'Related Identifier', 'key':'Related Identifier Type', 'value':'Related Identifier'},
-                                    'Relation Type',
-                                    'Size',
-                                    'Format',
-                                    'Version',
-                                    'Rights',
-                                    'Rights URI',
-                                    'Funding Reference',
-                                    'Funder Name',
-                                    'Award Number',
-                                ]
+                                    var metadataOrder = [
+                                        {'key':'Identifier Type', 'value':'Identifier'},
+                                        'Creator',
+                                        'Title',
+                                        'Publisher',
+                                        'Publication Year',
+                                        'Resource Type General',
+                                        'Resource Type',
+                                        'Description',
+                                        'Subject',
+                                        // {'key':'Contributor Type', 'value':'Contributor'},
+                                        'Contributor',
+                                        {'key':'Alternate Identifier Type', 'value':'Alternate Identifier'},
+                                        {'Additional Label': 'Related Identifier', 'key':'Related Identifier Type', 'value':'Related Identifier'},
+                                        'Relation Type',
+                                        'Size',
+                                        'Format',
+                                        'Version',
+                                        'Rights',
+                                        'Rights URI',
+                                        'Funding Reference',
+                                        'Funder Name',
+                                        'Award Number',
+                                    ]
 
-                                var copy = Object.assign([], $scope.model.metadata);
-                                $scope.model.display.sortedMetadata = []
+                                    var copy = Object.assign([], $scope.model.metadata);
+                                    $scope.model.display.sortedMetadata = []
 
-                                for (var i=0; i < metadataOrder.length; i++) {
-                                    if (typeof metadataOrder[i] === 'object') {
-                                        var key = metadataOrder[i]['key']
-                                        var value = metadataOrder[i]['value']
-                                        var label, displayValue
-                                        if (typeof $scope.model.metadata[key] != 'undefined'
-                                            && typeof $scope.model.metadata[value] != 'undefined'
-                                            && $scope.model.metadata[key].value != ''
-                                            && $scope.model.metadata[value].value != '') {
+                                    for (var i=0; i < metadataOrder.length; i++) {
+                                        if (typeof metadataOrder[i] === 'object') {
+                                            var key = metadataOrder[i]['key']
+                                            var value = metadataOrder[i]['value']
+                                            var label, displayValue
+                                            if (typeof $scope.model.metadata[key] != 'undefined'
+                                                && typeof $scope.model.metadata[value] != 'undefined'){
 
-                                            if (typeof metadataOrder[i]['Additional Label'] != 'undefined'){
-                                                label = metadataOrder[i]['Additional Label']
-                                                displayValue = $scope.model.metadata[key].value + ': ' + $scope.model.metadata[value].value
-                                            } else {
-                                                label = $scope.model.metadata[key].value
-                                                displayValue = $scope.model.metadata[value].value
+                                                if (typeof metadataOrder[i]['Additional Label'] != 'undefined'
+                                                    && $scope.model.metadata[key].value
+                                                    && $scope.model.metadata[value].value){
+                                                    label = metadataOrder[i]['Additional Label']
+                                                    displayValue = $scope.model.metadata[key].value + ': ' + $scope.model.metadata[value].value
+                                                } else {
+                                                    label = $scope.model.metadata[key].value
+                                                    displayValue = $scope.model.metadata[value].value
+                                                }
+                                                $scope.model.display.sortedMetadata.push(
+                                                    {'key':label,
+                                                    'value': displayValue}
+                                                )
+                                                delete copy[key]
+                                                delete copy[value]
                                             }
-                                            $scope.model.display.sortedMetadata.push(
-                                                {'key':label,
-                                                'value': displayValue}
-                                            )
-                                            delete copy[key]
-                                            delete copy[value]
-                                        }
-                                    } else {
-                                        if (typeof $scope.model.metadata[metadataOrder[i]] != 'undefined') {
-                                            key=$scope.model.metadata[metadataOrder[i]].label
-                                            value=$scope.model.metadata[metadataOrder[i]].value
-                                            $scope.model.display.sortedMetadata.push(
-                                                {'key': key, 'value': value}
-                                            )
-                                            delete copy[key]
+                                        } else if (metadataOrder[i] == 'Contributor') {
+                                            for (var k=0; k < contributors.length; k++){
+                                                $scope.model.display.sortedMetadata.push(
+                                                    {'key': contributors[k].label, 'value': contributors[k].value}
+                                                )
+                                            }
+                                        } else {
+                                            if (typeof $scope.model.metadata[metadataOrder[i]] != 'undefined') {
+                                                key=$scope.model.metadata[metadataOrder[i]].label
+                                                value=$scope.model.metadata[metadataOrder[i]].value
+                                                $scope.model.display.sortedMetadata.push(
+                                                    {'key': key, 'value': value}
+                                                )
+                                                delete copy[key]
+                                            }
                                         }
                                     }
-                                }
 
-                                for (var i=0; i < Object.keys(copy).length; i++) { //display any other metadata
-                                    var meta = copy[Object.keys(copy)[i]]
-                                    if (meta.value) {
-                                        $scope.model.display.sortedMetadata.push(
-                                            {'key': meta.label, 'value': meta.value})
+                                    for (var i=0; i < Object.keys(copy).length; i++) { //display any other metadata
+                                        var meta = copy[Object.keys(copy)[i]]
+                                        if (meta.value) {
+                                            $scope.model.display.sortedMetadata.push(
+                                                {'key': meta.label, 'value': meta.value})
+                                        }
                                     }
                                 }
                             })
@@ -514,14 +575,20 @@ if (!Array.prototype.map) {
 
 
             $scope.downloadMetadata = function(id) {
-                DcrFileService.getItemMetadata(id, true).then(function (result) {
-                    var metadataJson = JSON.stringify(result, null, 4);
-                    var blob = new Blob([metadataJson], { type:"application/json;charset=utf-8;" });
-                    var downloadLink = angular.element('<a></a>');
-                    downloadLink.attr('href',window.URL.createObjectURL(blob));
-                    downloadLink.attr('download', $scope.model.item.label + '_metadata.json');
-                    downloadLink[0].click();
-                })
+                var metadataJson = angular.toJson($scope.model.display.sortedMetadata, true);
+                var blob = new Blob([metadataJson], { type:"application/json;charset=utf-8;" });
+                var downloadLink = angular.element('<a></a>');
+                downloadLink.attr('href',window.URL.createObjectURL(blob));
+                downloadLink.attr('download', $scope.model.item.label + '_metadata.json');
+                downloadLink[0].click();
+                // DcrFileService.getItemMetadata(id, true).then(function (result) {
+                //     var metadataJson = JSON.stringify(result, null, 4);
+                //     var blob = new Blob([metadataJson], { type:"application/json;charset=utf-8;" });
+                //     var downloadLink = angular.element('<a></a>');
+                //     downloadLink.attr('href',window.URL.createObjectURL(blob));
+                //     downloadLink.attr('download', $scope.model.item.label + '_metadata.json');
+                //     downloadLink[0].click();
+                // })
             }
 
             // Initial load

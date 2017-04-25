@@ -94,33 +94,65 @@ def api_stat(request, path):
 def api_metadata(request, item_id, download=False):
     cache_key = '{}:{}'.format(item_id, 'metadata')
     result = cache.get(cache_key)
+
     if result is None:
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
             metadata = tc.get_metadata(item_id)
-
-            avus = metadata['avus']+metadata['irods-avus']
-            result={}
-            for item in avus:
-                attr = item.get('attr')
-                label = data_dictionary.get(attr, attr)
-                my_dict={}
-                my_dict['attr'] = attr
-                my_dict['label'] = label
-                my_dict['value'] = item.get('value')
-
-                if label in result and result[label]['value']:
-                    result[label]['value'] += ', {}'.format(my_dict['value'])
-                else:
-                    result[label] = my_dict
-
+            result = metadata['avus'] + metadata['irods-avus']
             cache.set(cache_key, result, CACHE_EXPIRATION)
-
         except HTTPError as e:
             logger.exception('Failed to retrieve metadata', extra={'id': item_id})
             return HttpResponseBadRequest('Failed to retrieve metadata',
                                           content_type='application/json')
-    return JsonResponse(result)
+        # try:
+        #     tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+        #     metadata = tc.get_metadata(item_id)
+        #     print metadata
+        #     avus = metadata['avus']+metadata['irods-avus']
+        #     result={}
+        #     print avus
+        #     contributorTypes = []
+        #     contributors = []
+
+        #     for item in avus:
+        #         print item
+        #         attr = item.get('attr')
+        #         label = data_dictionary.get(attr, attr)
+        #         my_dict={}
+        #         my_dict['attr'] = attr
+        #         my_dict['label'] = label
+        #         my_dict['value'] = item.get('value')
+
+        #         # if label not in result:
+        #         if (label not in result
+        #             and label != 'Contributor Type'
+        #             and label != 'Contributor'):
+        #             result[label] = my_dict
+        #         elif label == 'Contributor Type':
+        #             contributorTypes.append([my_dict['value']])
+        #             result['Contributor Type'] = {
+        #                 'attr': attr,
+        #                 'label': label,
+        #                 'value': contributorTypes
+        #             }
+        #         elif label == 'Contributor':
+        #             contributors.append([my_dict['value']])
+        #             result['Contributor'] = {
+        #                 'attr': attr,
+        #                 'label': label,
+        #                 'value': contributors
+        #             }
+        #         elif result[label]['value']:
+        #             result[label]['value'] += ', {}'.format(my_dict['value'])
+
+        #     cache.set(cache_key, result, CACHE_EXPIRATION)
+
+        # except HTTPError as e:
+        #     logger.exception('Failed to retrieve metadata', extra={'id': item_id})
+        #     return HttpResponseBadRequest('Failed to retrieve metadata',
+        #                                   content_type='application/json')
+    return JsonResponse(result, safe=False)
 
 
 def api_list_item(request, path):
