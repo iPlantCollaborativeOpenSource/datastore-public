@@ -318,6 +318,8 @@ if (!Array.prototype.map) {
                                         $scope.model.metadata[label] = {'attr': attr, 'label': label, 'value': value}
                                     } else if ($scope.model.metadata[label]['value']) {
                                         $scope.model.metadata[label]['value'] = $scope.model.metadata[label]["value"] + ', ' + value
+                                    } else {
+                                        $scope.model.metadata[label]['value'] = value
                                     }
                                 }
 
