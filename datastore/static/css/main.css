@@ -1,14 +1,14 @@
 html {
-    background-color: #142248;
+    background-color: #ffffff;
 }
 
 body {
 }
 
 .navbar-cyverse {
-    background-color: #142248;
+    background-color: #ffffff;
     border-color: #0971AA;
-    border-bottom: 10px solid #0971AA;
+    border-bottom: 3px solid #E2E2E2;
     color: #ffffff;
 }
 
@@ -16,7 +16,7 @@ body {
     display: block;
     position: relative;
     height: auto;
-    top: 17px;
+   /* top: 17px;
     left: 15px;
     background-color: white;
     border: 3px solid #0971AA;
@@ -24,12 +24,12 @@ body {
     border-top-right-radius: 4px;
     border-top-left-radius: 4px;
     padding: 0px;
-    transition: .5s;
+    transition: .5s;*/
     display: flex;
     align-items: center;
 }
 
-@media (max-width: 767px) {
+/*@media (max-width: 767px) {
     .navbar-cyverse .navbar-brand {
         top: -3px;
         height: 56px;
@@ -38,16 +38,17 @@ body {
         border-radius: 0 0 4px 0;
         margin-bottom: -6px;
     }
-}
+}*/
 
-.navbar-cyverse .navbar-nav > li > a {
+/*.navbar-cyverse .navbar-nav > li > a {
     color: #99D9E9;
 }
-
+*/
 .navbar-cyverse .navbar-nav > li > a:focus,
 .navbar-cyverse .navbar-nav > li > a:hover {
     background-color: transparent;
-    color: #ffffff;
+    /*color: #ffffff;*/
+    text-decoration: underline;
 }
 
 .navbar-cyverse .navbar-toggle {
@@ -65,10 +66,12 @@ body {
 }
 
 footer {
-    background-color: #142248;
-    color: #dddddd;
+    background-color: #ffffff;
+    color: #525A68;
     margin-top: 20px;
     padding-top: 20px;
+    border-top: 3px solid;
+    border-top-color: #e2e2e2;
 }
 
 .nav-pills-centered > li {
@@ -76,10 +79,10 @@ footer {
     display: inline-block;
 }
 
-footer a,
+/*footer a,
 footer .nav > li > a {
     color: #99D9E9;
-}
+}*/
 
 footer a:focus,
 footer a:hover {
@@ -91,7 +94,8 @@ footer a:hover,
 footer .nav > li > a:focus,
 footer .nav > li > a:hover {
     background-color: transparent;
-    color: #ffffff;
+    /*color: #ffffff;*/
+    text-decoration: underline;
 }
 
 .ng-enter {

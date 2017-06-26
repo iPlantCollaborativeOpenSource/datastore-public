@@ -6,7 +6,7 @@
     <p>{{model.metadata['Description'].value}}</p>
     <em>{{model.metadata['Creator'].value}} ({{model.metadata['Publication Year'].value}})</em>
 
-    <p ng-if="model.metadata['identifierType'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}: {{model.metadata['Identifier'].value}}</p>
+    <p ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}: {{model.metadata['Identifier'].value}}</p>
 
     <p ng-if="model.metadata['Alternate Identifier Type'].value && model.metadata['Alternate Identifier'].value"> {{model.metadata['Alternate Identifier Type'].value}}: {{model.metadata['Alternate Identifier'].value}}</p>
     <p ng-bind-html="model.display.Rights"><p>
