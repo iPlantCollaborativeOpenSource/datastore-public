@@ -111,6 +111,12 @@ if (!Array.prototype.map) {
         'MAX_PREVIEW_SIZE': 8192
     });
 
+    app.filter('contains', function() {
+      return function (array, needle) {
+        return array.indexOf(needle) >= 0;
+      };
+    });
+
 
     app.factory('DcrFileService', ['$http', 'djangoUrl', 'TerrainConfig', 'BrushSources', function($http, djangoUrl, TerrainConfig, BrushSources) {
 
@@ -370,6 +376,8 @@ if (!Array.prototype.map) {
                                         'Funder Name',
                                         'Award Number',
                                     ]
+
+                                    $scope.model.display.alreadyDisplayed = ['Title', 'Creator', 'Description', 'Publisher', 'Publication Year']
 
                                     var copy = Object.assign([], $scope.model.metadata);
                                     $scope.model.display.sortedMetadata = []

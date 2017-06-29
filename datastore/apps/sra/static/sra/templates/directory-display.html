@@ -2,14 +2,19 @@
     <div>
         <h3>{{model.metadata['Title'].value}}</h3>
     </div>
+    <div id="folder-metadata-display">
+        <dt ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}:</dt> <dd ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value">{{model.metadata['Identifier'].value}}</dd>
 
-    <p>{{model.metadata['Description'].value}}</p>
-    <em>{{model.metadata['Creator'].value}} ({{model.metadata['Publication Year'].value}})</em>
+        <dt>Description:</dt> <dd>{{model.metadata['Description'].value}}</dd>
+        <dt ng-if="model.metadata['Creator'].value">Creator:</dt> <dd>{{model.metadata['Creator'].value}}</dd>
+        <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
+        <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
 
-    <p ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}: {{model.metadata['Identifier'].value}}</p>
 
-    <p ng-if="model.metadata['Alternate Identifier Type'].value && model.metadata['Alternate Identifier'].value"> {{model.metadata['Alternate Identifier Type'].value}}: {{model.metadata['Alternate Identifier'].value}}</p>
-    <p ng-bind-html="model.display.Rights"><p>
+       <!--  <dt ng-if="model.metadata['Alternate Identifier Type'].value && model.metadata['Alternate Identifier'].value"> {{model.metadata['Alternate Identifier Type'].value}}:</dt> <dd ng-if="model.metadata['Alternate Identifier Type'].value && model.metadata['Alternate Identifier'].value"> {{model.metadata['Alternate Identifier'].value}}</dd> -->
+
+        <p id="rights" ng-bind-html="model.display.Rights"></p>
+    </div>
 
     <div>
         <p>Export Formats:
@@ -37,7 +42,7 @@
 
 <div ng-show="expandMetadata" ng-if="model.metadata">
     <ul class="list-group">
-        <li class="list-group-item" ng-if="meta.value" ng-repeat="meta in model.display.sortedMetadata">
+        <li class="list-group-item" ng-if="meta.value && !(model.display.alreadyDisplayed | contains:meta.key)" ng-repeat="meta in model.display.sortedMetadata">
             <div class="row">
                 <div class="col-sm-3">
                     <b >{{meta.key}}</b>
