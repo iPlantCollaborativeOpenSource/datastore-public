@@ -377,7 +377,14 @@ if (!Array.prototype.map) {
                                         'Award Number',
                                     ]
 
-                                    $scope.model.display.alreadyDisplayed = ['Title', 'Creator', 'Description', 'Publisher', 'Publication Year']
+                                    $scope.model.display.alreadyDisplayed = [
+                                        'Title',
+                                        'Creator',
+                                        'Description',
+                                        'Publisher',
+                                        'Publication Year',
+                                        'DOI'
+                                    ]
 
                                     var copy = Object.assign([], $scope.model.metadata);
                                     $scope.model.display.sortedMetadata = []

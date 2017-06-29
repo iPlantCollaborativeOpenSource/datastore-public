@@ -5,8 +5,8 @@
     <div id="folder-metadata-display">
         <dt ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}:</dt> <dd ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value">{{model.metadata['Identifier'].value}}</dd>
 
-        <dt>Description:</dt> <dd>{{model.metadata['Description'].value}}</dd>
         <dt ng-if="model.metadata['Creator'].value">Creator:</dt> <dd>{{model.metadata['Creator'].value}}</dd>
+        <dt>Description:</dt> <dd>{{model.metadata['Description'].value}}</dd>
         <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
         <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
 
@@ -58,6 +58,12 @@
 <div style="min-height: 300px;" id="directory-contents">
     <div class="table-responsive">
         <table class="table table-bordered table-striped">
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Date Created</th>
+                <th>Date Modified</th>
+            </tr>
             <tr ng-repeat="folder in model.collection.folders">
                 <td>
                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
@@ -65,7 +71,9 @@
                     </a>
                     <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
                 </td>
-                <td></td>
+                <td> -- </td>
+                <td>{{ folder['date-created']|date:"medium"}}</td>
+                <td>{{ folder['date-modified']|date:"medium"}}</td>
             </tr>
             <tr ng-repeat="file in model.collection.files">
                 <td>
@@ -75,7 +83,13 @@
                     <span ng-if="file.loading"><i class="fa fa-spinner fa-spin"></i></span>
                 </td>
                 <td>
-                    ({{ file['file-size']|bytes }})
+                    {{ file['file-size']|bytes }}
+                </td>
+                <td>
+                    {{ file['date-created']|date:"medium"}}
+                </td>
+                <td>
+                    {{ file['date-modified']|date:"medium" }}
                 </td>
             </tr>
         </table>
