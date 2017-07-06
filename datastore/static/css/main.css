@@ -6,10 +6,11 @@ body {
 }
 
 .navbar-cyverse {
-    background-color: #ffffff;
-    border-color: #0971AA;
+    background-color: #004471;
+    /*background-color: #142248;*/
+   /* border-color: #0971AA;
     border-bottom: 3px solid #E2E2E2;
-    color: #ffffff;
+*/    color: #ffffff;
 }
 
 .navbar-cyverse .navbar-brand {
@@ -20,6 +21,11 @@ body {
     align-items: center;
 }
 
+.navbar-cyverse .navbar-nav > li > a {
+    color: #ffffff;
+}
+
+
 .navbar-cyverse .navbar-nav > li > a:focus,
 .navbar-cyverse .navbar-nav > li > a:hover {
     background-color: transparent;
@@ -27,7 +33,9 @@ body {
 }
 
 .navbar-cyverse .navbar-toggle {
-    border-color: #99D9E9;
+    border-color: #ffffff;
+    top: 15px;
+    /*border-color: #99D9E9;*/
 }
 
 .navbar-cyverse .navbar-toggle .icon-bar {
@@ -45,13 +53,19 @@ body {
     overflow: hidden;
 }
 
+footer a,footer .nav > li > a {
+     color: #ffffff;
+}
+
 footer {
-    background-color: #ffffff;
-    color: #525A68;
+    background-color: #004471;
+    color: #a5a4a4;
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 3px solid;
-    border-top-color: #e2e2e2;
+    /*border-top: 3px solid;*/
+    /*border-top-color: #e2e2e2;*/
+    box-shadow: 0px 500px 0px 500px #004471;
+
 }
 
 .nav-pills-centered > li {
@@ -69,7 +83,7 @@ footer a:hover,
 footer .nav > li > a:focus,
 footer .nav > li > a:hover {
     background-color: transparent;
-    /*color: #ffffff;*/
+    color: #ffffff;
     text-decoration: underline;
 }
 
@@ -118,7 +132,8 @@ footer .nav > li > a:hover {
     font-size: 18px;
     padding-right: 15px;
     margin: 0;
-    color: #17254B;
+    color: #ffffff;
+    font-weight:normal;
 }
 
 #data-commons-heading {
@@ -137,6 +152,8 @@ footer .nav > li > a:hover {
 
 #cyverse-icon {
     height: 30px;
+    position: relative;
+    bottom: 10px;
 }
 
 #download-metadata-button {
