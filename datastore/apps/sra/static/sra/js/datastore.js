@@ -330,15 +330,15 @@ if (!Array.prototype.map) {
                                 }
 
                                 /* get specific metadata for display */
-                                function search(attr){
-                                    var myArray = $scope.model.metadata
-                                    for (var i=0; i < myArray.length; i++) {
-                                        if (myArray[i].attr === attr) {
-                                            return myArray[i].value;
-                                        }
-                                    }
-                                    return null
-                                }
+                                // function search(attr){
+                                //     var myArray = $scope.model.metadata
+                                //     for (var i=0; i < myArray.length; i++) {
+                                //         if (myArray[i].attr === attr) {
+                                //             return myArray[i].value;
+                                //         }
+                                //     }
+                                //     return null
+                                // }
 
                                 if (Object.keys($scope.model.metadata).length) {
                                     $scope.model.display = {
@@ -350,6 +350,12 @@ if (!Array.prototype.map) {
                                         $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
                                         $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
+                                    }
+
+                                    if ($scope.model.metadata.Version) {
+                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Version.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
+                                    } else {
+                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
                                     }
 
                                     var metadataOrder = [
