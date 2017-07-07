@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import time
@@ -14,7 +15,7 @@ from django.shortcuts import render
 from datastore.libs.terrain.client import TerrainClient
 from datastore.libs.anon_files.client import AnonFilesClient
 import settings as sra_settings
-from datastore.apps.sra.dictionary import data_dictionary
+from datastore.apps.sra.dictionary import data_dictionary, metadata_order
 
 logger = logging.getLogger(__name__)
 
@@ -96,62 +97,104 @@ def api_metadata(request, item_id, download=False):
     result = cache.get(cache_key)
 
     if result is None:
-        try:
-            tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
-            metadata = tc.get_metadata(item_id)
-            result = metadata['avus'] + metadata['irods-avus']
-            cache.set(cache_key, result, CACHE_EXPIRATION)
-        except HTTPError as e:
-            logger.exception('Failed to retrieve metadata', extra={'id': item_id})
-            return HttpResponseBadRequest('Failed to retrieve metadata',
-                                          content_type='application/json')
         # try:
         #     tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
         #     metadata = tc.get_metadata(item_id)
-        #     print metadata
-        #     avus = metadata['avus']+metadata['irods-avus']
-        #     result={}
-        #     print avus
-        #     contributorTypes = []
-        #     contributors = []
-
-        #     for item in avus:
-        #         print item
-        #         attr = item.get('attr')
-        #         label = data_dictionary.get(attr, attr)
-        #         my_dict={}
-        #         my_dict['attr'] = attr
-        #         my_dict['label'] = label
-        #         my_dict['value'] = item.get('value')
-
-        #         # if label not in result:
-        #         if (label not in result
-        #             and label != 'Contributor Type'
-        #             and label != 'Contributor'):
-        #             result[label] = my_dict
-        #         elif label == 'Contributor Type':
-        #             contributorTypes.append([my_dict['value']])
-        #             result['Contributor Type'] = {
-        #                 'attr': attr,
-        #                 'label': label,
-        #                 'value': contributorTypes
-        #             }
-        #         elif label == 'Contributor':
-        #             contributors.append([my_dict['value']])
-        #             result['Contributor'] = {
-        #                 'attr': attr,
-        #                 'label': label,
-        #                 'value': contributors
-        #             }
-        #         elif result[label]['value']:
-        #             result[label]['value'] += ', {}'.format(my_dict['value'])
-
+        #     result = metadata['avus'] + metadata['irods-avus']
         #     cache.set(cache_key, result, CACHE_EXPIRATION)
-
         # except HTTPError as e:
         #     logger.exception('Failed to retrieve metadata', extra={'id': item_id})
         #     return HttpResponseBadRequest('Failed to retrieve metadata',
         #                                   content_type='application/json')
+        try:
+            tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+            metadata = tc.get_metadata(item_id)
+            print metadata
+            avus = metadata['avus']+metadata['irods-avus']
+            print avus
+            # contributor_types = []
+            contributors = []
+
+            readable_meta={}
+            for item in avus: #get readable labels
+                print item
+                attr = item.get('attr')
+                label = data_dictionary.get(attr, attr)
+                value = item.get('value')
+
+                my_dict = {}
+                my_dict['attr'] = attr
+                my_dict['label'] = label
+                my_dict['value'] = value
+
+                # if label not in result:
+                if (label not in readable_meta
+                    and label != 'Contributor Type'
+                    and label != 'Contributor'):
+                    readable_meta[label] = my_dict
+                # elif label == 'Contributor Type':
+                #     contributorTypes.append([my_dict['value']])
+                #     result['Contributor Type'] = {
+                #         'attr': attr,
+                #         'label': label,
+                #         'value': contributorTypes
+                #     }
+                # elif label == 'Contributor':
+                #     contributors.append([my_dict['value']])
+                #     result['Contributor'] = {
+                #         'attr': attr,
+                #         'label': label,
+                #         'value': contributors
+                #     }
+                elif label == 'Contributor Type' or label == 'Contributor':
+                    contributors.append(my_dict)
+                    # contributors.append({'attr': attr, 'label':label, 'value':value})
+                elif label not in readable_meta:
+                    readable_meta[label] = my_dict
+                elif readable_meta[label]['value']:
+                    import ipdb; ipdb.set_trace()
+                    readable_meta[label]['value'] += ', {}'.format(value)
+                else:
+                    readable_meta[label]['value'] = value
+
+            sorted_meta = []
+            meta_copy = copy.copy(readable_meta)
+            # result = []
+            for item in metadata_order:
+                if not isinstance(item, str):
+                    key = item['key']
+                    value = item['value']
+                    if key in meta_copy and value in meta_copy:
+                        if 'Additional Label' in item \
+                            and meta_copy[key]['value'] \
+                            and meta_copy[value]['value']:
+                            label = item['Additional Label']
+                            display_value = meta_copy[key]['value'] + ': ' + meta_copy[value]['value']
+                        else:
+                            label = meta_copy[key]['value']
+                            display_value = meta_copy[value]['value']
+                        sorted_meta.append({'key':label, 'value': display_value})
+                        meta_copy.pop(key, None)
+                        meta_copy.pop(value, None)
+                elif item == 'Contributor':
+                    for c in contributors:
+                        sorted_meta.append({'key': c['label'], 'value': c['value']})
+                elif item in meta_copy:
+                    key = meta_copy[item]['label']
+                    value = meta_copy[item]['value']
+                    sorted_meta.append({'key':key, 'value':value})
+                    meta_copy.pop(key, None)
+
+            for others in meta_copy:
+                sorted_meta.append({'key':readable_meta[others]['label'], 'value':readable_meta[others]['value']})
+
+            result = {'sorted_meta': sorted_meta, 'metadata': readable_meta}
+            cache.set(cache_key, result, CACHE_EXPIRATION)
+
+        except HTTPError as e:
+            logger.exception('Failed to retrieve metadata', extra={'id': item_id})
+            return HttpResponseBadRequest('Failed to retrieve metadata',
+                                          content_type='application/json')
     return JsonResponse(result, safe=False)
 
 

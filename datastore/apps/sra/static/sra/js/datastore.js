@@ -271,80 +271,84 @@ if (!Array.prototype.map) {
                         $scope.model.display = null;
                         promises.push(
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
-                                $scope.model.metadataRaw = result;
-                                console.log('$scope.model.metadataRaw', $scope.model.metadataRaw)
+                                $scope.model.metadata = result.metadata
+                                $scope.model.display = {'sortedMetadata': result.sorted_meta}
+                                // $scope.model.metadataRaw = result;
+                                // console.log('$scope.model.metadataRaw', $scope.model.metadataRaw)
 
-                                var data_dictionary = {
-                                    'alternateIdentifierType': 'Alternate Identifier Type',
-                                    'AlternateIdentifier': 'Alternate Identifier',
-                                    'awardNumber': 'Award Number',
-                                    'creatorAffiliation': 'Creator Affiliation',
-                                    'contributorType': 'Contributor Type',
-                                    'contributorName': 'Contributor',
-                                    'datacite.creator': 'Creator',
-                                    'datacite.publicationyear': 'Publication Year',
-                                    'datacite.publisher': 'Publisher',
-                                    'datacite.resourcetype': 'Resource Type General',
-                                    'datacite.title': 'Title',
-                                    'Description': 'Description',
-                                    'Format': 'Format',
-                                    'fundingReference': 'Funding Reference',
-                                    'fundingName': 'Funder Name',
-                                    'identifierType': 'Identifier Type',
-                                    'IdentifierType': 'Identifier Type',
-                                    'Identifier': 'Identifier',
-                                    'relatedIdentifierType': 'Related Identifier Type',
-                                    'RelatedIdentifierType': 'Related Identifier Type',
-                                    'RelatedIdentifier': 'Related Identifier',
-                                    'relationType': 'Relation Type',
-                                    'ResourceType': 'Resource Type',
-                                    'Rights': 'Rights',
-                                    'RightsURL': 'Rights URI',
-                                    'Size': 'Size',
-                                    'Subject': 'Subject',
-                                    'Version': 'Version'
-                                }
-
-                                var contributors = []
-                                $scope.model.metadata = {}
-                                for (var i=0; i < $scope.model.metadataRaw.length; i++) {
-                                    var attr = $scope.model.metadataRaw[i].attr
-                                    var value = $scope.model.metadataRaw[i].value
-                                    var label
-
-                                    if (typeof data_dictionary[attr] != 'undefined'){
-                                        label = data_dictionary[attr]
-                                    } else {
-                                        label = attr
-                                    }
-
-                                    if (label == 'Contributor Type' || label == 'Contributor') {
-                                        contributors.push({'attr': attr, 'label':label, 'value':value})
-                                    } else if (!(label in $scope.model.metadata)){
-                                        $scope.model.metadata[label] = {'attr': attr, 'label': label, 'value': value}
-                                    } else if ($scope.model.metadata[label]['value']) {
-                                        $scope.model.metadata[label]['value'] = $scope.model.metadata[label]["value"] + ', ' + value
-                                    } else {
-                                        $scope.model.metadata[label]['value'] = value
-                                    }
-                                }
-
-                                /* get specific metadata for display */
-                                // function search(attr){
-                                //     var myArray = $scope.model.metadata
-                                //     for (var i=0; i < myArray.length; i++) {
-                                //         if (myArray[i].attr === attr) {
-                                //             return myArray[i].value;
-                                //         }
-                                //     }
-                                //     return null
+                                // var data_dictionary = {
+                                //     'alternateIdentifierType': 'Alternate Identifier Type',
+                                //     'AlternateIdentifier': 'Alternate Identifier',
+                                //     'awardNumber': 'Award Number',
+                                //     'creatorAffiliation': 'Creator Affiliation',
+                                //     'contributorType': 'Contributor Type',
+                                //     'contributorName': 'Contributor',
+                                //     'datacite.creator': 'Creator',
+                                //     'datacite.publicationyear': 'Publication Year',
+                                //     'datacite.publisher': 'Publisher',
+                                //     'datacite.resourcetype': 'Resource Type General',
+                                //     'datacite.title': 'Title',
+                                //     'Description': 'Description',
+                                //     'Format': 'Format',
+                                //     'fundingReference': 'Funding Reference',
+                                //     'fundingName': 'Funder Name',
+                                //     'identifierType': 'Identifier Type',
+                                //     'IdentifierType': 'Identifier Type',
+                                //     'Identifier': 'Identifier',
+                                //     'relatedIdentifierType': 'Related Identifier Type',
+                                //     'RelatedIdentifierType': 'Related Identifier Type',
+                                //     'RelatedIdentifier': 'Related Identifier',
+                                //     'relationType': 'Relation Type',
+                                //     'ResourceType': 'Resource Type',
+                                //     'Rights': 'Rights',
+                                //     'RightsURL': 'Rights URI',
+                                //     'Size': 'Size',
+                                //     'Subject': 'Subject',
+                                //     'Version': 'Version'
                                 // }
 
+                                // var contributors = []
+                                // $scope.model.metadata = {}
+                                // for (var i=0; i < $scope.model.metadataRaw.length; i++) {
+                                //     var attr = $scope.model.metadataRaw[i].attr
+                                //     var value = $scope.model.metadataRaw[i].value
+                                //     var label
+
+                                //     if (typeof data_dictionary[attr] != 'undefined'){
+                                //         label = data_dictionary[attr]
+                                //     } else {
+                                //         label = attr
+                                //     }
+
+                                //     if (label == 'Contributor Type' || label == 'Contributor') {
+                                //         contributors.push({'attr': attr, 'label':label, 'value':value})
+                                //     } else if (!(label in $scope.model.metadata)){
+                                //         $scope.model.metadata[label] = {'attr': attr, 'label': label, 'value': value}
+                                //     } else if ($scope.model.metadata[label]['value']) {
+                                //         $scope.model.metadata[label]['value'] = $scope.model.metadata[label]["value"] + ', ' + value
+                                //     } else {
+                                //         $scope.model.metadata[label]['value'] = value
+                                //     }
+                                // }
+
+                                // /* get specific metadata for display */
+                                // // function search(attr){
+                                // //     var myArray = $scope.model.metadata
+                                // //     for (var i=0; i < myArray.length; i++) {
+                                // //         if (myArray[i].attr === attr) {
+                                // //             return myArray[i].value;
+                                // //         }
+                                // //     }
+                                // //     return null
+                                // // }
+
                                 if (Object.keys($scope.model.metadata).length) {
-                                    $scope.model.display = {
-                                        'showMoreButton': 'show more',
-                                        'hasMetadata': true
-                                    };
+                                    $scope.model.display.showMoreButton = 'show more'
+                                    $scope.model.display.hasMetadata = true
+                                    // $scope.model.display = {
+                                    //     'showMoreButton': 'show more',
+                                    //     'hasMetadata': true
+                                    // };
 
                                     if ($scope.model.metadata.Rights.value === 'ODC PDDL') {
                                         $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
@@ -358,30 +362,30 @@ if (!Array.prototype.map) {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
                                     }
 
-                                    var metadataOrder = [
-                                        {'key':'Identifier Type', 'value':'Identifier'},
-                                        'Creator',
-                                        'Title',
-                                        'Publisher',
-                                        'Publication Year',
-                                        'Resource Type General',
-                                        'Resource Type',
-                                        'Description',
-                                        'Subject',
-                                        // {'key':'Contributor Type', 'value':'Contributor'},
-                                        'Contributor',
-                                        {'key':'Alternate Identifier Type', 'value':'Alternate Identifier'},
-                                        {'Additional Label': 'Related Identifier', 'key':'Related Identifier Type', 'value':'Related Identifier'},
-                                        'Relation Type',
-                                        'Size',
-                                        'Format',
-                                        'Version',
-                                        'Rights',
-                                        'Rights URI',
-                                        'Funding Reference',
-                                        'Funder Name',
-                                        'Award Number',
-                                    ]
+                                    // var metadataOrder = [
+                                    //     {'key':'Identifier Type', 'value':'Identifier'},
+                                    //     'Creator',
+                                    //     'Title',
+                                    //     'Publisher',
+                                    //     'Publication Year',
+                                    //     'Resource Type General',
+                                    //     'Resource Type',
+                                    //     'Description',
+                                    //     'Subject',
+                                    //     // {'key':'Contributor Type', 'value':'Contributor'},
+                                    //     'Contributor',
+                                    //     {'key':'Alternate Identifier Type', 'value':'Alternate Identifier'},
+                                    //     {'Additional Label': 'Related Identifier', 'key':'Related Identifier Type', 'value':'Related Identifier'},
+                                    //     'Relation Type',
+                                    //     'Size',
+                                    //     'Format',
+                                    //     'Version',
+                                    //     'Rights',
+                                    //     'Rights URI',
+                                    //     'Funding Reference',
+                                    //     'Funder Name',
+                                    //     'Award Number',
+                                    // ]
 
                                     $scope.model.display.alreadyDisplayed = [
                                         'Title',
@@ -392,58 +396,58 @@ if (!Array.prototype.map) {
                                         'DOI'
                                     ]
 
-                                    var copy = Object.assign([], $scope.model.metadata);
-                                    $scope.model.display.sortedMetadata = []
+                                    // var copy = Object.assign([], $scope.model.metadata);
+                                    // $scope.model.display.sortedMetadata = []
 
-                                    for (var i=0; i < metadataOrder.length; i++) {
-                                        if (typeof metadataOrder[i] === 'object') {
-                                            var key = metadataOrder[i]['key']
-                                            var value = metadataOrder[i]['value']
-                                            var label, displayValue
-                                            if (typeof $scope.model.metadata[key] != 'undefined'
-                                                && typeof $scope.model.metadata[value] != 'undefined'){
+                                    // for (var i=0; i < metadataOrder.length; i++) {
+                                    //     if (typeof metadataOrder[i] === 'object') {
+                                    //         var key = metadataOrder[i]['key']
+                                    //         var value = metadataOrder[i]['value']
+                                    //         var label, displayValue
+                                    //         if (typeof $scope.model.metadata[key] != 'undefined'
+                                    //             && typeof $scope.model.metadata[value] != 'undefined'){
 
-                                                if (typeof metadataOrder[i]['Additional Label'] != 'undefined'
-                                                    && $scope.model.metadata[key].value
-                                                    && $scope.model.metadata[value].value){
-                                                    label = metadataOrder[i]['Additional Label']
-                                                    displayValue = $scope.model.metadata[key].value + ': ' + $scope.model.metadata[value].value
-                                                } else {
-                                                    label = $scope.model.metadata[key].value
-                                                    displayValue = $scope.model.metadata[value].value
-                                                }
-                                                $scope.model.display.sortedMetadata.push(
-                                                    {'key':label,
-                                                    'value': displayValue}
-                                                )
-                                                delete copy[key]
-                                                delete copy[value]
-                                            }
-                                        } else if (metadataOrder[i] == 'Contributor') {
-                                            for (var k=0; k < contributors.length; k++){
-                                                $scope.model.display.sortedMetadata.push(
-                                                    {'key': contributors[k].label, 'value': contributors[k].value}
-                                                )
-                                            }
-                                        } else {
-                                            if (typeof $scope.model.metadata[metadataOrder[i]] != 'undefined') {
-                                                key=$scope.model.metadata[metadataOrder[i]].label
-                                                value=$scope.model.metadata[metadataOrder[i]].value
-                                                $scope.model.display.sortedMetadata.push(
-                                                    {'key': key, 'value': value}
-                                                )
-                                                delete copy[key]
-                                            }
-                                        }
-                                    }
+                                    //             if (typeof metadataOrder[i]['Additional Label'] != 'undefined'
+                                    //                 && $scope.model.metadata[key].value
+                                    //                 && $scope.model.metadata[value].value){
+                                    //                 label = metadataOrder[i]['Additional Label']
+                                    //                 displayValue = $scope.model.metadata[key].value + ': ' + $scope.model.metadata[value].value
+                                    //             } else {
+                                    //                 label = $scope.model.metadata[key].value
+                                    //                 displayValue = $scope.model.metadata[value].value
+                                    //             }
+                                    //             $scope.model.display.sortedMetadata.push(
+                                    //                 {'key':label,
+                                    //                 'value': displayValue}
+                                    //             )
+                                    //             delete copy[key]
+                                    //             delete copy[value]
+                                    //         }
+                                    //     } else if (metadataOrder[i] == 'Contributor') {
+                                    //         for (var k=0; k < contributors.length; k++){
+                                    //             $scope.model.display.sortedMetadata.push(
+                                    //                 {'key': contributors[k].label, 'value': contributors[k].value}
+                                    //             )
+                                    //         }
+                                    //     } else {
+                                    //         if (typeof $scope.model.metadata[metadataOrder[i]] != 'undefined') {
+                                    //             key=$scope.model.metadata[metadataOrder[i]].label
+                                    //             value=$scope.model.metadata[metadataOrder[i]].value
+                                    //             $scope.model.display.sortedMetadata.push(
+                                    //                 {'key': key, 'value': value}
+                                    //             )
+                                    //             delete copy[key]
+                                    //         }
+                                    //     }
+                                    // }
 
-                                    for (var i=0; i < Object.keys(copy).length; i++) { //display any other metadata
-                                        var meta = copy[Object.keys(copy)[i]]
-                                        if (meta.value) {
-                                            $scope.model.display.sortedMetadata.push(
-                                                {'key': meta.label, 'value': meta.value})
-                                        }
-                                    }
+                                    // for (var i=0; i < Object.keys(copy).length; i++) { //display any other metadata
+                                    //     var meta = copy[Object.keys(copy)[i]]
+                                    //     if (meta.value) {
+                                    //         $scope.model.display.sortedMetadata.push(
+                                    //             {'key': meta.label, 'value': meta.value})
+                                    //     }
+                                    // }
                                 }
                             })
                         );
