@@ -97,27 +97,14 @@ def api_metadata(request, item_id, download=False):
     result = cache.get(cache_key)
 
     if result is None:
-        # try:
-        #     tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
-        #     metadata = tc.get_metadata(item_id)
-        #     result = metadata['avus'] + metadata['irods-avus']
-        #     cache.set(cache_key, result, CACHE_EXPIRATION)
-        # except HTTPError as e:
-        #     logger.exception('Failed to retrieve metadata', extra={'id': item_id})
-        #     return HttpResponseBadRequest('Failed to retrieve metadata',
-        #                                   content_type='application/json')
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
             metadata = tc.get_metadata(item_id)
-            print metadata
             avus = metadata['avus']+metadata['irods-avus']
-            print avus
-            # contributor_types = []
             contributors = []
 
             readable_meta={}
             for item in avus: #get readable labels
-                print item
                 attr = item.get('attr')
                 label = data_dictionary.get(attr, attr)
                 value = item.get('value')
@@ -127,28 +114,12 @@ def api_metadata(request, item_id, download=False):
                 my_dict['label'] = label
                 my_dict['value'] = value
 
-                # if label not in result:
                 if (label not in readable_meta
                     and label != 'Contributor Type'
                     and label != 'Contributor'):
                     readable_meta[label] = my_dict
-                # elif label == 'Contributor Type':
-                #     contributorTypes.append([my_dict['value']])
-                #     result['Contributor Type'] = {
-                #         'attr': attr,
-                #         'label': label,
-                #         'value': contributorTypes
-                #     }
-                # elif label == 'Contributor':
-                #     contributors.append([my_dict['value']])
-                #     result['Contributor'] = {
-                #         'attr': attr,
-                #         'label': label,
-                #         'value': contributors
-                #     }
                 elif label == 'Contributor Type' or label == 'Contributor':
                     contributors.append(my_dict)
-                    # contributors.append({'attr': attr, 'label':label, 'value':value})
                 elif label not in readable_meta:
                     readable_meta[label] = my_dict
                 elif readable_meta[label]['value']:
@@ -159,7 +130,7 @@ def api_metadata(request, item_id, download=False):
 
             sorted_meta = []
             meta_copy = copy.copy(readable_meta)
-            # result = []
+
             for item in metadata_order:
                 if not isinstance(item, str):
                     key = item['key']

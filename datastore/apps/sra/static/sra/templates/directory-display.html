@@ -10,9 +10,6 @@
         <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
         <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
 
-
-       <!--  <dt ng-if="model.metadata['Alternate Identifier Type'].value && model.metadata['Alternate Identifier'].value"> {{model.metadata['Alternate Identifier Type'].value}}:</dt> <dd ng-if="model.metadata['Alternate Identifier Type'].value && model.metadata['Alternate Identifier'].value"> {{model.metadata['Alternate Identifier'].value}}</dd> -->
-
         <p id="rights" ng-bind-html="model.display.Rights"></p>
         <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
     </div>
