@@ -4,7 +4,7 @@
   "authors": [
     "Marjo Poindexter <marjo@tacc.utexas.edu>"
   ],
-  "description": "DesignSafe-CI Portal",
+  "description": "Data Commons Portal",
   "license": "MIT",
   "homepage": "",
   "dependencies": {
@@ -17,6 +17,7 @@
     "angular-cookies": "~1.5.7",
     "angular-resource": "~1.5.7",
     "angular-route": "^1.5.7",
+    "angular-sanitize": "~1.5.7",
     "angular-translate": "~2.11.1",
     "underscore": "1.8.3",
     "font-awesome": "fontawesome#~4.6.3",

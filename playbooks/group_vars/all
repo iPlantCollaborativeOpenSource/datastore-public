@@ -1,1 +1,2 @@
 selinux_enabled: false
+terrain_api_key_passphrase: changeit

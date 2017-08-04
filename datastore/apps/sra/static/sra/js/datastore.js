@@ -89,7 +89,7 @@ if (!Array.prototype.map) {
     }
 
 
-    var app = angular.module('Datastore', ['djng.urls', 'ui.bootstrap', 'ngCookies'])
+    var app = angular.module('Datastore', ['djng.urls', 'ui.bootstrap', 'ngCookies', 'ngSanitize'])
         .config(['$httpProvider', '$locationProvider', config]);
 
 
@@ -109,6 +109,12 @@ if (!Array.prototype.map) {
         'DIR_PAGE_SIZE': 100,
         'MAX_DOWNLOAD_SIZE': 2147483648,
         'MAX_PREVIEW_SIZE': 8192
+    });
+
+    app.filter('contains', function() {
+      return function (array, needle) {
+        return array.indexOf(needle) >= 0;
+      };
     });
 
 
@@ -144,8 +150,8 @@ if (!Array.prototype.map) {
                 });
         };
 
-        service.getItemMetadata = function(itemId) {
-            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}))
+        service.getItemMetadata = function(itemId, download=false) {
+            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}), {'download': download})
                 .then(
                     function (resp) {
                         return resp.data;
@@ -169,7 +175,7 @@ if (!Array.prototype.map) {
                     });
         };
 
-        service.download = function(file) {
+        service.downloadFile = function(file) {
             var url = djangoUrl.reverse('download', {path: file.path});
             var link = document.createElement('a');
             link.setAttribute('download', file.label);
@@ -262,9 +268,37 @@ if (!Array.prototype.map) {
 
                         /* reset metadata */
                         $scope.model.metadata = null;
+                        $scope.model.display = null;
                         promises.push(
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
-                                $scope.model.metadata = result;
+                                $scope.model.metadata = result.metadata
+                                $scope.model.display = {'sortedMetadata': result.sorted_meta}
+
+                                if (Object.keys($scope.model.metadata).length) {
+                                    $scope.model.display.showMoreButton = 'show more'
+                                    $scope.model.display.hasMetadata = true
+
+                                    if ($scope.model.metadata.Rights.value === 'ODC PDDL') {
+                                        $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
+                                    } else if ($scope.model.metadata.Rights.value === 'CC0') {
+                                        $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
+                                    }
+
+                                    if ($scope.model.metadata.Version) {
+                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Version.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
+                                    } else {
+                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
+                                    }
+
+                                    $scope.model.display.alreadyDisplayed = [
+                                        'Title',
+                                        'Creator',
+                                        'Description',
+                                        'Publisher',
+                                        'Publication Year',
+                                        'DOI'
+                                    ]
+                                }
                             })
                         );
 
@@ -287,6 +321,9 @@ if (!Array.prototype.map) {
                                 .state(angular.copy($scope.model))
                                 .path('/browse' + $scope.model.item.path)
                                 .search('page', page ? page : null);
+
+                            $scope.expandMetadata = false;
+                            console.log('$scope', $scope)
                         });
 
                         $anchorScroll();
@@ -335,8 +372,8 @@ if (!Array.prototype.map) {
                     });
             };
 
-            $scope.download = function() {
-                DcrFileService.download($scope.model.item);
+            $scope.downloadFile = function() {
+                DcrFileService.downloadFile($scope.model.item);
             };
 
             $scope.preview = function(path) {
@@ -356,13 +393,72 @@ if (!Array.prototype.map) {
                 if ($cookies.get('recaptcha_status') != 'verified') {
                     $('#download_button').append('<script src="https://www.google.com/recaptcha/api.js" async defer></script>');
                 } else {
-                    $scope.download();
+                    $scope.downloadFile();
                     $('#download_button').popover('hide');
                 }
                 if ($('#recaptcha').html()) {
                     grecaptcha.reset();
                 }
             };
+
+            $scope.metadataToggle = function() {
+                $scope.expandMetadata = !$scope.expandMetadata;
+                if ($scope.expandMetadata) {
+                    $scope.model.display.showMoreButton = 'show less'
+                } else {
+                    $scope.model.display.showMoreButton = 'show more'
+                }
+            }
+
+            $scope.getCitation = function(style) {
+                if ($scope.model.display.citationFormat === style) {
+                    // toggle citation display
+                    $scope.model.display.citation = null;
+                    $scope.model.display.citationFormat = null;
+                    return
+                }
+
+                $scope.model.display.citationFormat = style
+                if (style =='BibTeX'){
+                    $scope.model.display.citation =
+                    '@misc{dataset, \n' +
+                    ' author = {' + $scope.model.metadata.Creator.value + '} \n' +
+                    ' title = {' + $scope.model.metadata.Title.value + '} \n' +
+                    ' publisher = {' + $scope.model.metadata.Publisher.value + '} \n' +
+                    ' year = {' + $scope.model.metadata["Publication Year"].value + '} \n' +
+                    ' note = {' + $scope.model.metadata.Description.value + '} \n' +
+                    '}';
+                } else if (style =='Endnote'){
+                    $scope.model.display.citation =
+                    '%0 Generic \n' +
+                    '%A ' + $scope.model.metadata.Creator.value + '\n' +
+                    '%T ' + $scope.model.metadata.Title.value + '\n' +
+                    '%I ' + $scope.model.metadata.Publisher.value + '\n' +
+                    '%D ' + $scope.model.metadata["Publication Year"].value + '\n';
+                }
+            }
+
+            $scope.downloadCitation = function(style) {
+                var citationFormat={
+                    'BibTeX': 'bib',
+                    'Endnote': 'enw'
+                }
+                var blob = new Blob([$scope.model.display.citation]);
+                var downloadLink = angular.element('<a></a>');
+                downloadLink.attr('href',window.URL.createObjectURL(blob));
+                downloadLink.attr('download', $scope.model.item.label + 'citation.' + citationFormat[style]);
+                downloadLink[0].click();
+            }
+
+
+            $scope.downloadMetadata = function(id) {
+                var metadataJson = angular.toJson($scope.model.display.sortedMetadata, true);
+                var blob = new Blob([metadataJson], { type:"application/json;charset=utf-8;" });
+                var downloadLink = angular.element('<a></a>');
+                downloadLink.attr('href',window.URL.createObjectURL(blob));
+                downloadLink.attr('download', $scope.model.item.label + '_metadata.json');
+                downloadLink[0].click();
+            }
 
             // Initial load
             var initialPath = $location.path();

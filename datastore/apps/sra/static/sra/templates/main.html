@@ -6,7 +6,7 @@
         {{ err }}
     </div>
 
-    <h2 ng-if="model.item">
+    <h2 ng-if="model.item.label=='Community Data' || model.item.label=='curated'">
         <span>{{ model.item.label }}</span>
         <!--
         <button class="btn btn-default btn-xs" uib-popover-template="'local/dcr-item-info.html'" popover-placement="bottom" popover-trigger="outsideClick" popover-title="{{ model.item.label }}">

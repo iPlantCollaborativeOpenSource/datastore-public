@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import time
@@ -14,6 +15,7 @@ from django.shortcuts import render
 from datastore.libs.terrain.client import TerrainClient
 from datastore.libs.anon_files.client import AnonFilesClient
 import settings as sra_settings
+from datastore.apps.sra.dictionary import data_dictionary, metadata_order
 
 logger = logging.getLogger(__name__)
 
@@ -90,19 +92,81 @@ def api_stat(request, path):
     return JsonResponse(path_stat)
 
 
-def api_metadata(request, item_id):
+def api_metadata(request, item_id, download=False):
     cache_key = '{}:{}'.format(item_id, 'metadata')
-    metadata = cache.get(cache_key)
-    if metadata is None:
+    result = cache.get(cache_key)
+
+    if result is None:
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
             metadata = tc.get_metadata(item_id)
-            cache.set(cache_key, metadata, CACHE_EXPIRATION)
+            avus = metadata['avus']+metadata['irods-avus']
+            contributors = []
+
+            readable_meta={}
+            for item in avus: #get readable labels
+                attr = item.get('attr')
+                label = data_dictionary.get(attr, attr)
+                value = item.get('value')
+
+                my_dict = {}
+                my_dict['attr'] = attr
+                my_dict['label'] = label
+                my_dict['value'] = value
+
+                if (label not in readable_meta
+                    and label != 'Contributor Type'
+                    and label != 'Contributor'):
+                    readable_meta[label] = my_dict
+                elif label == 'Contributor Type' or label == 'Contributor':
+                    contributors.append(my_dict)
+                elif label not in readable_meta:
+                    readable_meta[label] = my_dict
+                elif readable_meta[label]['value']:
+                    import ipdb; ipdb.set_trace()
+                    readable_meta[label]['value'] += ', {}'.format(value)
+                else:
+                    readable_meta[label]['value'] = value
+
+            sorted_meta = []
+            meta_copy = copy.copy(readable_meta)
+
+            for item in metadata_order:
+                if not isinstance(item, str):
+                    key = item['key']
+                    value = item['value']
+                    if key in meta_copy and value in meta_copy:
+                        if 'Additional Label' in item \
+                            and meta_copy[key]['value'] \
+                            and meta_copy[value]['value']:
+                            label = item['Additional Label']
+                            display_value = meta_copy[key]['value'] + ': ' + meta_copy[value]['value']
+                        else:
+                            label = meta_copy[key]['value']
+                            display_value = meta_copy[value]['value']
+                        sorted_meta.append({'key':label, 'value': display_value})
+                        meta_copy.pop(key, None)
+                        meta_copy.pop(value, None)
+                elif item == 'Contributor':
+                    for c in contributors:
+                        sorted_meta.append({'key': c['label'], 'value': c['value']})
+                elif item in meta_copy:
+                    key = meta_copy[item]['label']
+                    value = meta_copy[item]['value']
+                    sorted_meta.append({'key':key, 'value':value})
+                    meta_copy.pop(key, None)
+
+            for others in meta_copy:
+                sorted_meta.append({'key':readable_meta[others]['label'], 'value':readable_meta[others]['value']})
+
+            result = {'sorted_meta': sorted_meta, 'metadata': readable_meta}
+            cache.set(cache_key, result, CACHE_EXPIRATION)
+
         except HTTPError as e:
             logger.exception('Failed to retrieve metadata', extra={'id': item_id})
             return HttpResponseBadRequest('Failed to retrieve metadata',
                                           content_type='application/json')
-    return JsonResponse(metadata)
+    return JsonResponse(result, safe=False)
 
 
 def api_list_item(request, path):
@@ -143,342 +207,3 @@ def download_file_anon(request, path):
         logger.exception('Failed to preview file', extra={'path': path})
         return HttpResponseBadRequest('Failed to preview file',
                                       content_type='application/json')
-
-
-# def get_file_or_folder(request, path, page=1):
-#     path = _check_path(path)
-#
-#     cache_key = urllib.quote_plus(path + '_page_' + str(page))
-#     cache_value = cache.get(cache_key)
-#     logger.info('{} - cache value:{}'.format(cache_key, cache_value))
-#     if not cache_value:
-#         tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
-#         try:
-#             stat_response = tc.get_file_or_folder(path)
-#             item = stat_response['paths'][path]
-#             metadata = tc.get_metadata(item['id'])
-#             if item['type'] == 'dir':
-#                 contents = tc.get_contents(item['path'])
-#             else:
-#                 contents = None
-#
-#             cache_value = item
-#             cache_value['metadata'] = metadata
-#             cache_value['collection'] = contents
-#             cache.set(cache_key, cache_value, CACHE_EXPIRATION)
-#         except:
-#             logger.exception('unable to perform request')
-#             return HttpResponseBadRequest('Unable to perform request',
-#                                           content_type='application/json')
-#
-#     return JsonResponse(cache_value)
-#
-#
-# def get_metadata(request, id):
-#     cache_key = urllib.quote_plus('collection_id_' + id)
-#     metadata = cache.get(cache_key)
-#     if not metadata:
-#         url= sra_settings.DE_API_HOST + '/terrain/secured/filesystem/' + str(id) + '/metadata'
-#         de_response = send_request('GET', url=url)
-#
-#         if de_response.status_code == 200:
-#             de_meta = de_response.json()
-#
-#             try:
-#                 template_meta = de_meta['avus']
-#             except IndexError: #there is no template metadata
-#                 template_meta=[]
-#
-#             irods_meta = de_meta['irods-avus']
-#
-#         else: #something is wrong with DE metadata endpoint
-#             irods_meta=[{"attr": "Error", "value": de_response.reason}]
-#             template_meta=[]
-#
-#         metadata = {
-#             'irods': irods_meta,
-#             'template': template_meta,
-#         }
-#         cache.set(cache_key, metadata, CACHE_EXPIRATION)
-#     return metadata
-#
-#
-# def download_metadata(request, id):
-#     metadata = get_metadata(request, id)
-#     flat_metadata = metadata['irods'].copy()
-#     flat_metadata.update(metadata['template'])
-#
-#     return StreamingHttpResponse(flat_metadata, content_type='application/json')
-#
-#
-# def get_collection(request, path, page=1, id=None):
-#
-#     path = _check_path(path)
-#
-#     if id:
-#         cache_key = urllib.quote_plus('collection_and_meta_' + path + '_page_' + str(page))
-#     else: #just getting next page of collection
-#         cache_key = urllib.quote_plus('collection_' + path + '_page_' + str(page))
-#     collection = cache.get(cache_key)
-#     logger.info('cache_key: {} ---- cache_value: {}'.format(cache_key, collection))
-#     if not collection:
-#         PER_PAGE = 200
-#
-#         page=int(page)
-#         offset = PER_PAGE * (page - 1)
-#
-#         url= sra_settings.DE_API_HOST + '/terrain/secured/filesystem/paged-directory'
-#         params={
-#             'path': path,
-#             'limit': PER_PAGE,
-#             'offset': offset,
-#             'sort-col': 'name',
-#             'sort-dir': 'ASC'
-#             }
-#
-#         de_response = send_request('GET', url=url, params=params)
-#
-#         if de_response.status_code != 200:
-#             return HttpResponse(de_response.reason + ' -- ' + de_response.content, status=de_response.status_code)
-#
-#         collection = de_response.json()
-#         metadata = {}
-#
-#         if id:
-#             metadata=get_metadata(request, id)
-#
-#         if collection['total'] > PER_PAGE*page:
-#             collection['more_data'] = True
-#         else:
-#             collection['more_data'] = False
-#
-#         if 'djng_url_kwarg_id' in request.GET or 'djng_url_kwarg_page' in request.GET: #this function was called by get_file_or_folder
-#             cache_value = {'collection': collection, 'metadata': metadata}
-#             cache.set(cache_key, cache_value, CACHE_EXPIRATION)
-#             return JsonResponse(cache_value)
-#
-#         cache.set(cache_key, collection, CACHE_EXPIRATION)
-#
-#     logger.debug('HERE')
-#     logger.debug(request.is_ajax())
-#
-#     if 'djng_url_kwarg_id' in request.GET or 'djng_url_kwarg_page' in request.GET: #this function was called by get_file_or_folder
-#         return JsonResponse(collection)
-#     else:
-#         return collection
-#
-#
-# def serve_file(request, path=''):
-#     path = _check_path(path)
-#
-#     url = sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
-#     params = {
-#         'path': path,
-#         'chunk-size': 8000,
-#         'start': 0
-#         }
-#
-#     de_response = send_request('GET', url=url, params=params)
-#
-#     if de_response.status_code != 200:
-#         # return de_response.raw
-#         return HttpResponse(de_response.reason, status=de_response.status_code)
-#
-#     return HttpResponse(de_response.content)
-#
-#
-# def download_file(request, path=''):
-#     path = _check_path(path)
-#     url = sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
-#     params={'path': path}
-#
-#     de_response = send_request('GET', url=url, params=params, stream=True)
-#
-#     if de_response.status_code != 200:
-#         return HttpResponse(de_response.reason, status=de_response.status_code)
-#
-#     response = StreamingHttpResponse(de_response.content, content_type=de_response.headers['Content-Type'])
-#     response['Content-Disposition'] = de_response.headers['Content-Disposition']
-#     response['Accept-Ranges'] = 'bytes'
-#
-#     return response
-#
-#
-# def markdown_view(request, path=''):
-#     path = _check_path(path)
-#     url = sra_settings.DE_API_HOST + '/terrain/secured/fileio/download'
-#     params ={'path': path}
-#
-#     de_response = send_request('GET', url=url, params=params)
-#
-#     if de_response.status_code != 200:
-#         return HttpResponse(de_response.reason, status=de_response.status_code)
-#
-#     ext = splitext(de_response.headers['Content-Disposition'])[1][1:].strip('"')
-#
-#     if ext not in ['md', 'markdown']:
-#         return HttpResponseBadRequest()
-#
-#     html = markdown.markdown(de_response.content)
-#     response = HttpResponse(html, content_type='text/html')
-#     response['Content-Length'] = len(html)
-#     return response
-#
-#
-#
-#
-#
-# def search_metadata(request):
-#     pass
-#
-#
-# def search(request):
-#     # name = request.GET['search_term']
-#     search_term = request.GET.get('search_term', '*rice*')
-#
-#     #trying to use DE API -- experimental
-#     # query=json.dumps(
-#     #     {"wildcard":
-#     #         {"label":"BioSample_1_2"}
-#     #     }
-#     # )
-#
-#     # query=json.dumps(
-#     #     {"match":
-#     #         {"metadata.attribute":"BioProject Number"} #doesn't work, but label:BioProject_1 does
-#     #     }
-#     # )
-#
-#     #     # {
-#     #     #       "filtered": {
-#     #     #          "query": {
-#     #     #             "match_all": {}
-#     #     #          },
-#     #     #          "filter": {
-#     #     #             "term": {
-#     #     #                "metadata.value": "1BB8D567-43B8-4827-9016-B5767983F9EE"
-#     #     #             }
-#     #     #          }
-#     #     #       }
-#     #     # }
-#     # ) #not working
-#
-#     # query=json.dumps(
-#     #     {'query_string':
-#     #         {"query": search_term,
-#     #          'fields':['path', 'label', 'metadata.value']
-#     #         }
-#     #     }
-#     # )
-#
-#     # query=json.dumps(
-#     #     {"nested" : {
-#     #         "path" : "metadata",
-#     #         "query" : {
-#     #             "bool" : {
-#     #                 "must" : [
-#     #                     {
-#     #                         "match" : {"metadata.value" : "1_2"}
-#     #                     },
-#     #                     {
-#     #                         "match" : {"metadata.attribute" : "Fasta File Number"}
-#     #                     }
-#     #                 ]
-#     #             }
-#     #         }
-#     #     }}) #should we use DE api or irods?
-#
-#     # query=json.dumps(
-#     #     {"bool":
-#     #         {"must":[
-#     #             {"nested":
-#     #                 {"path":"metadata",
-#     #                  "query":
-#     #                     {"query_string":
-#     #                         {"query": "*" + search_term + "*",
-#     #                          "fields":["metadata.value"]}
-#     #                     }
-#     #                 }
-#     #             }
-#     #         ]}
-#     #     })
-#
-#     query=json.dumps(
-#         {"query":
-#             {"bool":
-#                  {"should":[
-#                     {"wildcard":
-#                         {"path":
-#                             {"value": "*" + search_term + "*"}
-#                         }
-#                     },
-#                     {"wildcard":
-#                         {"label":
-#                             {"value": "*" + search_term + "*"}
-#                         }
-#                     },
-#                     {"wildcard":
-#                         {"metadata.value":
-#                             {"value": "*" + search_term + "*"}
-#                         }
-#                     }
-#                  ]}
-#             }
-#         }
-#     )
-#
-#     url = sra_settings.DE_API_HOST + '/terrain/secured/filesystem/index'
-#     params = {'q': query}
-#
-#     resp = send_request('GET', url, params)
-#
-#     return JsonResponse(resp.json())
-#
-#
-# def create_jwt_token():
-#     payload = {
-#         "iat": int(time.time()),
-#         "sub": 'anonymous',
-#         "email": 'test@email.com'
-#     }
-#
-#     with open(sra_settings.DE_API_KEY_PATH, 'r') as api_key:
-#         shared_key = api_key.read()
-#
-#     from cryptography.hazmat.primitives.serialization import load_pem_private_key
-#     from cryptography.hazmat.backends import default_backend
-#
-#     key = load_pem_private_key(shared_key,
-#                                sra_settings.DE_API_KEY_PASSPHRASE, default_backend())
-#
-#     jwt_string = jwt.encode(payload, key, algorithm='RS256')
-#     encoded_jwt = urllib.quote_plus(jwt_string)  # url-encode the jwt string
-#
-#     return encoded_jwt
-#
-#
-# def send_request(http_method, url=None, params=None, stream=False, payload=None):
-#     encoded_jwt = create_jwt_token()
-#     headers = {'X-Iplant-De-Jwt': encoded_jwt}
-#
-#     logger.info('url: {0}'.format(url))
-#     logger.info('params: {0}'.format(params))
-#     logger.info('payload: {0}'.format(payload))
-#     logger.info('jwt: {0}'.format(encoded_jwt))
-#
-#     if payload:
-#         headers['Content-Type'] = 'application/json'
-#     if http_method.upper() == 'GET':
-#         response = requests.get(url, params=params, headers=headers, stream=stream)
-#     elif http_method.upper() == 'POST':
-#         data = json.dumps(payload)
-#         response = requests.post(url, data=data, params=params, headers=headers)
-#     elif http_method.upper() == 'PUT':
-#         data = json.dumps(payload)
-#         response = requests.put(url, data=data, params=params, headers=headers)
-#     elif http_method.upper() == 'DELETE':
-#         response = requests.delete(url, headers=headers)
-#
-#     logger.info('{} - response time: {}'.format(url, response.elapsed))
-#
-#     return response

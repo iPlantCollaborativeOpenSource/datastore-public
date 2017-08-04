@@ -1,19 +1,49 @@
-<div ng-if="model.metadata">
-    <ul class="list-group">
-        <li class="list-group-item" ng-repeat="meta in model.metadata.avus">
-            <div class="row">
-                <div class="col-sm-3">
-                    <b>{{ meta.attr }}</b>
-                </div>
-                <div class="col-sm-9">
-                    {{ meta.value }}
-                </div>
+<div ng-if="model.display.hasMetadata">
+    <div>
+        <h3>{{model.metadata['Title'].value}}</h3>
+    </div>
+    <div id="folder-metadata-display">
+        <dt ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}:</dt> <dd ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value">{{model.metadata['Identifier'].value}}</dd>
+
+        <dt ng-if="model.metadata['Creator'].value">Creator:</dt> <dd>{{model.metadata['Creator'].value}}</dd>
+        <dt>Description:</dt> <dd>{{model.metadata['Description'].value}}</dd>
+        <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
+        <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
+
+        <p id="rights" ng-bind-html="model.display.Rights"></p>
+        <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
+    </div>
+
+    <div>
+        <p>Export Formats:
+            <button type="button" class="btn btn-link" ng-click="getCitation('BibTeX')">BibTeX</button>
+            <button type="button" class="btn btn-link" ng-click="getCitation('Endnote')">Endnote</button>
+        </p>
+        <div id="citation" ng-if="model.display.citationFormat">
+            <div>
+              <button class="btn btn-link" type="button" ng-click="downloadCitation(model.display.citationFormat)">Download As {{model.display.citationFormat}}
             </div>
-        </li>
-        <li class="list-group-item" ng-repeat="meta in model.metadata['irods-avus']">
+
+            <pre ng-bind-html="model.display.citation"></pre>
+        </div>
+    </div>
+
+    <div class="actions-box">
+        <button type="button" class="btn btn-primary" ng-click="metadataToggle()">
+            {{model.display.showMoreButton}}
+        </button>
+        <button id="download-metadata-button" type="button" class="btn btn-primary" ng-click="downloadMetadata(model.item.id)">
+                Download Metadata
+        </button>
+    </div>
+</div>
+
+<div ng-show="expandMetadata" ng-if="model.metadata">
+    <ul class="list-group">
+        <li class="list-group-item" ng-if="meta.value && !(model.display.alreadyDisplayed | contains:meta.key)" ng-repeat="meta in model.display.sortedMetadata">
             <div class="row">
                 <div class="col-sm-3">
-                    <b>{{ meta.attr }}</b>
+                    <b >{{meta.key}}</b>
                 </div>
                 <div class="col-sm-9">
                     {{ meta.value }}
@@ -25,7 +55,7 @@
 
 <div style="min-height: 300px;" id="directory-contents">
     <div class="table-responsive">
-        <table class="table table-bordered table-striped">
+        <table ng-if="model.item.path === '/iplant/home/shared/commons_repo/curated'" class="table table-bordered table-striped">
             <tr ng-repeat="folder in model.collection.folders">
                 <td>
                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
@@ -33,7 +63,25 @@
                     </a>
                     <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
                 </td>
-                <td></td>
+            </tr>
+        </table>
+        <table ng-if="model.item.path !== '/iplant/home/shared/commons_repo/curated'" class="table table-bordered table-striped">
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Created</th>
+                <th>Last Modified</th>
+            </tr>
+            <tr ng-repeat="folder in model.collection.folders">
+                <td>
+                    <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
+                        <i class="fa fa-folder"></i> {{ folder.label }}
+                    </a>
+                    <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                </td>
+                <td> -- </td>
+                <td>{{ folder['date-created']|date:"medium"}}</td>
+                <td>{{ folder['date-modified']|date:"medium"}}</td>
             </tr>
             <tr ng-repeat="file in model.collection.files">
                 <td>
@@ -43,7 +91,13 @@
                     <span ng-if="file.loading"><i class="fa fa-spinner fa-spin"></i></span>
                 </td>
                 <td>
-                    ({{ file['file-size']|bytes }})
+                    {{ file['file-size']|bytes }}
+                </td>
+                <td>
+                    {{ file['date-created']|date:"medium"}}
+                </td>
+                <td>
+                    {{ file['date-modified']|date:"medium" }}
                 </td>
             </tr>
         </table>
