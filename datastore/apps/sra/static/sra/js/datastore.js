@@ -318,7 +318,7 @@ if (!Array.prototype.map) {
                             promises.push($scope.preview(item.path));
                         }
 
-                        $q.all(promises).then(function () {
+                        $q.all(promises).finally(function () {
                             /* update $location */
                             $location
                                 .state(angular.copy($scope.model))
