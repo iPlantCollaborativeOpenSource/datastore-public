@@ -210,12 +210,15 @@ if (!Array.prototype.map) {
             } else if (data == 'dcr') {
                 $scope.data.browseDescriptionTitle = 'CyVerse Curated:';
                 $scope.data.browseDescription = "All data that have been given a permanent identifier (DOI or ARK) by CyVerse. These data are stable and contents will not change.";
-            } else if (data == 'ncbi') {
+            } else if (data == 'ncbi-sra') {
                 $scope.data.publishDescriptionTitle = 'NCBI-SRA:';
                 $scope.data.publishDescription = "Instructions on how to publish data to NCBI's Sequence Read Archive via the Data Commons."
+            } else if (data == 'ncbi-wgs') {
+                $scope.data.publishDescriptionTitle = 'NCBI-WGS:';
+                $scope.data.publishDescription = "Instructions on how to publish data to NBCI's Whole Genome Shotgun (WGS) Archive via the Data Commons."
             } else if (data == 'dcrPublish') {
                 $scope.data.publishDescriptionTitle = 'CyVerse:';
-                $scope.data.publishDescription = "Instructions on how to request a permanent identifier and publish data to the Data Commons.";
+                $scope.data.publishDescription = "Request a permanent identifier (DOI or ARK) through the Data Commons or request a Community Released Data Folder.";
             }
         };
 
