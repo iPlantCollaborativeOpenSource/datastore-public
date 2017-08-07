@@ -123,7 +123,6 @@ def api_metadata(request, item_id, download=False):
                 elif label not in readable_meta:
                     readable_meta[label] = my_dict
                 elif readable_meta[label]['value']:
-                    import ipdb; ipdb.set_trace()
                     readable_meta[label]['value'] += ', {}'.format(value)
                 else:
                     readable_meta[label]['value'] = value
