@@ -14,7 +14,7 @@
         <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
     </div>
 
-    <div>
+    <div ng-if='model.display.curatedOrCommunity == "curated"'>
         <p>Export Formats:
             <button type="button" class="btn btn-link" ng-click="getCitation('BibTeX')">BibTeX</button>
             <button type="button" class="btn btn-link" ng-click="getCitation('Endnote')">Endnote</button>

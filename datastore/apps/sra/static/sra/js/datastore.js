@@ -276,6 +276,7 @@ if (!Array.prototype.map) {
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
                                 $scope.model.metadata = result.metadata
                                 $scope.model.display = {'sortedMetadata': result.sorted_meta}
+                                $scope.model.display['curatedOrCommunity'] = ($scope.model.item.path.startsWith('/iplant/home/shared/commons_repo/curated/')) ? 'curated' : 'community';
 
                                 if (Object.keys($scope.model.metadata).length) {
                                     $scope.model.display.showMoreButton = 'show more'
@@ -289,8 +290,13 @@ if (!Array.prototype.map) {
 
                                     if ($scope.model.metadata.Version) {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Version.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
-                                    } else {
+                                    } else if ($scope.model.display.curatedOrCommunity ==='curated') {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
+                                    } else {
+                                        var publicationYear = (typeof $scope.model.metadata['Date'] === 'undefined') ? (new Date()).getFullYear() : $scope.model.metadata['Date'];
+                                        publicationYear = (typeof publicationYear === 'object') ? $scope.model.metadata['Date'].value.substring(0,4) : (new Date()).getFullYear();
+                                        console.log(publicationYear)
+                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + publicationYear + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. '
                                     }
 
                                     $scope.model.display.alreadyDisplayed = [
