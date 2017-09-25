@@ -14,7 +14,7 @@
         <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
     </div>
 
-    <div ng-if='model.display.curatedOrCommunity == "curated"'>
+    <div>
         <p>Export Formats:
             <button type="button" class="btn btn-link" ng-click="getCitation('BibTeX')">BibTeX</button>
             <button type="button" class="btn btn-link" ng-click="getCitation('Endnote')">Endnote</button>
@@ -55,7 +55,7 @@
 
 <div style="min-height: 300px;" id="directory-contents">
     <div class="table-responsive">
-        <table ng-if="model.item.path === '/iplant/home/shared/commons_repo/curated'" class="table table-bordered table-striped">
+        <table ng-if="model.item.path === BasePaths.curated" class="table table-bordered table-striped">
             <tr ng-repeat="folder in model.collection.folders">
                 <td>
                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
@@ -65,7 +65,7 @@
                 </td>
             </tr>
         </table>
-        <table ng-if="model.item.path !== '/iplant/home/shared/commons_repo/curated'" class="table table-bordered table-striped">
+        <table ng-if="model.item.path !== BasePaths.curated" class="table table-bordered table-striped">
             <tr>
                 <th>Name</th>
                 <th>Size</th>

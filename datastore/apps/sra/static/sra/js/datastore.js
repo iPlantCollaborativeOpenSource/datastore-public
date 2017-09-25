@@ -111,6 +111,11 @@ if (!Array.prototype.map) {
         'MAX_PREVIEW_SIZE': 8192
     });
 
+    app.value('DcrPaths', {
+        'CURATED': '/iplant/home/shared/commons_repo/curated/',
+        'COMMUNITY': '/iplant/home/shared/'
+    });
+
     app.filter('contains', function() {
       return function (array, needle) {
         return array.indexOf(needle) >= 0;
@@ -191,7 +196,7 @@ if (!Array.prototype.map) {
 
     }]);
 
-    app.controller('HomeCtrl', ['$scope',function($scope) {
+    app.controller('HomeCtrl', ['$scope', 'DcrPaths', function($scope, DcrPaths) {
         var defaultTitle = 'Tip:';
         var defaultDescription = 'Hover over an option for more information.';
 
@@ -199,7 +204,7 @@ if (!Array.prototype.map) {
             browseDescriptionTitle: defaultTitle,
             browseDescription: defaultDescription,
             publishDescriptionTitle: defaultTitle,
-            publishDescription: defaultDescription,
+            publishDescription: defaultDescription
         };
 
         $scope.mouseOver = function(data) {
@@ -233,8 +238,8 @@ if (!Array.prototype.map) {
     }]);
 
 
-    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrFileService',
-        function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrFileService) {
+    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrPaths', 'DcrFileService',
+        function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrPaths, DcrFileService) {
 
             $scope.config = TerrainConfig;
 
@@ -250,6 +255,11 @@ if (!Array.prototype.map) {
                     item_end: 0
                 }
             };
+
+            $scope.BasePaths={
+                community: DcrPaths.COMMUNITY,
+                curated: DcrPaths.CURATED
+            }
 
             $scope.browse = function($event, item, page) {
                 if (item.loading) {
@@ -276,7 +286,7 @@ if (!Array.prototype.map) {
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
                                 $scope.model.metadata = result.metadata
                                 $scope.model.display = {'sortedMetadata': result.sorted_meta}
-                                $scope.model.display['curatedOrCommunity'] = ($scope.model.item.path.startsWith('/iplant/home/shared/commons_repo/curated/')) ? 'curated' : 'community';
+                                $scope.model.display['curatedOrCommunity'] = ($scope.model.item.path.startsWith(DcrPaths.curated)) ? 'curated' : 'community';
 
                                 if (Object.keys($scope.model.metadata).length) {
                                     $scope.model.display.showMoreButton = 'show more'
@@ -427,6 +437,16 @@ if (!Array.prototype.map) {
                     return
                 }
 
+                var publicationYear
+
+                if (typeof $scope.model.metadata['Publication Year'] !== 'undefined') {
+                    publicationYear = $scope.model.metadata['Publication Year'].value;
+                } else if (typeof $scope.model.metadata['Date'] !== 'undefined') {
+                    publicationYear = $scope.model.metadata['Date'].value.substring(0,4);
+                } else {
+                    publicationYear = ($scope.model.display['curatedOrCommunity'] === 'community') ? (new Date()).getFullYear() : '';
+                }
+
                 $scope.model.display.citationFormat = style
                 if (style =='BibTeX'){
                     $scope.model.display.citation =
@@ -434,7 +454,7 @@ if (!Array.prototype.map) {
                     ' author = {' + $scope.model.metadata.Creator.value + '} \n' +
                     ' title = {' + $scope.model.metadata.Title.value + '} \n' +
                     ' publisher = {' + $scope.model.metadata.Publisher.value + '} \n' +
-                    ' year = {' + $scope.model.metadata["Publication Year"].value + '} \n' +
+                    ' year = {' + publicationYear+ '} \n' +
                     ' note = {' + $scope.model.metadata.Description.value + '} \n' +
                     '}';
                 } else if (style =='Endnote'){
@@ -443,7 +463,7 @@ if (!Array.prototype.map) {
                     '%A ' + $scope.model.metadata.Creator.value + '\n' +
                     '%T ' + $scope.model.metadata.Title.value + '\n' +
                     '%I ' + $scope.model.metadata.Publisher.value + '\n' +
-                    '%D ' + $scope.model.metadata["Publication Year"].value + '\n';
+                    '%D ' + publicationYear + '\n';
                 }
             }
 
@@ -472,8 +492,8 @@ if (!Array.prototype.map) {
             // Initial load
             var initialPath = $location.path();
             if (initialPath === '/') {
-                initialPath = '/iplant/home/shared';
-                $location.path('/browse/iplant/home/shared');
+                initialPath = DcrPaths.COMMUNITY;
+                $location.path('/browse' + DcrPaths.COMMUNITY);
             }
             else if (initialPath.indexOf('/browse') === 0) {
                 initialPath = initialPath.slice(7);
