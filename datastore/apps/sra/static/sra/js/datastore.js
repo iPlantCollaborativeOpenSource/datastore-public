@@ -296,17 +296,24 @@ if (!Array.prototype.map) {
                                         $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
                                         $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
+                                    } else {
+                                        $scope.model.display.Rights = '<dt>Rights: </dt> <dd>' + $scope.model.metadata.Rights.value + '</dd>'
                                     }
 
                                     if ($scope.model.metadata.Version) {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Version.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
                                     } else if ($scope.model.display.curatedOrCommunity ==='curated') {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
-                                    } else {
-                                        var publicationYear = (typeof $scope.model.metadata['Date'] === 'undefined') ? (new Date()).getFullYear() : $scope.model.metadata['Date'];
-                                        publicationYear = (typeof publicationYear === 'object') ? $scope.model.metadata['Date'].value.substring(0,4) : (new Date()).getFullYear();
-                                        console.log(publicationYear)
-                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + publicationYear + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. '
+                                    } else if ($scope.model.display.curatedOrCommunity ==='community'){
+                                        if (typeof $scope.model.metadata['Publication Year'] !== 'undefined') {
+                                            $scope.model.display['Publication Year'] = $scope.model.metadata['Publication Year'].value;
+                                        } else if (typeof $scope.model.metadata['Date'] !== 'undefined') {
+                                            $scope.model.display['Publication Year'] = $scope.model.metadata['Date'].value.substring(0,4);
+                                        } else {
+                                            $scope.model.display['Publication Year'] = (new Date()).getFullYear();
+                                        }
+
+                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.display['Publication Year'] + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. '
                                     }
 
                                     $scope.model.display.alreadyDisplayed = [
@@ -437,16 +444,6 @@ if (!Array.prototype.map) {
                     return
                 }
 
-                var publicationYear
-
-                if (typeof $scope.model.metadata['Publication Year'] !== 'undefined') {
-                    publicationYear = $scope.model.metadata['Publication Year'].value;
-                } else if (typeof $scope.model.metadata['Date'] !== 'undefined') {
-                    publicationYear = $scope.model.metadata['Date'].value.substring(0,4);
-                } else {
-                    publicationYear = ($scope.model.display['curatedOrCommunity'] === 'community') ? (new Date()).getFullYear() : '';
-                }
-
                 $scope.model.display.citationFormat = style
                 if (style =='BibTeX'){
                     $scope.model.display.citation =
@@ -454,7 +451,7 @@ if (!Array.prototype.map) {
                     ' author = {' + $scope.model.metadata.Creator.value + '} \n' +
                     ' title = {' + $scope.model.metadata.Title.value + '} \n' +
                     ' publisher = {' + $scope.model.metadata.Publisher.value + '} \n' +
-                    ' year = {' + publicationYear+ '} \n' +
+                    ' year = {' + $scope.model.display['Publication Year']+ '} \n' +
                     ' note = {' + $scope.model.metadata.Description.value + '} \n' +
                     '}';
                 } else if (style =='Endnote'){
@@ -463,7 +460,7 @@ if (!Array.prototype.map) {
                     '%A ' + $scope.model.metadata.Creator.value + '\n' +
                     '%T ' + $scope.model.metadata.Title.value + '\n' +
                     '%I ' + $scope.model.metadata.Publisher.value + '\n' +
-                    '%D ' + publicationYear + '\n';
+                    '%D ' + $scope.model.display['Publication Year'] + '\n';
                 }
             }
 
