@@ -21,15 +21,15 @@
     <section>
         <h2 class="subheading">Browse Data</h2>
         <div class="subsection">
+            {% verbatim %}
             <div class="actions-box">
-                <a class="btn btn-primary" href="/browse/iplant/home/shared/" ng-mouseover="mouseOver('shared')" ng-mouseleave="mouseLeave()">
+                <a class="btn btn-primary" href="{{urls.community}}" ng-mouseover="mouseOver('shared')" ng-mouseleave="mouseLeave()">
                     Community Released <i class="fa"></i>
                 </a>
-                <a class="btn btn-primary" href="/browse/iplant/home/shared/commons_repo/curated/" ng-mouseover="mouseOver('dcr')" ng-mouseleave="mouseLeave()">
+                <a class="btn btn-primary" href="{{urls.curated}}" ng-mouseover="mouseOver('dcr')" ng-mouseleave="mouseLeave()">
                     CyVerse Curated <i class="fa"></i>
                 </a>
             </div>
-            {% verbatim %}
                 <div id="description" class="tip-box">
                     <dt>{{data.browseDescriptionTitle}}</dt>
                     <dd>{{data.browseDescription}}</dd>

@@ -207,6 +207,11 @@ if (!Array.prototype.map) {
             publishDescription: defaultDescription
         };
 
+        $scope.urls={
+            community: '/browse' + DcrPaths.COMMUNITY,
+            curated: '/browse' + DcrPaths.CURATED
+        };
+
         $scope.mouseOver = function(data) {
             if (data == 'shared') {
                 $scope.data.browseDescriptionTitle = 'Community Released:';
