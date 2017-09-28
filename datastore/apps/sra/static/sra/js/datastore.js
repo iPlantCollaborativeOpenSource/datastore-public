@@ -291,7 +291,7 @@ if (!Array.prototype.map) {
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
                                 $scope.model.metadata = result.metadata
                                 $scope.model.display = {'sortedMetadata': result.sorted_meta}
-                                $scope.model.display['curatedOrCommunity'] = ($scope.model.item.path.startsWith(DcrPaths.curated)) ? 'curated' : 'community';
+                                $scope.model.display['curatedOrCommunity'] = ($scope.model.item.path.startsWith(DcrPaths.CURATED)) ? 'curated' : 'community';
 
                                 if (Object.keys($scope.model.metadata).length) {
                                     $scope.model.display.showMoreButton = 'show more'
