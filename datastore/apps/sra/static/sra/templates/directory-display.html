@@ -57,7 +57,7 @@
 <div style="min-height: 300px;" id="directory-contents">
     <div class="table-responsive">
         <table ng-if="model.item.path === BasePaths.curated" class="table table-bordered table-striped">
-            <tr ng-repeat="folder in model.collection.folders">
+            <tr ng-repeat="folder in model.collection.folders | orderBy:sortType:sortReverse">
                 <td>
                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
                         <i class="fa fa-folder"></i> {{ folder.label }}
@@ -66,39 +66,52 @@
                 </td>
             </tr>
         </table>
+
         <table ng-if="model.item.path !== BasePaths.curated" class="table table-bordered table-striped">
-            <tr>
-                <th>Name</th>
-                <th>Size</th>
-                <th>Created</th>
-                <th>Last Modified</th>
-            </tr>
-            <tr ng-repeat="folder in model.collection.folders">
+            <thead>
+                <tr>
+                    <th ng-click="sort('label')">
+                        <a>
+                            Name
+                            <i class="glyphicon" ng-class="getSortIcon('label')"></i>
+                        </a>
+                    </th>
+                    <th ng-click="sort('file-size')">
+                        <a>
+                            Size
+                            <i class="glyphicon" ng-class="getSortIcon('file-size')"></i>
+                        </a>
+                    </th>
+                    <th ng-click="sort('date-created')">
+                        <a>
+                            Created
+                            <i class="glyphicon" ng-class="getSortIcon('date-created')"></i>
+                        </a>
+                    </th>
+                    <th ng-click="sort('date-modified')">
+                        <a>
+                            Last Modified
+                            <i class="glyphicon" ng-class="getSortIcon('date-modified')"></i>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tr ng-repeat="item in model.collection.FoldersAndFiles | orderBy:orderBy(sortType):sortReverse">
                 <td>
-                    <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
-                        <i class="fa fa-folder"></i> {{ folder.label }}
+                    <a ng-href="/browse{{ item.path }}" ng-click="browse($event, item)">
+                        <i ng-class="{ 'fa fa-folder':item.isFolder,'fa fa-file-o':!item.isFolder }"></i>
+                        {{ item.label }}
                     </a>
-                    <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span ng-if="item.loading"><i class="fa fa-spinner fa-spin"></i></span>
                 </td>
-                <td> -- </td>
-                <td>{{ folder['date-created']|date:"medium"}}</td>
-                <td>{{ folder['date-modified']|date:"medium"}}</td>
-            </tr>
-            <tr ng-repeat="file in model.collection.files">
-                <td>
-                    <a ng-href="/browse{{ file.path }}" ng-click="browse($event, file)">
-                        <i class="fa fa-file-o"></i> {{ file.label }}
-                    </a>
-                    <span ng-if="file.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                <td >
+                    {{ item['file-size']|bytes }}
                 </td>
                 <td>
-                    {{ file['file-size']|bytes }}
+                    {{ item['date-created']|date:"medium"}}
                 </td>
                 <td>
-                    {{ file['date-created']|date:"medium"}}
-                </td>
-                <td>
-                    {{ file['date-modified']|date:"medium" }}
+                    {{ item['date-modified']|date:"medium" }}
                 </td>
             </tr>
         </table>

@@ -112,8 +112,8 @@ if (!Array.prototype.map) {
     });
 
     app.value('DcrPaths', {
-        'CURATED': '/iplant/home/shared/commons_repo/curated/',
-        'COMMUNITY': '/iplant/home/shared/'
+        'CURATED': '/iplant/home/shared/commons_repo/curated',
+        'COMMUNITY': '/iplant/home/shared'
     });
 
     app.filter('contains', function() {
@@ -266,6 +266,9 @@ if (!Array.prototype.map) {
                 curated: DcrPaths.CURATED
             }
 
+            $scope.sortType     = 'label'; // set the default sort type
+            $scope.sortReverse  = false;  // set the default sort order
+
             $scope.browse = function($event, item, page) {
                 if (item.loading) {
                     return;
@@ -365,6 +368,19 @@ if (!Array.prototype.map) {
                 return DcrFileService.getListItem(path, page).then(
                     function(results) {
                         $scope.model.collection = results;
+                        angular.forEach(results.folders, function(item){
+                            item['isFolder'] = true;
+                            item['file-size'] = '-'
+                            // item['date-created'] = new Date(item['date-created'])
+                            // item['date-modified'] = new Date(item['date-modified'])
+                        })
+                        // angular.forEach(results.files, function(item){
+                        //     item['date-created'] = new Date(item['date-created'])
+                        //     item['date-modified'] = new Date(item['date-modified'])
+                        // })
+                        $scope.model.collection['FoldersAndFiles'] = results.folders;
+                        $scope.model.collection['FoldersAndFiles'] = $scope.model.collection['FoldersAndFiles'].concat(results.files)
+
                         if ($scope.model.collection.total > 0) {
                             var offset = page * TerrainConfig.DIR_PAGE_SIZE;
                             $scope.model.pagination.item_start = offset + 1;
@@ -387,6 +403,28 @@ if (!Array.prototype.map) {
                         $scope.model.err = err;
                     }
                 );
+            };
+
+            $scope.sort = function(sortType) {
+                if ($scope.sortType == sortType) {
+                    $scope.sortReverse = !$scope.sortReverse;
+                } else {
+                    $scope.sortType = sortType;
+                    $scope.sortReverse = false;
+                }
+            };
+
+            $scope.getSortIcon = function(sortType) {
+                if ($scope.sortType == sortType) {
+                    return $scope.sortReverse ? 'glyphicon-chevron-up' : 'glyphicon-chevron-down'
+                    // return $scope.sortReverse ? 'fa-sort-asc' : 'fa-sort-desc'
+                }
+            };
+
+            $scope.orderBy = function(property) { //orderBy won't work with properties that have hyphens
+              return function(item) {
+                return item[property];
+              };
             };
 
             $scope.pageChanged = function() {
