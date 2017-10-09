@@ -416,8 +416,7 @@ if (!Array.prototype.map) {
 
             $scope.getSortIcon = function(sortType) {
                 if ($scope.sortType == sortType) {
-                    return $scope.sortReverse ? 'glyphicon-chevron-up' : 'glyphicon-chevron-down'
-                    // return $scope.sortReverse ? 'fa-sort-asc' : 'fa-sort-desc'
+                    return $scope.sortReverse ? 'glyphicon-chevron-down' : 'glyphicon-chevron-up'
                 }
             };
 
