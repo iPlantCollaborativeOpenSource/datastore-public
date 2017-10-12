@@ -3,7 +3,10 @@
         <h3>{{model.metadata['Title'].value}}</h3>
     </div>
     <div id="folder-metadata-display">
-        <dt ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}:</dt> <dd ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value">{{model.metadata['Identifier'].value}}</dd>
+        <div ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value" id="doi-curated">
+            <dt> {{model.metadata['Identifier Type'].value}}:</dt>
+            <dd>{{model.metadata['Identifier'].value}}</dd>
+        </div>
 
         <dt ng-if="model.metadata['Creator'].value">Creator:</dt> <dd>{{model.metadata['Creator'].value}}</dd>
         <dt>Description:</dt> <dd>{{model.metadata['Description'].value}}</dd>
