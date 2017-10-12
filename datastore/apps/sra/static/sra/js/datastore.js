@@ -311,6 +311,7 @@ if (!Array.prototype.map) {
                                     if ($scope.model.metadata.Version) {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Version.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
                                     } else if ($scope.model.display.curatedOrCommunity ==='curated') {
+                                        $scope.model.display['Publication Year'] = $scope.model.metadata['Publication Year'].value;
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
                                     } else if ($scope.model.display.curatedOrCommunity ==='community'){
                                         if (typeof $scope.model.metadata['Publication Year'] !== 'undefined') {
