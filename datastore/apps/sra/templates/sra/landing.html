@@ -19,7 +19,7 @@
             $scope.download($scope.file_path)
         };
 
-        window.DEBUG = false;
+        window.DEBUG = window.location.hostname == 'localhost' ? true : false;
         if(!window.DEBUG){
             if(!window.console) window.console = {};
             var methods = ["log", "debug", "warn", "info"];
