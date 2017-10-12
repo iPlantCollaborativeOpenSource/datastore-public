@@ -18,14 +18,10 @@
             var $scope = $el.scope();
             $scope.download($scope.file_path)
         };
-
-        window.DEBUG = window.location.hostname == 'localhost' ? true : false;
-        if(!window.DEBUG){
-            if(!window.console) window.console = {};
-            var methods = ["log", "debug", "warn", "info"];
-            for(var i=0;i<methods.length;i++){
-                console[methods[i]] = function(){};
-            }
-        }
     </script>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'sra/js/landingpage.js' %}"></script>
 {% endblock %}

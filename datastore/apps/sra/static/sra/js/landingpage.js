@@ -1,97 +1,7 @@
-if (!Array.prototype.map) {
-    /* polyfill */
-    Array.prototype.map = function(callback, thisArg) {
-
-        var T, A, k;
-
-        if (this == null) {
-            throw new TypeError(" this is null or not defined");
-        }
-
-        // 1. Let O be the result of calling ToObject passing the |this| value as the argument.
-        var O = Object(this);
-
-        // 2. Let lenValue be the result of calling the Get internal method of O with the argument "length".
-        // 3. Let len be ToUint32(lenValue).
-        var len = O.length >>> 0;
-
-        // 4. If IsCallable(callback) is false, throw a TypeError exception.
-        // See: http://es5.github.com/#x9.11
-        if (typeof callback !== "function") {
-            throw new TypeError(callback + " is not a function");
-        }
-
-        // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
-        if (thisArg) {
-            T = thisArg;
-        }
-
-        // 6. Let A be a new array created as if by the expression new Array(len) where Array is
-        // the standard built-in constructor with that name and len is the value of len.
-        A = new Array(len);
-
-        // 7. Let k be 0
-        k = 0;
-
-        // 8. Repeat, while k < len
-        while(k < len) {
-
-            var kValue, mappedValue;
-
-            // a. Let Pk be ToString(k).
-            //   This is implicit for LHS operands of the in operator
-            // b. Let kPresent be the result of calling the HasProperty internal method of O with argument Pk.
-            //   This step can be combined with c
-            // c. If kPresent is true, then
-            if (k in O) {
-
-                // i. Let kValue be the result of calling the Get internal method of O with argument Pk.
-                kValue = O[ k ];
-
-                // ii. Let mappedValue be the result of calling the Call internal method of callback
-                // with T as the this value and argument list containing kValue, k, and O.
-                mappedValue = callback.call(T, kValue, k, O);
-
-                // iii. Call the DefineOwnProperty internal method of A with arguments
-                // Pk, Property Descriptor {Value: mappedValue, : true, Enumerable: true, Configurable: true},
-                // and false.
-
-                // In browsers that support Object.defineProperty, use the following:
-                // Object.defineProperty(A, Pk, { value: mappedValue, writable: true, enumerable: true, configurable: true });
-
-                // For best browser support, use the following:
-                A[ k ] = mappedValue;
-            }
-            // d. Increase k by 1.
-            k++;
-        }
-
-        // 9. return A
-        return A;
-    };
-}
-
 (function(window, angular, $) {
     "use strict";
 
-    function config($httpProvider, $locationProvider) {
-        /* ensure server recognized ajax requests */
-        $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-        /* CSRF support, but we're not doing any posts... */
-        $httpProvider.defaults.xsrfCookieName = 'csrftoken';
-        $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
-
-        /* cache responses by default */
-        $httpProvider.defaults.cache = true;
-
-        $locationProvider.html5Mode(true);
-    }
-
-
-    var app = angular.module('Datastore', ['djng.urls', 'ui.bootstrap', 'ngCookies', 'ngSanitize'])
-        .config(['$httpProvider', '$locationProvider', config]);
-
+    var app = angular.module('Datastore')
 
     app.value('BrushSources', {
         'php': 'shBrushPhp',
@@ -109,11 +19,6 @@ if (!Array.prototype.map) {
         'DIR_PAGE_SIZE': 100,
         'MAX_DOWNLOAD_SIZE': 2147483648,
         'MAX_PREVIEW_SIZE': 8192
-    });
-
-    app.value('DcrPaths', {
-        'CURATED': '/iplant/home/shared/commons_repo/curated',
-        'COMMUNITY': '/iplant/home/shared'
     });
 
     app.filter('contains', function() {
@@ -195,53 +100,6 @@ if (!Array.prototype.map) {
         return service;
 
     }]);
-
-    app.controller('HomeCtrl', ['$scope', 'DcrPaths', function($scope, DcrPaths) {
-        var defaultTitle = 'Tip:';
-        var defaultDescription = 'Hover over an option for more information.';
-
-        $scope.data={
-            browseDescriptionTitle: defaultTitle,
-            browseDescription: defaultDescription,
-            publishDescriptionTitle: defaultTitle,
-            publishDescription: defaultDescription
-        };
-
-        $scope.urls={
-            community: '/browse' + DcrPaths.COMMUNITY,
-            curated: '/browse' + DcrPaths.CURATED
-        };
-
-        $scope.mouseOver = function(data) {
-            if (data == 'shared') {
-                $scope.data.browseDescriptionTitle = 'Community Released:';
-                $scope.data.browseDescription = "These data are provided by community collaborators for public access. Community Released Data are not curated by the Data Commons and don't have permanent identifiers. Their location and contents may change."
-
-            } else if (data == 'dcr') {
-                $scope.data.browseDescriptionTitle = 'CyVerse Curated:';
-                $scope.data.browseDescription = "All data that have been given a permanent identifier (DOI or ARK) by CyVerse. These data are stable and contents will not change.";
-            } else if (data == 'ncbi-sra') {
-                $scope.data.publishDescriptionTitle = 'NCBI-SRA:';
-                $scope.data.publishDescription = "Instructions on how to publish data to NCBI's Sequence Read Archive via the Data Commons."
-            } else if (data == 'ncbi-wgs') {
-                $scope.data.publishDescriptionTitle = 'NCBI-WGS:';
-                $scope.data.publishDescription = "Instructions on how to publish data to NBCI's Whole Genome Shotgun (WGS) Archive via the Data Commons."
-            } else if (data == 'dcrPublish') {
-                $scope.data.publishDescriptionTitle = 'CyVerse:';
-                $scope.data.publishDescription = "Request a permanent identifier (DOI or ARK) through the Data Commons or request a Community Released Data Folder.";
-            }
-        };
-
-        $scope.mouseLeave = function() {
-            $scope.data={
-                browseDescriptionTitle: defaultTitle,
-                browseDescription: defaultDescription,
-                publishDescriptionTitle: defaultTitle,
-                publishDescription: defaultDescription,
-            };
-        };
-    }]);
-
 
     app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrPaths', 'DcrFileService',
         function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrPaths, DcrFileService) {
@@ -372,13 +230,8 @@ if (!Array.prototype.map) {
                         angular.forEach(results.folders, function(item){
                             item['isFolder'] = true;
                             item['file-size'] = '-'
-                            // item['date-created'] = new Date(item['date-created'])
-                            // item['date-modified'] = new Date(item['date-modified'])
                         })
-                        // angular.forEach(results.files, function(item){
-                        //     item['date-created'] = new Date(item['date-created'])
-                        //     item['date-modified'] = new Date(item['date-modified'])
-                        // })
+
                         $scope.model.collection['FoldersAndFiles'] = results.folders;
                         $scope.model.collection['FoldersAndFiles'] = $scope.model.collection['FoldersAndFiles'].concat(results.files)
 

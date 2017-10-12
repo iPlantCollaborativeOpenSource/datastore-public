@@ -20,14 +20,23 @@
 <script src="{% static 'vendor/SyntaxHighlighter/scripts/shBrushRuby.js' %}"></script>
 <script src="{% static 'vendor/SyntaxHighlighter/scripts/shBrushXml.js' %}"></script>
 <script src="{% static 'djng/js/django-angular.min.js' %}"></script>
-<script src="{% static 'sra/js/datastore.js' %}"></script>
 <script src="{% static 'sra/js/SyntaxHighlighter/shBrushFasta.js' %}"></script>
+<script src="{% static 'sra/js/app.js' %}"></script>
 
 <script type="text/javascript">
     var root = "{{ root }}";
     var root_name = "{{ root_name }}";
     var metadata_prefix = "{{ metadata_prefix }}";
     var csrftoken = "{% csrf_token %}"
+
+    window.DEBUG = window.location.hostname == 'localhost' ? true : false;
+    if(!window.DEBUG){
+        if(!window.console) window.console = {};
+        var methods = ["log", "debug", "warn", "info"];
+        for(var i=0;i<methods.length;i++){
+            console[methods[i]] = function(){};
+        }
+    }
 </script>
 
 {% if GOOGLE_ANALYTICS_PROPERTY_ID %}
