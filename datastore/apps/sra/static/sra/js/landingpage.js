@@ -169,28 +169,20 @@
                                     if ($scope.model.metadata.Version) {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Version.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
                                     } else if ($scope.model.display.curatedOrCommunity ==='curated') {
-                                        $scope.model.display['Publication Year'] = $scope.model.metadata['Publication Year'].value;
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
-                                    } else if ($scope.model.display.curatedOrCommunity ==='community'){
-                                        if (typeof $scope.model.metadata['Publication Year'] !== 'undefined') {
-                                            $scope.model.display['Publication Year'] = $scope.model.metadata['Publication Year'].value;
-                                        } else if (typeof $scope.model.metadata['Date'] !== 'undefined') {
-                                            $scope.model.display['Publication Year'] = $scope.model.metadata['Date'].value.substring(0,4);
-                                        } else {
-                                            $scope.model.display['Publication Year'] = (new Date()).getFullYear();
-                                        }
-
-                                        $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.display['Publication Year'] + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. '
                                     }
 
                                     $scope.model.display.alreadyDisplayed = [
                                         'Title',
                                         'Creator',
-                                        'Description',
-                                        'Publisher',
-                                        'Publication Year',
-                                        'DOI'
+                                        'Description'
                                     ]
+
+                                    if ($scope.model.display.curatedOrCommunity ==='curated') {
+                                        $scope.model.display.alreadyDisplayed.push('Publisher', 'Publication Year', 'DOI')
+                                    }
+
+
                                 }
                             })
                         );
@@ -347,7 +339,7 @@
                     ' author = {' + $scope.model.metadata.Creator.value + '} \n' +
                     ' title = {' + $scope.model.metadata.Title.value + '} \n' +
                     ' publisher = {' + $scope.model.metadata.Publisher.value + '} \n' +
-                    ' year = {' + $scope.model.display['Publication Year']+ '} \n' +
+                    ' year = {' + $scope.model.metadata['Publication Year'].value+ '} \n' +
                     ' note = {' + $scope.model.metadata.Description.value + '} \n' +
                     '}';
                 } else if (style =='Endnote'){
@@ -356,7 +348,7 @@
                     '%A ' + $scope.model.metadata.Creator.value + '\n' +
                     '%T ' + $scope.model.metadata.Title.value + '\n' +
                     '%I ' + $scope.model.metadata.Publisher.value + '\n' +
-                    '%D ' + $scope.model.display['Publication Year'] + '\n';
+                    '%D ' + $scope.model.metadata['Publication Year'].value + '\n';
                 }
             }
 

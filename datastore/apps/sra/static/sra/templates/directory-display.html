@@ -10,14 +10,15 @@
 
         <dt ng-if="model.metadata['Creator'].value">Creator:</dt> <dd>{{model.metadata['Creator'].value}}</dd>
         <dt>Description:</dt> <dd>{{model.metadata['Description'].value}}</dd>
-        <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
-        <dt ng-if="model.display['Publication Year']">Publication Year:</dt> <dd>{{model.display['Publication Year']}}</dd>
-
-        <p id="rights" ng-bind-html="model.display.Rights"></p>
-        <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
+        <div ng-if="model.display.curatedOrCommunity == 'curated'">
+            <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
+            <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
+            <p id="rights" ng-bind-html="model.display.Rights"></p>
+            <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
+        </div>
     </div>
 
-    <div>
+    <div ng-if="model.display.curatedOrCommunity == 'curated'">
         <p>Export Formats:
             <button type="button" class="btn btn-link" ng-click="getCitation('BibTeX')">BibTeX</button>
             <button type="button" class="btn btn-link" ng-click="getCitation('Endnote')">Endnote</button>
