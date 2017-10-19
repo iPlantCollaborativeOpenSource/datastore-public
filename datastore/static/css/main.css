@@ -87,6 +87,10 @@ footer .nav > li > a:hover {
     text-decoration: underline;
 }
 
+.italic {
+    font-style: italic;
+}
+
 .ng-enter {
     z-index: 8888;
     background-color: lime;

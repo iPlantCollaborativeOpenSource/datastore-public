@@ -163,7 +163,7 @@
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
                                         $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
                                     } else {
-                                        $scope.model.display.Rights = '<dt>Rights: </dt> <dd>' + $scope.model.metadata.Rights.value + '</dd>'
+                                        $scope.model.display.Rights = '<p>' + $scope.model.metadata.Rights.value + '</p'
                                     }
 
                                     if ($scope.model.metadata.Version) {
@@ -175,7 +175,8 @@
                                     $scope.model.display.alreadyDisplayed = [
                                         'Title',
                                         'Creator',
-                                        'Description'
+                                        'Description',
+                                        'Rights'
                                     ]
 
                                     if ($scope.model.display.curatedOrCommunity ==='curated') {
