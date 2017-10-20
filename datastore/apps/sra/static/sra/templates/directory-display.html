@@ -63,7 +63,7 @@
 <div style="min-height: 300px;" id="directory-contents">
     <div class="table-responsive">
         <table ng-if="model.item.path === BasePaths.curated" class="table table-bordered table-striped">
-            <tr ng-repeat="folder in model.collection.folders | orderBy:sortType:sortReverse">
+            <tr ng-repeat="folder in model.collection.folders">
                 <td>
                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
                         <i class="fa fa-folder"></i> {{ folder.label }}
@@ -102,10 +102,22 @@
                     </th>
                 </tr>
             </thead>
-            <tr ng-repeat="item in model.collection.FoldersAndFiles | orderBy:orderBy(sortType):sortReverse">
+            <!-- <tr ng-repeat="item in model.collection.FoldersAndFiles | orderBy:orderBy(sortType):sortDESC"> -->
+            <tr ng-repeat="folder in model.collection.folders">
+                 <td>
+                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
+                         <i class="fa fa-folder"></i> {{ folder.label }}
+                     </a>
+                     <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                 </td>
+                 <td> -- </td>
+                 <td>{{ folder['date-created']|date:"medium"}}</td>
+                 <td>{{ folder['date-modified']|date:"medium"}}</td>
+             </tr>
+             <tr ng-repeat="item in model.collection.files">
                 <td>
                     <a ng-href="/browse{{ item.path }}" ng-click="browse($event, item)">
-                        <i ng-class="{ 'fa fa-folder':item.isFolder,'fa fa-file-o':!item.isFolder }"></i>
+                        <i class="fa fa-file-o"></i>
                         {{ item.label }}
                     </a>
                     <span ng-if="item.loading"><i class="fa fa-spinner fa-spin"></i></span>

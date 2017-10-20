@@ -72,14 +72,15 @@ class TerrainClient(object):
             settings.TERRAIN_API_HOST)
 
         page = int(kwargs.pop('page', '0'))
+        sort_col = str(kwargs.pop('sort_col', TerrainClient.SORT_COL))
+        sort_dir = str(kwargs.pop('sort_dir', TerrainClient.SORT_DIR))
         offset = page * TerrainClient.DIR_PAGE_SIZE
-
         params = {
             'path': path,
             'limit': TerrainClient.DIR_PAGE_SIZE,
             'offset': offset,
-            'sort-col': TerrainClient.SORT_COL,
-            'sort-dir': TerrainClient.SORT_DIR,
+            'sort-col': sort_col,
+            'sort-dir': sort_dir,
         }
         return self.send_request('GET', url, params=params).json()
 

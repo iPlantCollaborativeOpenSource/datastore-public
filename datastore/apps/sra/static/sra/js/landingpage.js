@@ -68,9 +68,25 @@
                     });
         };
 
-        service.getListItem = function(path, page) {
+        service.getListItem = function(path, page, sortType, sortDir) {
             page = page || 0;
-            return $http.get(djangoUrl.reverse('api_list_item', {'path': path}), {'params': {'page': page}})
+
+            switch(sortType) {
+                case 'label':
+                    sortType = 'NAME';
+                    break;
+                case 'file-size':
+                    sortType = 'SIZE';
+                    break;
+                case 'date-created':
+                    sortType = 'DATECREATED';
+                    break;
+                case 'date-modified':
+                    sortType = 'LASTMODIFIED';
+                    break;
+            }
+
+            return $http.get(djangoUrl.reverse('api_list_item', {'path': path}), {'params': {'page': page, 'sort-col': sortType, 'sort-dir': sortDir}})
                 .then(
                     function (resp) {
                         return resp.data;
@@ -125,7 +141,7 @@
             }
 
             $scope.sortType     = 'label'; // set the default sort type
-            $scope.sortReverse  = false;  // set the default sort order
+            $scope.sortDir  = 'ASC';  // set the default sort order
 
             $scope.browse = function($event, item, page) {
                 if (item.loading) {
@@ -216,8 +232,8 @@
                     });
             };
 
-            $scope.getContents = function(path, page) {
-                return DcrFileService.getListItem(path, page).then(
+            $scope.getContents = function(path, page, sortType='label', sortDir='ASC') {
+                return DcrFileService.getListItem(path, page, sortType, sortDir).then(
                     function(results) {
                         $scope.model.collection = results;
                         angular.forEach(results.folders, function(item){
@@ -225,8 +241,8 @@
                             item['file-size'] = '-'
                         })
 
-                        $scope.model.collection['FoldersAndFiles'] = results.folders;
-                        $scope.model.collection['FoldersAndFiles'] = $scope.model.collection['FoldersAndFiles'].concat(results.files)
+                        // $scope.model.collection['FoldersAndFiles'] = results.folders;
+                        // $scope.model.collection['FoldersAndFiles'] = $scope.model.collection['FoldersAndFiles'].concat(results.files)
 
                         if ($scope.model.collection.total > 0) {
                             var offset = page * TerrainConfig.DIR_PAGE_SIZE;
@@ -254,16 +270,27 @@
 
             $scope.sort = function(sortType) {
                 if ($scope.sortType == sortType) {
-                    $scope.sortReverse = !$scope.sortReverse;
+                    $scope.sortDir = $scope.sortDir === 'ASC' ? 'DESC' : 'ASC'
                 } else {
                     $scope.sortType = sortType;
-                    $scope.sortReverse = false;
+                    $scope.sortDir = 'ASC';
                 }
+
+                var load_page = 0;
+                $scope.getContents($scope.model.item.path, load_page, sortType, $scope.sortDir)
+                    .then(function() {
+                        /* scroll to top of listing */
+                        $anchorScroll('directory-contents');
+                        /* update $location */
+                        $location
+                            .state(angular.copy($scope.model))
+                            .search('page', load_page);
+                    });
             };
 
             $scope.getSortIcon = function(sortType) {
                 if ($scope.sortType == sortType) {
-                    return $scope.sortReverse ? 'glyphicon-chevron-down' : 'glyphicon-chevron-up'
+                    return $scope.sortDir==='ASC' ? 'glyphicon-chevron-up' : 'glyphicon-chevron-down';
                 }
             };
 
@@ -275,7 +302,7 @@
 
             $scope.pageChanged = function() {
                 var load_page = $scope.model.pagination.current - 1;
-                $scope.getContents($scope.model.item.path, load_page)
+                $scope.getContents($scope.model.item.path, load_page, $scope.sortType, $scope.sortDir)
                     .then(function() {
                         /* scroll to top of listing */
                         $anchorScroll('directory-contents');
