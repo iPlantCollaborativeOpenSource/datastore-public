@@ -16,7 +16,9 @@
             <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
         </div>
 
-        <p id="rights" ng-bind-html="model.display.Rights"></p>
+        <div id="rights" ng-if="model.display.Rights">
+            <dt>Rights:</dt><dd ng-bind-html="model.display.Rights"></dd>
+        </div>
 
         <div ng-if="model.display.curatedOrCommunity == 'curated'">
             <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
