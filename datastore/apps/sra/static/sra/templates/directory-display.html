@@ -3,30 +3,39 @@
         <h3>{{model.metadata['Title'].value}}</h3>
     </div>
     <div id="folder-metadata-display">
-        <dt ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value"> {{model.metadata['Identifier Type'].value}}:</dt> <dd ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value">{{model.metadata['Identifier'].value}}</dd>
+        <div ng-if="model.metadata['Identifier Type'].value && model.metadata['Identifier'].value" id="doi-curated">
+            <dt> {{model.metadata['Identifier Type'].value}}:</dt>
+            <dd>{{model.metadata['Identifier'].value}}</dd>
+        </div>
 
         <dt ng-if="model.metadata['Creator'].value">Creator:</dt> <dd>{{model.metadata['Creator'].value}}</dd>
         <dt>Description:</dt> <dd>{{model.metadata['Description'].value}}</dd>
-        <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
-        <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
 
-        <p id="rights" ng-bind-html="model.display.Rights"></p>
-        <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
-    </div>
+        <div ng-if="model.display.curatedOrCommunity == 'curated'">
+            <dt ng-if="model.metadata['Publisher'].value">Publisher:</dt> <dd>{{model.metadata['Publisher'].value}}</dd>
+            <dt ng-if="model.metadata['Publication Year'].value">Publication Year:</dt> <dd>{{model.metadata['Publication Year'].value}}</dd>
+        </div>
 
-    <div>
-        <p>Export Formats:
-            <button type="button" class="btn btn-link" ng-click="getCitation('BibTeX')">BibTeX</button>
-            <button type="button" class="btn btn-link" ng-click="getCitation('Endnote')">Endnote</button>
-        </p>
-        <div id="citation" ng-if="model.display.citationFormat">
-            <div>
-              <button class="btn btn-link" type="button" ng-click="downloadCitation(model.display.citationFormat)">Download As {{model.display.citationFormat}}
+        <div id="rights" ng-if="model.display.Rights">
+            <dt>Rights:</dt><dd ng-bind-html="model.display.Rights"></dd>
+        </div>
+
+        <div ng-if="model.display.curatedOrCommunity == 'curated'">
+            <dt>Citation:</dt><dd>{{model.display.readableCitation}}</dd>
+            <p>Export Formats:
+                <button type="button" class="btn btn-link" ng-click="getCitation('BibTeX')">BibTeX</button>
+                <button type="button" class="btn btn-link" ng-click="getCitation('Endnote')">Endnote</button>
+            </p>
+            <div id="citation" ng-if="model.display.citationFormat">
+                <div>
+                  <button class="btn btn-link" type="button" ng-click="downloadCitation(model.display.citationFormat)">Download As {{model.display.citationFormat}}
+                </div>
+
+                <pre ng-bind-html="model.display.citation"></pre>
             </div>
-
-            <pre ng-bind-html="model.display.citation"></pre>
         </div>
     </div>
+    <p ng-if="model.display.curatedOrCommunity == 'community'" class='italic'> This dataset is not stable or permanent and might change.</p>
 
     <div class="actions-box">
         <button type="button" class="btn btn-primary" ng-click="metadataToggle()">
@@ -55,7 +64,7 @@
 
 <div style="min-height: 300px;" id="directory-contents">
     <div class="table-responsive">
-        <table ng-if="model.item.path === '/iplant/home/shared/commons_repo/curated'" class="table table-bordered table-striped">
+        <table ng-if="model.item.path === BasePaths.curated" class="table table-bordered table-striped">
             <tr ng-repeat="folder in model.collection.folders">
                 <td>
                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
@@ -65,39 +74,64 @@
                 </td>
             </tr>
         </table>
-        <table ng-if="model.item.path !== '/iplant/home/shared/commons_repo/curated'" class="table table-bordered table-striped">
-            <tr>
-                <th>Name</th>
-                <th>Size</th>
-                <th>Created</th>
-                <th>Last Modified</th>
-            </tr>
+
+        <table ng-if="model.item.path !== BasePaths.curated" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th ng-click="sort('label')">
+                        <a>
+                            Name
+                            <i class="glyphicon" ng-class="getSortIcon('label')"></i>
+                        </a>
+                    </th>
+                    <th ng-click="sort('file-size')">
+                        <a>
+                            Size
+                            <i class="glyphicon" ng-class="getSortIcon('file-size')"></i>
+                        </a>
+                    </th>
+                    <th ng-click="sort('date-created')">
+                        <a>
+                            Created
+                            <i class="glyphicon" ng-class="getSortIcon('date-created')"></i>
+                        </a>
+                    </th>
+                    <th ng-click="sort('date-modified')">
+                        <a>
+                            Last Modified
+                            <i class="glyphicon" ng-class="getSortIcon('date-modified')"></i>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <!-- <tr ng-repeat="item in model.collection.FoldersAndFiles | orderBy:orderBy(sortType):sortDESC"> -->
             <tr ng-repeat="folder in model.collection.folders">
+                 <td>
+                     <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
+                         <i class="fa fa-folder"></i> {{ folder.label }}
+                     </a>
+                     <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                 </td>
+                 <td> -- </td>
+                 <td>{{ folder['date-created']|date:"medium"}}</td>
+                 <td>{{ folder['date-modified']|date:"medium"}}</td>
+             </tr>
+             <tr ng-repeat="item in model.collection.files">
                 <td>
-                    <a ng-href="/browse{{ folder.path }}" ng-click="browse($event, folder)">
-                        <i class="fa fa-folder"></i> {{ folder.label }}
+                    <a ng-href="/browse{{ item.path }}" ng-click="browse($event, item)">
+                        <i class="fa fa-file-o"></i>
+                        {{ item.label }}
                     </a>
-                    <span ng-if="folder.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span ng-if="item.loading"><i class="fa fa-spinner fa-spin"></i></span>
                 </td>
-                <td> -- </td>
-                <td>{{ folder['date-created']|date:"medium"}}</td>
-                <td>{{ folder['date-modified']|date:"medium"}}</td>
-            </tr>
-            <tr ng-repeat="file in model.collection.files">
-                <td>
-                    <a ng-href="/browse{{ file.path }}" ng-click="browse($event, file)">
-                        <i class="fa fa-file-o"></i> {{ file.label }}
-                    </a>
-                    <span ng-if="file.loading"><i class="fa fa-spinner fa-spin"></i></span>
+                <td >
+                    {{ item['file-size']|bytes }}
                 </td>
                 <td>
-                    {{ file['file-size']|bytes }}
+                    {{ item['date-created']|date:"medium"}}
                 </td>
                 <td>
-                    {{ file['date-created']|date:"medium"}}
-                </td>
-                <td>
-                    {{ file['date-modified']|date:"medium" }}
+                    {{ item['date-modified']|date:"medium" }}
                 </td>
             </tr>
         </table>

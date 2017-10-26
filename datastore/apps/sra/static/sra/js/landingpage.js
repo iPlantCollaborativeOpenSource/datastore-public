@@ -1,97 +1,7 @@
-if (!Array.prototype.map) {
-    /* polyfill */
-    Array.prototype.map = function(callback, thisArg) {
-
-        var T, A, k;
-
-        if (this == null) {
-            throw new TypeError(" this is null or not defined");
-        }
-
-        // 1. Let O be the result of calling ToObject passing the |this| value as the argument.
-        var O = Object(this);
-
-        // 2. Let lenValue be the result of calling the Get internal method of O with the argument "length".
-        // 3. Let len be ToUint32(lenValue).
-        var len = O.length >>> 0;
-
-        // 4. If IsCallable(callback) is false, throw a TypeError exception.
-        // See: http://es5.github.com/#x9.11
-        if (typeof callback !== "function") {
-            throw new TypeError(callback + " is not a function");
-        }
-
-        // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
-        if (thisArg) {
-            T = thisArg;
-        }
-
-        // 6. Let A be a new array created as if by the expression new Array(len) where Array is
-        // the standard built-in constructor with that name and len is the value of len.
-        A = new Array(len);
-
-        // 7. Let k be 0
-        k = 0;
-
-        // 8. Repeat, while k < len
-        while(k < len) {
-
-            var kValue, mappedValue;
-
-            // a. Let Pk be ToString(k).
-            //   This is implicit for LHS operands of the in operator
-            // b. Let kPresent be the result of calling the HasProperty internal method of O with argument Pk.
-            //   This step can be combined with c
-            // c. If kPresent is true, then
-            if (k in O) {
-
-                // i. Let kValue be the result of calling the Get internal method of O with argument Pk.
-                kValue = O[ k ];
-
-                // ii. Let mappedValue be the result of calling the Call internal method of callback
-                // with T as the this value and argument list containing kValue, k, and O.
-                mappedValue = callback.call(T, kValue, k, O);
-
-                // iii. Call the DefineOwnProperty internal method of A with arguments
-                // Pk, Property Descriptor {Value: mappedValue, : true, Enumerable: true, Configurable: true},
-                // and false.
-
-                // In browsers that support Object.defineProperty, use the following:
-                // Object.defineProperty(A, Pk, { value: mappedValue, writable: true, enumerable: true, configurable: true });
-
-                // For best browser support, use the following:
-                A[ k ] = mappedValue;
-            }
-            // d. Increase k by 1.
-            k++;
-        }
-
-        // 9. return A
-        return A;
-    };
-}
-
 (function(window, angular, $) {
     "use strict";
 
-    function config($httpProvider, $locationProvider) {
-        /* ensure server recognized ajax requests */
-        $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-        /* CSRF support, but we're not doing any posts... */
-        $httpProvider.defaults.xsrfCookieName = 'csrftoken';
-        $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
-
-        /* cache responses by default */
-        $httpProvider.defaults.cache = true;
-
-        $locationProvider.html5Mode(true);
-    }
-
-
-    var app = angular.module('Datastore', ['djng.urls', 'ui.bootstrap', 'ngCookies', 'ngSanitize'])
-        .config(['$httpProvider', '$locationProvider', config]);
-
+    var app = angular.module('Datastore')
 
     app.value('BrushSources', {
         'php': 'shBrushPhp',
@@ -158,9 +68,25 @@ if (!Array.prototype.map) {
                     });
         };
 
-        service.getListItem = function(path, page) {
+        service.getListItem = function(path, page, sortType, sortDir) {
             page = page || 0;
-            return $http.get(djangoUrl.reverse('api_list_item', {'path': path}), {'params': {'page': page}})
+
+            switch(sortType) {
+                case 'label':
+                    sortType = 'NAME';
+                    break;
+                case 'file-size':
+                    sortType = 'SIZE';
+                    break;
+                case 'date-created':
+                    sortType = 'DATECREATED';
+                    break;
+                case 'date-modified':
+                    sortType = 'LASTMODIFIED';
+                    break;
+            }
+
+            return $http.get(djangoUrl.reverse('api_list_item', {'path': path}), {'params': {'page': page, 'sort-col': sortType, 'sort-dir': sortDir}})
                 .then(
                     function (resp) {
                         return resp.data;
@@ -191,50 +117,8 @@ if (!Array.prototype.map) {
 
     }]);
 
-    app.controller('HomeCtrl', ['$scope',function($scope) {
-        var defaultTitle = 'Tip:';
-        var defaultDescription = 'Hover over an option for more information.';
-
-        $scope.data={
-            browseDescriptionTitle: defaultTitle,
-            browseDescription: defaultDescription,
-            publishDescriptionTitle: defaultTitle,
-            publishDescription: defaultDescription,
-        };
-
-        $scope.mouseOver = function(data) {
-            if (data == 'shared') {
-                $scope.data.browseDescriptionTitle = 'Community Released:';
-                $scope.data.browseDescription = "These data are provided by community collaborators for public access. Community Released Data are not curated by the Data Commons and don't have permanent identifiers. Their location and contents may change."
-
-            } else if (data == 'dcr') {
-                $scope.data.browseDescriptionTitle = 'CyVerse Curated:';
-                $scope.data.browseDescription = "All data that have been given a permanent identifier (DOI or ARK) by CyVerse. These data are stable and contents will not change.";
-            } else if (data == 'ncbi-sra') {
-                $scope.data.publishDescriptionTitle = 'NCBI-SRA:';
-                $scope.data.publishDescription = "Instructions on how to publish data to NCBI's Sequence Read Archive via the Data Commons."
-            } else if (data == 'ncbi-wgs') {
-                $scope.data.publishDescriptionTitle = 'NCBI-WGS:';
-                $scope.data.publishDescription = "Instructions on how to publish data to NBCI's Whole Genome Shotgun (WGS) Archive via the Data Commons."
-            } else if (data == 'dcrPublish') {
-                $scope.data.publishDescriptionTitle = 'CyVerse:';
-                $scope.data.publishDescription = "Request a permanent identifier (DOI or ARK) through the Data Commons or request a Community Released Data Folder.";
-            }
-        };
-
-        $scope.mouseLeave = function() {
-            $scope.data={
-                browseDescriptionTitle: defaultTitle,
-                browseDescription: defaultDescription,
-                publishDescriptionTitle: defaultTitle,
-                publishDescription: defaultDescription,
-            };
-        };
-    }]);
-
-
-    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrFileService',
-        function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrFileService) {
+    app.controller('DcrMainCtrl', ['$scope', '$q', '$location', '$cookies', '$anchorScroll', 'TerrainConfig', 'DcrPaths', 'DcrFileService',
+        function($scope, $q, $location, $cookies, $anchorScroll, TerrainConfig, DcrPaths, DcrFileService) {
 
             $scope.config = TerrainConfig;
 
@@ -250,6 +134,14 @@ if (!Array.prototype.map) {
                     item_end: 0
                 }
             };
+
+            $scope.BasePaths={
+                community: DcrPaths.COMMUNITY,
+                curated: DcrPaths.CURATED
+            }
+
+            $scope.sortType     = 'label'; // set the default sort type
+            $scope.sortDir  = 'ASC';  // set the default sort order
 
             $scope.browse = function($event, item, page) {
                 if (item.loading) {
@@ -276,6 +168,7 @@ if (!Array.prototype.map) {
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
                                 $scope.model.metadata = result.metadata
                                 $scope.model.display = {'sortedMetadata': result.sorted_meta}
+                                $scope.model.display['curatedOrCommunity'] = ($scope.model.item.path.startsWith(DcrPaths.CURATED)) ? 'curated' : 'community';
 
                                 if (Object.keys($scope.model.metadata).length) {
                                     $scope.model.display.showMoreButton = 'show more'
@@ -284,12 +177,16 @@ if (!Array.prototype.map) {
                                     if ($scope.model.metadata.Rights.value === 'ODC PDDL') {
                                         $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
-                                        $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
+                                        $scope.model.display.Rights = '<a rel="license" href="https://creativecommons.org/share-your-work/public-domain/cc0/"><img alt="Creative Commons License Badge" style="border-width:0" src="' + window.location.origin + '/static/img/CC0.png"/></a><br />This work is available in the public domain under the <a rel="license" href="https://creativecommons.org/share-your-work/public-domain/cc0/">Creative Commons CC0 agreement</a>.';
+                                    } else if ($scope.model.metadata.Rights.value === 'CC-BY') {
+                                        $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License Badge" style="border-width:0" src="' + window.location.origin + '/static/img/CCBY.png"/></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
+                                    } else {
+                                        $scope.model.display.Rights = $scope.model.metadata.Rights.value
                                     }
 
                                     if ($scope.model.metadata.Version) {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Version.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
-                                    } else {
+                                    } else if ($scope.model.display.curatedOrCommunity ==='curated') {
                                         $scope.model.display.readableCitation = $scope.model.metadata.Creator.value + ' (' + $scope.model.metadata['Publication Year'].value + '). ' + $scope.model.metadata.Title.value + '. ' + $scope.model.metadata.Publisher.value + '. ' + $scope.model.metadata['Identifier Type'].value + ' ' + $scope.model.metadata['Identifier'].value
                                     }
 
@@ -297,10 +194,14 @@ if (!Array.prototype.map) {
                                         'Title',
                                         'Creator',
                                         'Description',
-                                        'Publisher',
-                                        'Publication Year',
-                                        'DOI'
+                                        'Rights'
                                     ]
+
+                                    if ($scope.model.display.curatedOrCommunity ==='curated') {
+                                        $scope.model.display.alreadyDisplayed.push('Publisher', 'Publication Year', 'DOI')
+                                    }
+
+
                                 }
                             })
                         );
@@ -333,10 +234,18 @@ if (!Array.prototype.map) {
                     });
             };
 
-            $scope.getContents = function(path, page) {
-                return DcrFileService.getListItem(path, page).then(
+            $scope.getContents = function(path, page, sortType='label', sortDir='ASC') {
+                return DcrFileService.getListItem(path, page, sortType, sortDir).then(
                     function(results) {
                         $scope.model.collection = results;
+                        angular.forEach(results.folders, function(item){
+                            item['isFolder'] = true;
+                            item['file-size'] = '-'
+                        })
+
+                        // $scope.model.collection['FoldersAndFiles'] = results.folders;
+                        // $scope.model.collection['FoldersAndFiles'] = $scope.model.collection['FoldersAndFiles'].concat(results.files)
+
                         if ($scope.model.collection.total > 0) {
                             var offset = page * TerrainConfig.DIR_PAGE_SIZE;
                             $scope.model.pagination.item_start = offset + 1;
@@ -361,9 +270,41 @@ if (!Array.prototype.map) {
                 );
             };
 
+            $scope.sort = function(sortType) {
+                if ($scope.sortType == sortType) {
+                    $scope.sortDir = $scope.sortDir === 'ASC' ? 'DESC' : 'ASC'
+                } else {
+                    $scope.sortType = sortType;
+                    $scope.sortDir = 'ASC';
+                }
+
+                var load_page = 0;
+                $scope.getContents($scope.model.item.path, load_page, sortType, $scope.sortDir)
+                    .then(function() {
+                        /* scroll to top of listing */
+                        $anchorScroll('directory-contents');
+                        /* update $location */
+                        $location
+                            .state(angular.copy($scope.model))
+                            .search('page', load_page);
+                    });
+            };
+
+            $scope.getSortIcon = function(sortType) {
+                if ($scope.sortType == sortType) {
+                    return $scope.sortDir==='ASC' ? 'glyphicon-chevron-up' : 'glyphicon-chevron-down';
+                }
+            };
+
+            $scope.orderBy = function(property) { //orderBy won't work with properties that have hyphens
+              return function(item) {
+                return item[property];
+              };
+            };
+
             $scope.pageChanged = function() {
                 var load_page = $scope.model.pagination.current - 1;
-                $scope.getContents($scope.model.item.path, load_page)
+                $scope.getContents($scope.model.item.path, load_page, $scope.sortType, $scope.sortDir)
                     .then(function() {
                         /* scroll to top of listing */
                         $anchorScroll('directory-contents');
@@ -428,7 +369,7 @@ if (!Array.prototype.map) {
                     ' author = {' + $scope.model.metadata.Creator.value + '} \n' +
                     ' title = {' + $scope.model.metadata.Title.value + '} \n' +
                     ' publisher = {' + $scope.model.metadata.Publisher.value + '} \n' +
-                    ' year = {' + $scope.model.metadata["Publication Year"].value + '} \n' +
+                    ' year = {' + $scope.model.metadata['Publication Year'].value+ '} \n' +
                     ' note = {' + $scope.model.metadata.Description.value + '} \n' +
                     '}';
                 } else if (style =='Endnote'){
@@ -437,7 +378,7 @@ if (!Array.prototype.map) {
                     '%A ' + $scope.model.metadata.Creator.value + '\n' +
                     '%T ' + $scope.model.metadata.Title.value + '\n' +
                     '%I ' + $scope.model.metadata.Publisher.value + '\n' +
-                    '%D ' + $scope.model.metadata["Publication Year"].value + '\n';
+                    '%D ' + $scope.model.metadata['Publication Year'].value + '\n';
                 }
             }
 
@@ -466,8 +407,8 @@ if (!Array.prototype.map) {
             // Initial load
             var initialPath = $location.path();
             if (initialPath === '/') {
-                initialPath = '/iplant/home/shared';
-                $location.path('/browse/iplant/home/shared');
+                initialPath = DcrPaths.COMMUNITY;
+                $location.path('/browse' + DcrPaths.COMMUNITY);
             }
             else if (initialPath.indexOf('/browse') === 0) {
                 initialPath = initialPath.slice(7);

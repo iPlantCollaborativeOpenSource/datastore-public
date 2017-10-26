@@ -171,13 +171,16 @@ def api_metadata(request, item_id, download=False):
 def api_list_item(request, path):
     path = _check_path(path)
     page = request.GET.get('page', 0)
-    cache_key = '{}:{}:{}'.format(urllib.quote_plus(path), 'list_page', page)
+    sort_col = request.GET.get('sort-col', 'NAME')
+    sort_dir = request.GET.get('sort-dir', 'ASC')
+    cache_key = '{}:{}:{}:sorted:{}-{}'.format(urllib.quote_plus(path), 'list_page', page, sort_col, sort_dir)
     logger.info(cache_key)
     list_resp = cache.get(cache_key)
+
     if list_resp is None:
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
-            list_resp = tc.get_contents(path, page=page)
+            list_resp = tc.get_contents(path, page=page, sort_col=sort_col, sort_dir=sort_dir)
             cache.set(cache_key, list_resp, CACHE_EXPIRATION)
         except HTTPError as e:
             logger.exception('Failed to list contents for path', extra={'path': path})
