@@ -60,8 +60,8 @@
                 });
         };
 
-        service.getItemMetadata = function(itemId, download=false) {
-            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}), {'download': download})
+        service.getItemMetadata = function(itemId) {
+            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}))
                 .then(
                     function (resp) {
                         return resp.data;
@@ -210,7 +210,7 @@
                         $scope.model.collection = null;
                         $scope.model.pagination.show = false;
                         if (item.type === 'dir') {
-                            promises.push($scope.getContents(item.path, page));
+                            promises.push($scope.getContents(item.path, page, 'label', 'ASC'));
                         }
 
                         /* reset preview */
@@ -234,7 +234,7 @@
                     });
             };
 
-            $scope.getContents = function(path, page, sortType='label', sortDir='ASC') {
+            $scope.getContents = function(path, page, sortType, sortDir) {
                 return DcrFileService.getListItem(path, page, sortType, sortDir).then(
                     function(results) {
                         $scope.model.collection = results;
