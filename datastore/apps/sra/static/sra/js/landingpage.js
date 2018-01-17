@@ -140,7 +140,7 @@
                 curated: DcrPaths.CURATED
             }
 
-            $scope.sortType     = 'label'; // set the default sort type
+            $scope.sortType = 'label'; // set the default sort type
             $scope.sortDir  = 'ASC';  // set the default sort order
 
             $scope.browse = function($event, item, page) {
@@ -210,7 +210,7 @@
                         $scope.model.collection = null;
                         $scope.model.pagination.show = false;
                         if (item.type === 'dir') {
-                            promises.push($scope.getContents(item.path, page, 'label', 'ASC'));
+                            promises.push($scope.getContents(item.path, page, $scope.sortType, $scope.sortDir));
                         }
 
                         /* reset preview */
