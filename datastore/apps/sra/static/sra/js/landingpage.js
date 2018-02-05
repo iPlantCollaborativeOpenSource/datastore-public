@@ -175,12 +175,16 @@
                                     $scope.model.display.hasMetadata = true
 
                                     if ($scope.model.metadata.Rights.value === 'ODC PDDL') {
+                                        $scope.model.display.rightsUrl = 'http://www.opendatacommons.org/licenses/pddl/1.0/'
                                         $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
+                                        $scope.model.display.rightsUrl = 'https://creativecommons.org/share-your-work/public-domain/cc0/'
                                         $scope.model.display.Rights = '<a rel="license" href="https://creativecommons.org/share-your-work/public-domain/cc0/"><img alt="Creative Commons License Badge" style="border-width:0" src="' + window.location.origin + '/static/img/CC0.png"/></a><br />This work is available in the public domain under the <a rel="license" href="https://creativecommons.org/share-your-work/public-domain/cc0/">Creative Commons CC0 agreement</a>.';
                                     } else if ($scope.model.metadata.Rights.value === 'CC-BY') {
+                                        $scope.model.display.rightsUrl = 'http://creativecommons.org/licenses/by/4.0/'
                                         $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License Badge" style="border-width:0" src="' + window.location.origin + '/static/img/CCBY.png"/></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
                                     } else {
+                                        $scope.model.display.rightsUrl = $scope.model.metadata.Rights.value
                                         $scope.model.display.Rights = $scope.model.metadata.Rights.value
                                     }
 
@@ -200,6 +204,48 @@
                                     if ($scope.model.display.curatedOrCommunity ==='curated') {
                                         $scope.model.display.alreadyDisplayed.push('Publisher', 'Publication Year', 'DOI')
                                     }
+
+                                    /* create schema.org tags */
+                                    $scope.getValue = function(obj, keypath) {
+                                        var current = obj;
+                                        while (keypath.length) {
+                                            const nextPath = keypath.shift();
+                                            if (!current.hasOwnProperty(nextPath)) {
+                                                return undefined;
+                                            }
+                                            current = current[nextPath];
+                                        }
+                                        return current;
+                                    }
+
+                                    $scope.maybeAssign = function(obj) {
+                                        var objectToAssignTo = obj;
+                                        return function (key, val) {
+                                            if (val == null) return objectToAssignTo;
+                                            objectToAssignTo[key] = val;
+                                        }
+                                    }
+                                    var data = {
+                                      "@context": "http://schema.org",
+                                      "@type": "Dataset",
+                                      "sameAs": window.location.href,
+                                      "includedInDataCatalog": "http://datacommons.cyverse.org/",
+                                    };
+
+                                    var assignTo = $scope.maybeAssign(data);
+                                    assignTo('url', "https://doi.org/" + $scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+                                    assignTo('name', $scope.getValue($scope.model.metadata, ['Title', 'value']))
+                                    assignTo('description', $scope.getValue($scope.model.metadata, ['Description', 'value']))
+                                    assignTo('keywords', $scope.getValue($scope.model.metadata, ['Subject', 'value']))
+                                    assignTo('license', $scope.getValue($scope.model.display, ['rightsUrl']))
+                                    assignTo('identifier', "DOI: " + $scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+                                    assignTo('citation', $scope.getValue($scope.model.display, ['readableCitation']))
+                                    assignTo('creator', $scope.getValue($scope.model.metadata, ['Creator', 'value']))
+                                    assignTo('datePublished', $scope.getValue($scope.model.metadata, ['Publication Year', 'value']))
+                                    assignTo('publisher', $scope.getValue($scope.model.metadata, ['Publisher', 'value']))
+                                    assignTo('contributor', $scope.getValue($scope.model.metadata, ['Contributor', 'value']))
+
+                                    angular.element(document.querySelector('#schemaTags')).html(JSON.stringify(data))
 
 
                                 }
