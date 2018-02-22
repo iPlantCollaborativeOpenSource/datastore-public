@@ -219,11 +219,15 @@
                                     }
 
                                     $scope.maybeAssign = function(obj) {
-                                        var objectToAssignTo = obj;
-                                        return function (key, val) {
-                                            if (val == null) return objectToAssignTo;
-                                            objectToAssignTo[key] = val;
-                                        }
+                                      var objectToAssignTo = obj;
+                                      return function (key, getVal) {
+                                        var val = (typeof getVal === 'function')
+                                            ? getVal()
+                                            : getVal;
+                                        if (val == null) return objectToAssignTo;
+                                        objectToAssignTo[key] = val;
+                                        return objectToAssignTo;
+                                      }
                                     }
                                     var data = {
                                       "@context": "http://schema.org",
@@ -233,16 +237,39 @@
                                     };
 
                                     var assignTo = $scope.maybeAssign(data);
-                                    assignTo('url', "https://doi.org/" + $scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+
+                                    assignTo('url', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+                                          ? 'https://doi.org/' + $scope.model.metadata.Identifier.value
+                                          : null
+                                    })
                                     assignTo('name', $scope.getValue($scope.model.metadata, ['Title', 'value']))
                                     assignTo('description', $scope.getValue($scope.model.metadata, ['Description', 'value']))
                                     assignTo('keywords', $scope.getValue($scope.model.metadata, ['Subject', 'value']))
                                     assignTo('license', $scope.getValue($scope.model.display, ['rightsUrl']))
-                                    assignTo('identifier', "DOI: " + $scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+                                    assignTo('identifier', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+                                        ? 'DOI: ' + $scope.model.metadata.Identifier.value
+                                        : null
+                                    })
                                     assignTo('citation', $scope.getValue($scope.model.display, ['readableCitation']))
-                                    assignTo('creator', $scope.getValue($scope.model.metadata, ['Creator', 'value']))
+                                    assignTo('creator', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Creator', 'value']))
+                                        ? {
+                                          "type": "Person",
+                                          "name": $scope.model.metadata.Creator.value
+                                          }
+                                        : null
+                                    })
                                     assignTo('datePublished', $scope.getValue($scope.model.metadata, ['Publication Year', 'value']))
-                                    assignTo('publisher', $scope.getValue($scope.model.metadata, ['Publisher', 'value']))
+                                    assignTo('publisher', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Publisher', 'value']))
+                                        ? {
+                                          "type": "Organization",
+                                          "name": $scope.model.metadata.Publisher.value
+                                          }
+                                        : null
+                                    })
                                     assignTo('contributor', $scope.getValue($scope.model.metadata, ['Contributor', 'value']))
 
                                     angular.element(document.querySelector('#schemaTags')).html(JSON.stringify(data))
