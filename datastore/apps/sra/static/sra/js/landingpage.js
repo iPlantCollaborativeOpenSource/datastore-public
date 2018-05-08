@@ -60,8 +60,8 @@
                 });
         };
 
-        service.getItemMetadata = function(itemId, download=false) {
-            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}), {'download': download})
+        service.getItemMetadata = function(itemId) {
+            return $http.get(djangoUrl.reverse('api_metadata', {'item_id': itemId}))
                 .then(
                     function (resp) {
                         return resp.data;
@@ -140,7 +140,7 @@
                 curated: DcrPaths.CURATED
             }
 
-            $scope.sortType     = 'label'; // set the default sort type
+            $scope.sortType = 'label'; // set the default sort type
             $scope.sortDir  = 'ASC';  // set the default sort order
 
             $scope.browse = function($event, item, page) {
@@ -175,12 +175,16 @@
                                     $scope.model.display.hasMetadata = true
 
                                     if ($scope.model.metadata.Rights.value === 'ODC PDDL') {
+                                        $scope.model.display.rightsUrl = 'http://www.opendatacommons.org/licenses/pddl/1.0/'
                                         $scope.model.display.Rights = 'This data is made available under the Public Domain Dedication and License v1.0 whose full text can be found at <a href="http://www.opendatacommons.org/licenses/pddl/1.0/"> http://www.opendatacommons.org/licenses/pddl/1.0/ </a>';
                                     } else if ($scope.model.metadata.Rights.value === 'CC0') {
+                                        $scope.model.display.rightsUrl = 'https://creativecommons.org/share-your-work/public-domain/cc0/'
                                         $scope.model.display.Rights = '<a rel="license" href="https://creativecommons.org/share-your-work/public-domain/cc0/"><img alt="Creative Commons License Badge" style="border-width:0" src="' + window.location.origin + '/static/img/CC0.png"/></a><br />This work is available in the public domain under the <a rel="license" href="https://creativecommons.org/share-your-work/public-domain/cc0/">Creative Commons CC0 agreement</a>.';
                                     } else if ($scope.model.metadata.Rights.value === 'CC-BY') {
+                                        $scope.model.display.rightsUrl = 'http://creativecommons.org/licenses/by/4.0/'
                                         $scope.model.display.Rights = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License Badge" style="border-width:0" src="' + window.location.origin + '/static/img/CCBY.png"/></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.';
                                     } else {
+                                        $scope.model.display.rightsUrl = $scope.model.metadata.Rights.value
                                         $scope.model.display.Rights = $scope.model.metadata.Rights.value
                                     }
 
@@ -201,6 +205,75 @@
                                         $scope.model.display.alreadyDisplayed.push('Publisher', 'Publication Year', 'DOI')
                                     }
 
+                                    /* create schema.org tags */
+                                    $scope.getValue = function(obj, keypath) {
+                                        var current = obj;
+                                        while (keypath.length) {
+                                            const nextPath = keypath.shift();
+                                            if (!current.hasOwnProperty(nextPath)) {
+                                                return undefined;
+                                            }
+                                            current = current[nextPath];
+                                        }
+                                        return current;
+                                    }
+
+                                    $scope.maybeAssign = function(obj) {
+                                      var objectToAssignTo = obj;
+                                      return function (key, getVal) {
+                                        var val = (typeof getVal === 'function')
+                                            ? getVal()
+                                            : getVal;
+                                        if (val == null) return objectToAssignTo;
+                                        objectToAssignTo[key] = val;
+                                        return objectToAssignTo;
+                                      }
+                                    }
+                                    var data = {
+                                      "@context": "http://schema.org",
+                                      "@type": "Dataset",
+                                      "sameAs": window.location.href,
+                                      "includedInDataCatalog": "http://datacommons.cyverse.org/",
+                                    };
+
+                                    var assignTo = $scope.maybeAssign(data);
+
+                                    assignTo('url', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+                                          ? 'https://doi.org/' + $scope.model.metadata.Identifier.value
+                                          : null
+                                    })
+                                    assignTo('name', $scope.getValue($scope.model.metadata, ['Title', 'value']))
+                                    assignTo('description', $scope.getValue($scope.model.metadata, ['Description', 'value']))
+                                    assignTo('keywords', $scope.getValue($scope.model.metadata, ['Subject', 'value']))
+                                    assignTo('license', $scope.getValue($scope.model.display, ['rightsUrl']))
+                                    assignTo('identifier', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Identifier', 'value']))
+                                        ? 'DOI: ' + $scope.model.metadata.Identifier.value
+                                        : null
+                                    })
+                                    assignTo('citation', $scope.getValue($scope.model.display, ['readableCitation']))
+                                    assignTo('creator', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Creator', 'value']))
+                                        ? {
+                                          "type": "Person",
+                                          "name": $scope.model.metadata.Creator.value
+                                          }
+                                        : null
+                                    })
+                                    assignTo('datePublished', $scope.getValue($scope.model.metadata, ['Publication Year', 'value']))
+                                    assignTo('publisher', function() {
+                                      return ($scope.getValue($scope.model.metadata, ['Publisher', 'value']))
+                                        ? {
+                                          "type": "Organization",
+                                          "name": $scope.model.metadata.Publisher.value
+                                          }
+                                        : null
+                                    })
+                                    assignTo('contributor', $scope.getValue($scope.model.metadata, ['Contributor', 'value']))
+
+                                    angular.element(document.querySelector('#schemaTags')).html(JSON.stringify(data))
+
 
                                 }
                             })
@@ -210,7 +283,7 @@
                         $scope.model.collection = null;
                         $scope.model.pagination.show = false;
                         if (item.type === 'dir') {
-                            promises.push($scope.getContents(item.path, page));
+                            promises.push($scope.getContents(item.path, page, $scope.sortType, $scope.sortDir));
                         }
 
                         /* reset preview */
@@ -234,7 +307,7 @@
                     });
             };
 
-            $scope.getContents = function(path, page, sortType='label', sortDir='ASC') {
+            $scope.getContents = function(path, page, sortType, sortDir) {
                 return DcrFileService.getListItem(path, page, sortType, sortDir).then(
                     function(results) {
                         $scope.model.collection = results;
