@@ -37,6 +37,12 @@
     </div>
     <p ng-if="model.display.curatedOrCommunity == 'community'" class='italic'> This dataset is not stable or permanent and might change.</p>
 
+    <div ng-if="model.metadata['external_data_link'].value">
+      <a ng-href="{{model.metadata['external_data_link'].value}}" class="btn btn-default">
+          External Data Link
+      </a>
+    </div>
+
     <div class="actions-box">
         <button type="button" class="btn btn-primary" ng-click="metadataToggle()">
             {{model.display.showMoreButton}}
