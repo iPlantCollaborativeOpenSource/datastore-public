@@ -127,17 +127,17 @@ footer .nav > li > a:hover {
     word-wrap: break-word;
 }
 
-#data-commons-icon {
-    height: 50px;
-    margin-left: 5px;
-}
-
 .page-logo-title {
     font-size: 18px;
     padding-right: 15px;
     margin: 0;
     color: #ffffff;
     font-weight:normal;
+}
+
+#data-commons-icon {
+  height: 50px;
+  margin-left: 5px;
 }
 
 #data-commons-heading {
@@ -161,6 +161,10 @@ footer .nav > li > a:hover {
 }
 
 #download-metadata-button {
+    float: right;
+}
+
+#analysis-tool {
     float: right;
 }
 

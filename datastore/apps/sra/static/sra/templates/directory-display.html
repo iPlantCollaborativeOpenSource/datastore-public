@@ -37,10 +37,13 @@
     </div>
     <p ng-if="model.display.curatedOrCommunity == 'community'" class='italic'> This dataset is not stable or permanent and might change.</p>
 
-    <div ng-if="model.metadata['external_data_link'].value">
-      <a ng-href="{{model.metadata['external_data_link'].value}}" class="btn btn-default">
-          External Data Link
-      </a>
+    <div class="actions-box">
+        <a ng-if="model.metadata['external_data_link'].value" ng-href="{{model.metadata['external_data_link'].value}}" class="btn btn-info">
+            External Data Link
+        </a>
+        <a id="analysis-tool" ng-if="model.metadata['analysis_tool'].value" ng-href="{{model.metadata['analysis_tool'].value}}" class="btn btn-info">
+          Analysis tool
+        </a>
     </div>
 
     <div class="actions-box">
