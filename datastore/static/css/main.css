@@ -135,6 +135,10 @@ footer .nav > li > a:hover {
     font-weight:normal;
 }
 
+.btn-primary {
+  background-color: #0971ab;
+}
+
 #data-commons-icon {
   height: 50px;
   margin-left: 5px;
