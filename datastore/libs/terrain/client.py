@@ -87,3 +87,10 @@ class TerrainClient(object):
     def download(self, params):
         url = '{0}/terrain/secured/fileio/download'.format(settings.TERRAIN_API_HOST)
         return self.send_request('GET', url=url, params=params, stream=True)
+
+    def search(self, query):
+        url = '{0}/terrain/secured/filesystem/search'.format(
+            settings.TERRAIN_API_HOST)
+        payload = {'query': query,
+                   'user': 'anonymous'}
+        return self.send_request('POST', url, data=payload).json()
