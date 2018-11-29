@@ -192,7 +192,6 @@
                                 $scope.model.metadata = result.metadata
                                 $scope.model.display = {'sortedMetadata': result.sorted_meta}
                                 $scope.model.display['curatedOrCommunity'] = $scope.getValue($scope.model.metadata, ['Identifier', 'value']) ? 'curated' : 'community';
-                                console.log($scope.model.display['curatedOrCommunity'])
 
                                 if (Object.keys($scope.model.metadata).length) {
                                     $scope.model.display.showMoreButton = 'show more'
