@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load filters %}
+
+{% block content %}
+  <h2>Search results matching: {{search_term}}</h2>
+  <table class="table table-bordered table-striped">
+      <thead>
+          <tr>
+              <th>
+                  <a>
+                      Name
+                  </a>
+              </th>
+              <th>
+                  <a>
+                      Size
+                  </a>
+              </th>
+              <th>
+                  <a>
+                      Created
+                  </a>
+              </th>
+              <th>
+                  <a>
+                      Last Modified
+                  </a>
+              </th>
+          </tr>
+      </thead>
+
+      {% for item in matches %}
+      <tr>
+         <td>
+             <a href="{% url 'browse' path=item.path %}">
+                 {% if item.type == 'folder' %} <i class="fa fa-folder"></i> {% else %} <i class="fa fa-file-o"></i> {% endif %} {{ item.label }}
+             </a>
+         </td>
+         <td> {% if item.type == 'file' %} {{item.filesize|bytes}} {% else %} -- {% endif %} </td>
+         <td>{{item.dateModified|date:"M j, Y g:i:s A"}}</td>
+         <td>{{ item.dateModified|date:"M j, Y g:i:s A"}}</td>
+     </tr>
+     {% endfor %}
+  </table>
+
+{% endblock %}

@@ -166,9 +166,32 @@
                         $scope.model.display = null;
                         promises.push(
                             DcrFileService.getItemMetadata(item.id).then(function (result) {
+                                $scope.getValue = function(obj, keypath) {
+                                    var current = obj;
+                                    while (keypath.length) {
+                                        const nextPath = keypath.shift();
+                                        if (!current.hasOwnProperty(nextPath)) {
+                                            return undefined;
+                                        }
+                                        current = current[nextPath];
+                                    }
+                                    return current;
+                                }
+
+                                $scope.maybeAssign = function(obj) {
+                                  var objectToAssignTo = obj;
+                                  return function (key, getVal) {
+                                    var val = (typeof getVal === 'function')
+                                        ? getVal()
+                                        : getVal;
+                                    if (val == null) return objectToAssignTo;
+                                    objectToAssignTo[key] = val;
+                                    return objectToAssignTo;
+                                  }
+                                }
                                 $scope.model.metadata = result.metadata
                                 $scope.model.display = {'sortedMetadata': result.sorted_meta}
-                                $scope.model.display['curatedOrCommunity'] = ($scope.model.item.path.startsWith(DcrPaths.CURATED)) ? 'curated' : 'community';
+                                $scope.model.display['curatedOrCommunity'] = $scope.getValue($scope.model.metadata, ['Identifier', 'value']) ? 'curated' : 'community';
 
                                 if (Object.keys($scope.model.metadata).length) {
                                     $scope.model.display.showMoreButton = 'show more'
@@ -206,29 +229,7 @@
                                     }
 
                                     /* create schema.org tags */
-                                    $scope.getValue = function(obj, keypath) {
-                                        var current = obj;
-                                        while (keypath.length) {
-                                            const nextPath = keypath.shift();
-                                            if (!current.hasOwnProperty(nextPath)) {
-                                                return undefined;
-                                            }
-                                            current = current[nextPath];
-                                        }
-                                        return current;
-                                    }
 
-                                    $scope.maybeAssign = function(obj) {
-                                      var objectToAssignTo = obj;
-                                      return function (key, getVal) {
-                                        var val = (typeof getVal === 'function')
-                                            ? getVal()
-                                            : getVal;
-                                        if (val == null) return objectToAssignTo;
-                                        objectToAssignTo[key] = val;
-                                        return objectToAssignTo;
-                                      }
-                                    }
                                     var data = {
                                       "@context": "http://schema.org",
                                       "@type": "Dataset",

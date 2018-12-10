@@ -1,4 +1,5 @@
 import copy
+import datetime
 import json
 import logging
 import time
@@ -209,3 +210,62 @@ def download_file_anon(request, path):
         logger.exception('Failed to preview file', extra={'path': path})
         return HttpResponseBadRequest('Failed to preview file',
                                       content_type='application/json')
+
+
+def search(request):
+    search_term = request.GET.get('search_term')
+    query={
+        "all": [
+            {"type": "path",
+            "args": {"prefix": "/iplant/home/shared"}
+            }
+        ],
+        "any": [
+            {"type": "label",
+            "args": {"exact": False, "label": search_term}
+            },
+            {"type": "metadata",
+            "args": {"value": search_term}
+            }
+        ]
+    }
+
+    tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
+    list_resp = tc.search(query)
+    files=[]
+    folders=[]
+    matches=[]
+
+    for item in list_resp['hits']:
+        if item['_type'] == 'file':
+            files.append({
+                'path': item['_source']['path'].lstrip('/'),
+                'label': item['_source']['label'],
+                'filesize': item['_source']['fileSize'],
+                'dateCreated': datetime.datetime.fromtimestamp(item['_source']['dateCreated']/1000.0),
+                'dateModified': datetime.datetime.fromtimestamp(item['_source']['dateModified']/1000.0),
+            })
+            matches.append({
+                'path': item['_source']['path'].lstrip('/'),
+                'label': item['_source']['label'],
+                'filesize': item['_source']['fileSize'],
+                'dateCreated': datetime.datetime.fromtimestamp(item['_source']['dateCreated']/1000.0),
+                'dateModified': datetime.datetime.fromtimestamp(item['_source']['dateModified']/1000.0),
+                'type': item['_type']
+            })
+
+        elif item['_type'] == 'folder':
+            folders.append({
+                'path': item['_source']['path'].lstrip('/'),
+                'label': item['_source']['label'],
+                'dateCreated': datetime.datetime.fromtimestamp(item['_source']['dateCreated']/1000.0),
+                'dateModified': datetime.datetime.fromtimestamp(item['_source']['dateModified']/1000.0),
+            })
+            matches.append({
+                'path': item['_source']['path'].lstrip('/'),
+                'label': item['_source']['label'],
+                'dateCreated': datetime.datetime.fromtimestamp(item['_source']['dateCreated']/1000.0),
+                'dateModified': datetime.datetime.fromtimestamp(item['_source']['dateModified']/1000.0),
+                'type': item['_type']
+            })
+    return render(request, 'sra/search.html',{'folders':folders, 'files':files, 'matches':matches, 'search_term':search_term})

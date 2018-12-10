@@ -20,6 +20,12 @@
           <li><a href="http://www.cyverse.org/data-store">Data Store</a></li>
           <li><a href="http://www.cyverse.org/discovery-environment">Discovery Environment</a></li>
           <li><a href="http://www.cyverse.org/atmosphere">Atmosphere</a></li>
+          <form class="navbar-form navbar-left" action="/search/">
+            <div class="form-group">
+              <input type="text" class="form-control" placeholder="Search" name="search_term">
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
           <li>
             <a href="http://www.cyverse.org" target="_self">
               <img id="cyverse-icon" src="{% static 'img/cyverse_icon_white.png' %}" alt="CyVerse Data Commons">
