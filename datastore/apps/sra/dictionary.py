@@ -22,6 +22,7 @@ data_dictionary = {
     'identifierType': 'Identifier Type',
     'IdentifierType': 'Identifier Type',
     'Identifier': 'Identifier',
+    'identifier': 'Identifier',
     'relatedIdentifierType': 'Related Identifier Type',
     'RelatedIdentifierType': 'Related Identifier Type',
     'RelatedIdentifier': 'Related Identifier',
