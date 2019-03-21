@@ -14,6 +14,7 @@ data_dictionary = {
     'title': 'Title',
     'creator': 'Creator',
     'publicationyear': 'Publication Year',
+    'publicationYear': 'Publication Year',
     'publisher': 'Publisher',
     'resourcetype': 'Resource Type General',
     'Description': 'Description',
