@@ -5,7 +5,7 @@ data_dictionary = {
     'creatorAffiliation': 'Creator Affiliation',
     'contributorType': 'Contributor Type',
     'contributorName': 'Contributor',
-    'contriubtor': 'Contributor',
+    'contributor': 'Contributor',
     'datacite.creator': 'Creator',
     'datacite.publicationyear': 'Publication Year',
     'datacite.publisher': 'Publisher',
