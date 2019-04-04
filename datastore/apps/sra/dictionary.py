@@ -42,7 +42,8 @@ data_dictionary = {
     'size': 'Size',
     'Subject': 'Subject',
     'subject': 'Subject',
-    'Version': 'Version'
+    'Version': 'Version',
+    'version': 'Version',
 }
 
 metadata_order = [
