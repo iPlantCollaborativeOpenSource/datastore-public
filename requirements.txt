@@ -7,7 +7,7 @@ Markdown==2.6.2
 prettytable==0.7.2
 PyJWT==1.4.1
 python-memcached==1.57
-requests==2.8.1
+requests==2.20.0
 six==1.10.0
 slimit
 supervisor==3.0b2
