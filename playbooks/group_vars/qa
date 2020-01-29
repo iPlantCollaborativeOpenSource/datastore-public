@@ -8,7 +8,7 @@ irods_path: /iplant/home/shared
 irods_user: anonymous
 irods_password:
 
-terrain_api_host: https://everdene.iplantcollaborative.org
+terrain_api_host: https://de.cyverse.org
 terrain_api_key_path: /etc/ssl/terrain_api/terrain_api_key.pem
 
 anon_files_api_host: https://de.cyverse.org/anon-files

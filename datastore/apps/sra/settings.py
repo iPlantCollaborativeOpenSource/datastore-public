@@ -17,6 +17,6 @@ datastore = {
 }
 
 # DE API JWWT
-DE_API_HOST = os.getenv('DE_API_HOST', 'https://everdene.iplantcollaborative.org')
+DE_API_HOST = os.getenv('DE_API_HOST', 'https://de.cyverse.org')
 DE_API_KEY_PATH = os.getenv('DE_API_KEY_PATH', 'de-api-key.pem')
 DE_API_KEY_PASSPHRASE = os.getenv('DE_API_KEY_PASSPHRASE', 'changeit')
