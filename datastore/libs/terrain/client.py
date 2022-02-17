@@ -45,7 +45,9 @@ class TerrainClient(object):
 
     def send_request(self, method, url, **kwargs):
         headers = kwargs.pop('headers', {})
-        headers['X-Iplant-De-Jwt'] = self.jwt_token
+        anonymous = kwargs.pop('anonymous', False)
+        if not anonymous:
+            headers['X-Iplant-De-Jwt'] = self.jwt_token
         data = kwargs.pop('data', None)
         if data:
             headers['Content-Type'] = 'application/json'
@@ -89,8 +91,6 @@ class TerrainClient(object):
         return self.send_request('GET', url=url, params=params, stream=True)
 
     def search(self, query):
-        url = '{0}/terrain/secured/filesystem/search'.format(
-            settings.TERRAIN_API_HOST)
-        payload = {'query': query,
-                   'user': 'anonymous'}
-        return self.send_request('POST', url, data=payload).json()
+        url = '{0}/terrain/filesystem/search'.format(settings.TERRAIN_API_HOST)
+        payload = {'query': query}
+        return self.send_request('POST', url, data=payload, anonymous=True).json()
