@@ -79,13 +79,16 @@ def legacy_redirect(request, path=''):
 
 def api_stat(request, path):
     cache_key = '{}:{}'.format(urllib.quote_plus(path), 'stat')
-    path_stat = cache.get(cache_key)
+    path_stat = None
+    if len(cache_key) < 250:
+        path_stat = cache.get(cache_key)
     if path_stat is None:
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
             path_stat = tc.get_file_or_folder(path)
             path_stat = path_stat['paths'][path]
-            cache.set(cache_key, path_stat, CACHE_EXPIRATION)
+            if len(cache_key) < 250:
+                cache.set(cache_key, path_stat, CACHE_EXPIRATION)
         except HTTPError as e:
             logger.exception('Failed to stat path', extra={'path': path})
             return HttpResponseBadRequest('Failed to stat path',
@@ -95,7 +98,9 @@ def api_stat(request, path):
 
 def api_metadata(request, item_id, download=False):
     cache_key = '{}:{}'.format(item_id, 'metadata')
-    result = cache.get(cache_key)
+    result = None
+    if len(cache_key) < 250:
+        result = cache.get(cache_key)
 
     if result is None:
         try:
@@ -160,7 +165,8 @@ def api_metadata(request, item_id, download=False):
                 sorted_meta.append({'key':readable_meta[others]['label'], 'value':readable_meta[others]['value']})
 
             result = {'sorted_meta': sorted_meta, 'metadata': readable_meta}
-            cache.set(cache_key, result, CACHE_EXPIRATION)
+            if len(cache_key) < 250:
+                cache.set(cache_key, result, CACHE_EXPIRATION)
 
         except HTTPError as e:
             logger.exception('Failed to retrieve metadata', extra={'id': item_id})
@@ -176,13 +182,16 @@ def api_list_item(request, path):
     sort_dir = request.GET.get('sort-dir', 'ASC')
     cache_key = '{}:{}:{}:sorted:{}-{}'.format(urllib.quote_plus(path), 'list_page', page, sort_col, sort_dir)
     logger.info(cache_key)
-    list_resp = cache.get(cache_key)
+    list_resp = None
+    if len(cache_key) < 250:
+        list_resp = cache.get(cache_key)
 
     if list_resp is None:
         try:
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
             list_resp = tc.get_contents(path, page=page, sort_col=sort_col, sort_dir=sort_dir)
-            cache.set(cache_key, list_resp, CACHE_EXPIRATION)
+            if len(cache_key) < 250:
+                cache.set(cache_key, list_resp, CACHE_EXPIRATION)
         except HTTPError as e:
             logger.exception('Failed to list contents for path', extra={'path': path})
             return HttpResponseBadRequest('Failed to list contents',
