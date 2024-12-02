@@ -1,6 +1,6 @@
 ipdb
 cryptography==1.1
-Django==1.8.3
+Django==2.2.24
 django-pipeline
 django-angular==0.8.2
 Markdown==2.6.2
