@@ -1,5 +1,5 @@
 ipdb
-cryptography==1.1
+cryptography==39.0.1
 Django==1.8.3
 django-pipeline
 django-angular==0.8.2
