@@ -7,7 +7,7 @@ import urllib
 import jwt
 import markdown
 import requests
-from requests import HTTPError
+from requests import RequestException
 from os.path import splitext
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, StreamingHttpResponse
@@ -71,7 +71,7 @@ def legacy_redirect(request, path=''):
                 return HttpResponseRedirect('/browse/' + path)
             elif path_stat['type'] == 'file':
                 return HttpResponseRedirect('/download/' + path)
-    except HTTPError as e:
+    except RequestException as e:
         logger.exception('Failed to stat path', extra={'path': path})
         return HttpResponseBadRequest('Failed to stat path',
                                       content_type='application/json')
@@ -86,7 +86,7 @@ def api_stat(request, path):
             path_stat = tc.get_file_or_folder(path)
             path_stat = path_stat['paths'][path]
             cache.set(cache_key, path_stat, CACHE_EXPIRATION)
-        except HTTPError as e:
+        except RequestException as e:
             logger.exception('Failed to stat path', extra={'path': path})
             return HttpResponseBadRequest('Failed to stat path',
                                           content_type='application/json')
@@ -162,7 +162,7 @@ def api_metadata(request, item_id, download=False):
             result = {'sorted_meta': sorted_meta, 'metadata': readable_meta}
             cache.set(cache_key, result, CACHE_EXPIRATION)
 
-        except HTTPError as e:
+        except RequestException as e:
             logger.exception('Failed to retrieve metadata', extra={'id': item_id})
             return HttpResponseBadRequest('Failed to retrieve metadata',
                                           content_type='application/json')
@@ -183,7 +183,7 @@ def api_list_item(request, path):
             tc = TerrainClient('anonymous', 'anonymous@cyverse.org')
             list_resp = tc.get_contents(path, page=page, sort_col=sort_col, sort_dir=sort_dir)
             cache.set(cache_key, list_resp, CACHE_EXPIRATION)
-        except HTTPError as e:
+        except RequestException as e:
             logger.exception('Failed to list contents for path', extra={'path': path})
             return HttpResponseBadRequest('Failed to list contents',
                                           content_type='application/json')
@@ -195,7 +195,7 @@ def api_preview_file(request, path):
         af = AnonFilesClient()
         response = af.download(path, stream=True, headers={'Range': 'bytes=0-8192'})
         return StreamingHttpResponse(response.content)
-    except HTTPError as e:
+    except RequestException as e:
         logger.exception('Failed to preview file', extra={'path': path})
         return HttpResponseBadRequest('Failed to preview file',
                                       content_type='application/json')
@@ -206,7 +206,7 @@ def download_file_anon(request, path):
         af = AnonFilesClient()
         redirect_url = af.download_url(path)
         return HttpResponseRedirect(redirect_to=redirect_url)
-    except HTTPError as e:
+    except RequestException as e:
         logger.exception('Failed to preview file', extra={'path': path})
         return HttpResponseBadRequest('Failed to preview file',
                                       content_type='application/json')
