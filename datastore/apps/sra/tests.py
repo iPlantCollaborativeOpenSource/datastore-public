@@ -9,7 +9,8 @@ import mock
 from django.test import SimpleTestCase, override_settings
 
 from datastore.apps.sra import dc_redirects
-from datastore.apps.sra.management.commands.build_dc_redirects import Command
+from datastore.apps.sra.management.commands.build_dc_redirects import (
+    Command, avus_to_dict, candidate_names, get_name_from_title, get_title, resource_folder)
 
 ORG = 'https://dc.cyverse.org/organization/cyverse'
 DS = 'https://dc.cyverse.org/dataset/'
@@ -158,13 +159,49 @@ class BrowseViewTests(RedirectMapTestCase):
         self.assertEqual(resp['Location'], 'https://data.cyverse.org/dav-anon/x')
 
 
-def _dataset(name, resource_paths=(), extras=()):
-    prefix = 'https://data.cyverse.org/dav-anon' + CURATED + '/'
-    return {
-        'name': name,
-        'resources': [{'id': '%s-%d' % (name, i), 'url': prefix + p} for i, p in enumerate(resource_paths)],
-        'extras': [{'key': k, 'value': v} for k, v in extras],
-    }
+def _avus(**attrs):
+    out = []
+    for key, value in attrs.items():
+        for v in (value if isinstance(value, list) else [value]):
+            out.append({'attr': key.replace('__', '.'), 'value': v})
+    return {'avus': out, 'irods-avus': [{'attr': 'title', 'value': 'ignored, kando only reads avus'}]}
+
+
+def _dataset(name, resource_names=()):
+    return {'name': name, 'resources': [{'id': '%s-%d' % (name, i), 'name': r}
+                                        for i, r in enumerate(resource_names)]}
+
+
+class TitleRuleTests(SimpleTestCase):
+    """Same results as kando/sync/mapping.py in cyverse/data-commons."""
+
+    def test_name_from_title(self):
+        self.assertEqual(get_name_from_title(u'Barrow Viromes 2019'), u'barrow_viromes_2019')
+        self.assertEqual(get_name_from_title(u'B73 RefGen_v4 (CEN) - 10.6 Mb!'), u'b73_refgen_v4_cen_-_106_mb')
+        self.assertEqual(len(get_name_from_title(u'x' * 150)), 100)
+
+    def test_title_is_stripped_and_tabs_removed(self):
+        self.assertEqual(get_title({'title': u' Maize\tSyn10 '}, 'F'), u'MaizeSyn10')
+
+    def test_last_title_key_wins(self):
+        self.assertEqual(get_title({'title': u'a', 'Title': u'b', 'datacite.title': u'c'}, 'F'), u'c')
+        self.assertEqual(get_title({'title': u'a', 'Title': u'b'}, 'F'), u'b')
+
+    def test_multi_valued_title(self):
+        self.assertEqual(get_title({'title': [u'Part one', u'Part two']}, 'F'), u'Part one, Part two')
+
+    def test_missing_title_uses_folder_name(self):
+        self.assertEqual(candidate_names({}, u'Some_Folder')[0], u'some_folder')
+
+    def test_collision_name(self):
+        self.assertEqual(candidate_names({'title': u'Data', 'identifier': u'10.7946/P2PK96'}, u'F')[1],
+                         u'data_10-7946-P2PK96')
+        self.assertEqual(candidate_names({'title': u'Data'}, u'A_Long_Folder_Name_2020')[1],
+                         u'data_A_Long_Folder_Name_')
+
+    def test_avus_to_dict_collects_multi_values(self):
+        self.assertEqual(avus_to_dict(_avus(title=u'T', subject=[u'a', u'b'])['avus']),
+                         {'title': u'T', 'subject': [u'a', u'b']})
 
 
 class BuildMapTests(SimpleTestCase):
@@ -173,43 +210,49 @@ class BuildMapTests(SimpleTestCase):
         self.cmd = Command()
         self.cmd.stderr = mock.Mock()
 
-    def test_match_by_resources(self):
-        datasets = [
-            _dataset('a', ['FolderA/one.txt', 'FolderA/sub', 'FolderA2/x']),
-            _dataset('b', ['Folder%20B/data file.csv', 'Folder C /c.txt']),
-            _dataset('logo'),
-        ]
-        mapping, ambiguous = self.cmd.match_by_resources(datasets)
-        self.assertEqual(mapping['FolderA'], {'dataset': 'a', 'resources': {'one.txt': 'a-0', 'sub': 'a-1'}})
-        self.assertEqual(mapping['FolderA2']['dataset'], 'a')
-        self.assertEqual(mapping['Folder B'], {'dataset': 'b', 'resources': {'data file.csv': 'b-0'}})
-        self.assertEqual(mapping['Folder C'], {'dataset': 'b', 'resources': {'c.txt': 'b-1'}})
-        self.assertEqual(ambiguous, set())
-
-    def test_folder_claimed_by_two_datasets_is_skipped(self):
-        mapping, ambiguous = self.cmd.match_by_resources([
-            _dataset('a', ['Shared/x']), _dataset('b', ['Shared/y'])])
-        self.assertNotIn('Shared', mapping)
-        self.assertEqual(ambiguous, {'Shared'})
-
-    def test_match_by_doi_ignores_related_identifiers(self):
-        datasets = [
-            _dataset('barrow_viromes', extras=[('Citation', 'Zhong 2018. Barrow Viromes. DOI 10.7946/P2PK96')]),
-            _dataset('barrow_viromes_2019', extras=[
-                ('Citation', 'Zhong 2019. DOI 10.25739/0e7n-6611'),
-                ('relatedIdentifier', '10.7946/P2PK96')]),
-        ]
-        metadata = {
-            'id-2018': {'avus': [{'attr': 'Identifier', 'value': '10.7946/P2PK96'}], 'irods-avus': []},
-            'id-2019': {'avus': [{'attr': 'identifier', 'value': '10.25739/0e7n-6611'},
-                                 {'attr': 'relatedIdentifier', 'value': '10.7946/P2PK96'}], 'irods-avus': []},
-            'id-none': {'avus': [], 'irods-avus': []},
-        }
+    def build(self, metadata, datasets):
         self.cmd.terrain_anonymous = lambda method, endpoint, **kw: metadata[endpoint.split('/')[0]]
-        mapping = {}
-        matched = self.cmd.match_by_doi(
-            datasets, {'Zhong_Barrow_Viromes_2018': 'id-2018', 'Zhong_Barrow_2019': 'id-2019',
-                       'Unmigrated': 'id-none'}, mapping, set())
-        self.assertEqual(matched, {'Zhong_Barrow_Viromes_2018': 'barrow_viromes',
-                                   'Zhong_Barrow_2019': 'barrow_viromes_2019'})
-        self.assertNotIn('Unmigrated', mapping)
+        folders = dict((name, name) for name in metadata)
+        return self.cmd.build_mapping(folders, dict((d['name'], d) for d in datasets))
+
+    def test_maps_by_title_with_resource_ids(self):
+        mapping, unmatched, shared = self.build(
+            {'Zhong_Barrow_2019': _avus(title=u'Barrow Viromes 2019')},
+            [_dataset('barrow_viromes_2019', ['README.txt', 'viromes'])])
+        self.assertEqual(mapping, {'Zhong_Barrow_2019': {
+            'dataset': 'barrow_viromes_2019',
+            'resources': {'README.txt': 'barrow_viromes_2019-0', 'viromes': 'barrow_viromes_2019-1'}}})
+        self.assertEqual((unmatched, shared), ([], {}))
+
+    def test_uses_collision_name_when_plain_name_is_absent(self):
+        mapping, _, _ = self.build({'F': _avus(title=u'Data', identifier=u'10.1/abc')}, [_dataset('data_10-1-abc')])
+        self.assertEqual(mapping['F']['dataset'], 'data_10-1-abc')
+
+    def test_name_must_exist_on_dc(self):
+        mapping, unmatched, _ = self.build({'New_2026': _avus(title=u'Not synced yet')}, [_dataset('other')])
+        self.assertEqual(mapping, {})
+        self.assertEqual(unmatched, ['New_2026'])
+
+    def test_deprecated_folders_are_skipped(self):
+        mapping, unmatched, _ = self.build({'_deprecated_X': _avus(title=u'X')}, [_dataset('x')])
+        self.assertEqual(mapping, {})
+        self.assertEqual(unmatched, ['_deprecated_X'])
+
+    def test_folders_with_the_same_title_share_one_dataset(self):
+        dav = 'https://data.cyverse.org/dav-anon' + CURATED + '/'
+        dataset = {'name': 'same', 'resources': [
+            {'id': 'r1', 'name': 'data', 'url': dav + 'V1_July/data'},
+            {'id': 'r2', 'name': 'README', 'url': dav + 'V1_July/README'},
+            {'id': 'r3', 'name': 'new_in_v2', 'url': dav + 'V2_Aug/new_in_v2'},
+        ]}
+        mapping, _, shared = self.build(
+            {'V1_July': _avus(title=u'Same'), 'V2_Aug': _avus(Title=u'Same ')}, [dataset])
+        self.assertEqual(mapping['V1_July'], {'dataset': 'same', 'resources': {'data': 'r1', 'README': 'r2'}})
+        # V2's own "data" was never added to the dataset, so it must not point at V1's.
+        self.assertEqual(mapping['V2_Aug'], {'dataset': 'same', 'resources': {'new_in_v2': 'r3'}})
+        self.assertEqual(shared, {'same': ['V1_July', 'V2_Aug']})
+
+    def test_resource_folder_ignores_stray_whitespace(self):
+        url = 'https://data.cyverse.org/dav-anon' + CURATED + '/G2F_2018 /README.txt'
+        self.assertEqual(resource_folder({'url': url}), u'G2F_2018')
+        self.assertIsNone(resource_folder({'url': 'https://dc.cyverse.org/x.png'}))
