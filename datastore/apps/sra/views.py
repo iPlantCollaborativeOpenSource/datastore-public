@@ -237,7 +237,7 @@ def search(request):
     matches=[]
 
     for item in list_resp['hits']:
-        if item['_type'] == 'file':
+        if item['_source']['doc_type'] == 'file':
             files.append({
                 'path': item['_source']['path'].lstrip('/'),
                 'label': item['_source']['label'],
@@ -251,10 +251,10 @@ def search(request):
                 'filesize': item['_source']['fileSize'],
                 'dateCreated': datetime.datetime.fromtimestamp(item['_source']['dateCreated']/1000.0),
                 'dateModified': datetime.datetime.fromtimestamp(item['_source']['dateModified']/1000.0),
-                'type': item['_type']
+                'type': item['_source']['doc_type']
             })
 
-        elif item['_type'] == 'folder':
+        elif item['_source']['doc_type'] == 'folder':
             folders.append({
                 'path': item['_source']['path'].lstrip('/'),
                 'label': item['_source']['label'],
@@ -266,6 +266,6 @@ def search(request):
                 'label': item['_source']['label'],
                 'dateCreated': datetime.datetime.fromtimestamp(item['_source']['dateCreated']/1000.0),
                 'dateModified': datetime.datetime.fromtimestamp(item['_source']['dateModified']/1000.0),
-                'type': item['_type']
+                'type': item['_source']['doc_type']
             })
     return render(request, 'sra/search.html',{'folders':folders, 'files':files, 'matches':matches, 'search_term':search_term})
