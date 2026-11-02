@@ -155,7 +155,9 @@ if (!String.prototype.startsWith) {
 
     app.value('DcrPaths', {
         'CURATED': '/iplant/home/shared/commons_repo/curated',
-        'COMMUNITY': '/iplant/home/shared'
+        'COMMUNITY': '/iplant/home/shared',
+        /* migrated to dc.cyverse.org; the server decides where each path goes */
+        'COMMONS_REPO': '/iplant/home/shared/commons_repo'
     });
 
 })(window, angular);

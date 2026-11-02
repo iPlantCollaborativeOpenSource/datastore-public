@@ -11,10 +11,11 @@ from requests import RequestException
 from os.path import splitext
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, StreamingHttpResponse
-from django.http import JsonResponse
+from django.http import HttpResponsePermanentRedirect, JsonResponse
 from django.shortcuts import render
 from datastore.libs.terrain.client import TerrainClient
 from datastore.libs.anon_files.client import AnonFilesClient
+from datastore.apps.sra import dc_redirects
 import settings as sra_settings
 from datastore.apps.sra.dictionary import data_dictionary, metadata_order
 
@@ -31,11 +32,21 @@ def _check_path(path):
     return path
 
 
+def _dc_redirect(path):
+    """Redirect to dc.cyverse.org if this path has been migrated there."""
+    target = dc_redirects.resolve(path)
+    if target is None:
+        return None
+    if dc_redirects.PERMANENT:
+        return HttpResponsePermanentRedirect(target)
+    return HttpResponseRedirect(target)
+
+
 def home(request, **kwargs):
     return render(request, 'sra/home.html')
 
-def landing_page(request, **kwargs):
-    return render(request, 'sra/landing.html')
+def landing_page(request, path='', **kwargs):
+    return _dc_redirect(path) or render(request, 'sra/landing.html')
 
 def legacy_redirect(request, path=''):
     """

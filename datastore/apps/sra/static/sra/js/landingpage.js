@@ -150,6 +150,16 @@
 
                 if ($event) {
                     $event.preventDefault();
+
+                    /* Curated data has moved to dc.cyverse.org. Load these paths as a
+                     * full page so the server can redirect them; folders that haven't
+                     * migrated yet are served here as before. Only for clicks, so the
+                     * initial load of a non-redirected page doesn't loop. */
+                    var path = item.path || '';
+                    if (path === DcrPaths.COMMONS_REPO || path.indexOf(DcrPaths.COMMONS_REPO + '/') === 0) {
+                        window.location.assign('/browse' + path);
+                        return;
+                    }
                 }
 
                 page = page || 0;
