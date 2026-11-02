@@ -1,175 +1,123 @@
 # -*- coding: utf-8 -*-
 import json
-import os
-import shutil
-import tempfile
-import time
 
 import mock
+import requests
+from django.core.cache import cache
 from django.test import SimpleTestCase, override_settings
 
 from datastore.apps.sra import dc_redirects
-from datastore.apps.sra.management.commands.build_dc_redirects import (
-    Command, avus_to_dict, candidate_names, get_name_from_title, get_title, resource_folder)
+from datastore.apps.sra.dc_redirects import (
+    avus_to_dict, candidate_names, get_name_from_title, get_title, resource_folder)
 
 ORG = 'https://dc.cyverse.org/organization/cyverse'
 DS = 'https://dc.cyverse.org/dataset/'
 CURATED = '/iplant/home/shared/commons_repo/curated'
-
-MAP = {
-    'datasets': {
-        'Alcock_leafPhenotypingImages_2016': {
-            'dataset': 'alcock_leaf_phenotyping',
-            'resources': {'images': 'res-images', 'README.txt': 'res-readme'},
-        },
-        'Zhong_Barrow_2019': {'dataset': 'barrow_viromes_2019', 'resources': {}},
-        u'Café_2020': {'dataset': 'cafe_2020', 'resources': {u'données': 'res-donnees'}},
-    }
-}
+DAV = 'https://data.cyverse.org/dav-anon' + CURATED + '/'
 
 
-class RedirectMapTestCase(SimpleTestCase):
+class FakeResponse(object):
 
-    def setUp(self):
-        self.tmp = tempfile.mkdtemp()
-        self.map_path = os.path.join(self.tmp, 'dc_redirects.json')
-        self.write_map(MAP)
-        patches = [
-            mock.patch.object(dc_redirects, 'MAP_PATH', self.map_path),
-            mock.patch.object(dc_redirects, 'ENABLED', True),
-            mock.patch.object(dc_redirects, 'PERMANENT', False),
-            mock.patch.dict(dc_redirects._loaded, {'mtime': None, 'datasets': {}}),
-        ]
-        for p in patches:
-            p.start()
-            self.addCleanup(p.stop)
-        self.addCleanup(shutil.rmtree, self.tmp)
+    def __init__(self, status_code, body):
+        self.status_code = status_code
+        self._body = body
 
-    def write_map(self, data, mtime=None):
-        with open(self.map_path, 'w') as f:
-            json.dump(data, f)
-        if mtime is not None:
-            os.utime(self.map_path, (mtime, mtime))
+    def json(self):
+        return json.loads(json.dumps(self._body))
 
 
-class ResolveTests(RedirectMapTestCase):
+class FakeAPIs(object):
+    """Terrain's anonymous filesystem endpoints and CKAN's package_show."""
 
-    def test_commons_repo_and_curated_go_to_organization(self):
-        for path in ('/iplant/home/shared/commons_repo', '/iplant/home/shared/commons_repo/',
-                     CURATED, CURATED + '/', 'iplant/home/shared/commons_repo/curated',
-                     '/iplant/home/shared/commons_repo/something_else'):
-            self.assertEqual(dc_redirects.resolve(path), ORG, path)
+    def __init__(self):
+        self.folders = {}   # folder name -> list of AVUs
+        self.datasets = {}  # dataset name -> CKAN dataset
+        self.calls = 0
+        self.down = False
 
-    def test_dataset_folder(self):
-        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016'),
-                         DS + 'alcock_leaf_phenotyping')
+    def folder(self, name, **attrs):
+        avus = []
+        for key, value in attrs.items():
+            for v in (value if isinstance(value, list) else [value]):
+                avus.append({'attr': key, 'value': v})
+        self.folders[name] = avus
 
-    def test_first_level_child(self):
-        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/README.txt'),
-                         DS + 'alcock_leaf_phenotyping/resource/res-readme')
+    def dataset(self, name, *resources):
+        """resources: (resource name, folder it was synced from) pairs."""
+        self.datasets[name] = {'name': name, 'resources': [
+            {'id': '%s-%d' % (name, i), 'name': r, 'url': DAV + folder + '/' + r}
+            for i, (r, folder) in enumerate(resources)]}
 
-    def test_deep_path_goes_to_first_level_child(self):
-        self.assertEqual(
-            dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/images/plot3/day7/leaf.png'),
-            DS + 'alcock_leaf_phenotyping/resource/res-images')
+    def add_resource(self, dataset, name, url):
+        resources = self.datasets[dataset]['resources']
+        resources.append({'id': '%s-%d' % (dataset, len(resources)), 'name': name, 'url': url})
 
-    def test_unknown_child_falls_back_to_dataset(self):
-        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/gone/deeper'),
-                         DS + 'alcock_leaf_phenotyping')
+    def request(self, method, url, **kwargs):
+        self.calls += 1
+        if self.down:
+            raise requests.ConnectionError('down')
+        endpoint = url.split('/terrain/filesystem/')[1]
+        if endpoint == 'stat':
+            path = kwargs['json']['paths'][0]
+            name = path[len(CURATED) + 1:]
+            if name not in self.folders:
+                return FakeResponse(500, {'error_code': 'ERR_DOES_NOT_EXIST', 'paths': [path]})
+            return FakeResponse(200, {'paths': {path: {'id': 'id:' + name, 'type': 'dir', 'path': path}}})
+        name = endpoint[len('id:'):-len('/metadata')]
+        return FakeResponse(200, {'avus': self.folders[name],
+                                  'irods-avus': [{'attr': 'title', 'value': 'kando only reads avus'}]})
 
-    def test_dataset_without_resources(self):
-        self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019/viromes/a.fa'),
-                         DS + 'barrow_viromes_2019')
-
-    def test_unmigrated_folder_is_not_redirected(self):
-        self.assertIsNone(dc_redirects.resolve(CURATED + '/Not_Migrated_Yet'))
-        self.assertIsNone(dc_redirects.resolve(CURATED + '/Not_Migrated_Yet/a/b'))
-
-    def test_paths_outside_commons_repo_are_not_redirected(self):
-        for path in ('/iplant/home/shared', '/iplant/home/shared/TCIA/4D-Lung',
-                     '/iplant/home/shared/commons_repository'):
-            self.assertIsNone(dc_redirects.resolve(path), path)
-
-    def test_double_slashes(self):
-        self.assertEqual(dc_redirects.resolve('//iplant/home/shared/commons_repo//curated/Zhong_Barrow_2019/'),
-                         DS + 'barrow_viromes_2019')
-
-    def test_unicode_names(self):
-        self.assertEqual(dc_redirects.resolve(CURATED + u'/Café_2020/données/x'),
-                         DS + 'cafe_2020/resource/res-donnees')
-
-    def test_disabled(self):
-        with mock.patch.object(dc_redirects, 'ENABLED', False):
-            self.assertIsNone(dc_redirects.resolve(CURATED))
-
-    def test_map_reloads_when_file_changes(self):
-        self.assertIsNone(dc_redirects.resolve(CURATED + '/New_2026'))
-        updated = {'datasets': dict(MAP['datasets'], New_2026={'dataset': 'new_2026', 'resources': {}})}
-        self.write_map(updated, mtime=time.time() + 10)
-        self.assertEqual(dc_redirects.resolve(CURATED + '/New_2026'), DS + 'new_2026')
-
-    def test_bad_map_keeps_last_good_copy(self):
-        dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019')
-        with open(self.map_path, 'w') as f:
-            f.write('{not json')
-        os.utime(self.map_path, (time.time() + 10, time.time() + 10))
-        self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'), DS + 'barrow_viromes_2019')
-
-    def test_missing_map_redirects_only_the_top_level(self):
-        os.remove(self.map_path)
-        self.assertEqual(dc_redirects.resolve(CURATED), ORG)
-        self.assertIsNone(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'))
+    def get(self, url, params=None, **kwargs):
+        self.calls += 1
+        if self.down:
+            raise requests.ConnectionError('down')
+        action = url.rsplit('/', 1)[1]
+        if action == 'package_search':
+            assert params['fl'] == 'id,name', 'must not fetch whole datasets'
+            name = params['fq'][len('name:"'):-1]
+            results = [{'id': 'id-' + name, 'name': name}] if name in self.datasets else []
+            return FakeResponse(200, {'success': True, 'result': {'count': len(results), 'results': results}})
+        if action == 'resource_search':
+            # CKAN matches each "field:value" term as a case-insensitive substring.
+            terms = params['query'] if isinstance(params['query'], list) else [params['query']]
+            hits = []
+            for name, dataset in self.datasets.items():
+                for r in dataset['resources']:
+                    r = dict(r, package_id='id-' + name)
+                    if all(t.split(':', 1)[1].lower() in r[t.split(':', 1)[0]].lower() for t in terms):
+                        hits.append(r)
+            hits.sort(key=lambda r: r['name'])
+            return FakeResponse(200, {'success': True, 'result': {'count': len(hits), 'results': hits[:params['limit']]}})
+        raise AssertionError('unexpected CKAN action %s' % action)
 
 
 @override_settings(
     STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage',
     CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}},
 )
-class BrowseViewTests(RedirectMapTestCase):
+class RedirectTestCase(SimpleTestCase):
 
-    def test_curated_redirects(self):
-        resp = self.client.get('/browse' + CURATED)
-        self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp['Location'], ORG)
-
-    def test_deep_path_redirects_to_resource(self):
-        resp = self.client.get('/browse' + CURATED + '/Alcock_leafPhenotypingImages_2016/images/plot3/')
-        self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp['Location'], DS + 'alcock_leaf_phenotyping/resource/res-images')
-
-    def test_encoded_path(self):
-        resp = self.client.get('/browse/iplant/home/shared/commons_repo/curated/Caf%C3%A9_2020/donn%C3%A9es')
-        self.assertEqual(resp['Location'], DS + 'cafe_2020/resource/res-donnees')
-
-    def test_permanent(self):
-        with mock.patch.object(dc_redirects, 'PERMANENT', True):
-            resp = self.client.get('/browse' + CURATED)
-        self.assertEqual(resp.status_code, 301)
-
-    def test_unmigrated_and_community_pages_still_render(self):
-        for path in (CURATED + '/Not_Migrated_Yet/sub', '/iplant/home/shared', '/iplant/home/shared/TCIA'):
-            resp = self.client.get('/browse' + path)
-            self.assertEqual(resp.status_code, 200, path)
-            self.assertContains(resp, 'DcrMainCtrl')
-
-    def test_downloads_are_not_redirected(self):
-        with mock.patch('datastore.apps.sra.views.AnonFilesClient') as client:
-            client.return_value.download_url.return_value = 'https://data.cyverse.org/dav-anon/x'
-            resp = self.client.get('/download' + CURATED + '/Alcock_leafPhenotypingImages_2016/README.txt')
-        self.assertEqual(resp['Location'], 'https://data.cyverse.org/dav-anon/x')
-
-
-def _avus(**attrs):
-    out = []
-    for key, value in attrs.items():
-        for v in (value if isinstance(value, list) else [value]):
-            out.append({'attr': key.replace('__', '.'), 'value': v})
-    return {'avus': out, 'irods-avus': [{'attr': 'title', 'value': 'ignored, kando only reads avus'}]}
-
-
-def _dataset(name, resource_names=()):
-    return {'name': name, 'resources': [{'id': '%s-%d' % (name, i), 'name': r}
-                                        for i, r in enumerate(resource_names)]}
+    def setUp(self):
+        cache.clear()
+        self.api = FakeAPIs()
+        self.api.folder('Alcock_leafPhenotypingImages_2016', title=u' Alcock Leaf Phenotyping ')
+        self.api.dataset('alcock_leaf_phenotyping',
+                         ('images', 'Alcock_leafPhenotypingImages_2016'),
+                         ('README.txt', 'Alcock_leafPhenotypingImages_2016'))
+        self.api.folder('Zhong_Barrow_2019', title=u'Barrow Viromes 2019', identifier=u'10.25739/0e7n-6611')
+        self.api.dataset('barrow_viromes_2019')
+        self.api.folder(u'Café_2020', **{'datacite.title': u'Café 2020'})
+        self.api.dataset(u'café_2020', (u'données', u'Café_2020'))
+        self.api.folder('Not_Migrated_Yet', title=u'Not synced yet')
+        patches = [
+            mock.patch.object(dc_redirects.requests, 'request', self.api.request),
+            mock.patch.object(dc_redirects.requests, 'get', self.api.get),
+            mock.patch.object(dc_redirects, 'ENABLED', True),
+            mock.patch.object(dc_redirects, 'PERMANENT', False),
+        ]
+        for p in patches:
+            p.start()
+            self.addCleanup(p.stop)
 
 
 class TitleRuleTests(SimpleTestCase):
@@ -200,59 +148,182 @@ class TitleRuleTests(SimpleTestCase):
                          u'data_A_Long_Folder_Name_')
 
     def test_avus_to_dict_collects_multi_values(self):
-        self.assertEqual(avus_to_dict(_avus(title=u'T', subject=[u'a', u'b'])['avus']),
+        self.assertEqual(avus_to_dict([{'attr': 'title', 'value': u'T'}, {'attr': 'subject', 'value': u'a'},
+                                       {'attr': 'subject', 'value': u'b'}]),
                          {'title': u'T', 'subject': [u'a', u'b']})
 
-
-class BuildMapTests(SimpleTestCase):
-
-    def setUp(self):
-        self.cmd = Command()
-        self.cmd.stderr = mock.Mock()
-
-    def build(self, metadata, datasets):
-        self.cmd.terrain_anonymous = lambda method, endpoint, **kw: metadata[endpoint.split('/')[0]]
-        folders = dict((name, name) for name in metadata)
-        return self.cmd.build_mapping(folders, dict((d['name'], d) for d in datasets))
-
-    def test_maps_by_title_with_resource_ids(self):
-        mapping, unmatched, shared = self.build(
-            {'Zhong_Barrow_2019': _avus(title=u'Barrow Viromes 2019')},
-            [_dataset('barrow_viromes_2019', ['README.txt', 'viromes'])])
-        self.assertEqual(mapping, {'Zhong_Barrow_2019': {
-            'dataset': 'barrow_viromes_2019',
-            'resources': {'README.txt': 'barrow_viromes_2019-0', 'viromes': 'barrow_viromes_2019-1'}}})
-        self.assertEqual((unmatched, shared), ([], {}))
-
-    def test_uses_collision_name_when_plain_name_is_absent(self):
-        mapping, _, _ = self.build({'F': _avus(title=u'Data', identifier=u'10.1/abc')}, [_dataset('data_10-1-abc')])
-        self.assertEqual(mapping['F']['dataset'], 'data_10-1-abc')
-
-    def test_name_must_exist_on_dc(self):
-        mapping, unmatched, _ = self.build({'New_2026': _avus(title=u'Not synced yet')}, [_dataset('other')])
-        self.assertEqual(mapping, {})
-        self.assertEqual(unmatched, ['New_2026'])
-
-    def test_deprecated_folders_are_skipped(self):
-        mapping, unmatched, _ = self.build({'_deprecated_X': _avus(title=u'X')}, [_dataset('x')])
-        self.assertEqual(mapping, {})
-        self.assertEqual(unmatched, ['_deprecated_X'])
-
-    def test_folders_with_the_same_title_share_one_dataset(self):
-        dav = 'https://data.cyverse.org/dav-anon' + CURATED + '/'
-        dataset = {'name': 'same', 'resources': [
-            {'id': 'r1', 'name': 'data', 'url': dav + 'V1_July/data'},
-            {'id': 'r2', 'name': 'README', 'url': dav + 'V1_July/README'},
-            {'id': 'r3', 'name': 'new_in_v2', 'url': dav + 'V2_Aug/new_in_v2'},
-        ]}
-        mapping, _, shared = self.build(
-            {'V1_July': _avus(title=u'Same'), 'V2_Aug': _avus(Title=u'Same ')}, [dataset])
-        self.assertEqual(mapping['V1_July'], {'dataset': 'same', 'resources': {'data': 'r1', 'README': 'r2'}})
-        # V2's own "data" was never added to the dataset, so it must not point at V1's.
-        self.assertEqual(mapping['V2_Aug'], {'dataset': 'same', 'resources': {'new_in_v2': 'r3'}})
-        self.assertEqual(shared, {'same': ['V1_July', 'V2_Aug']})
-
     def test_resource_folder_ignores_stray_whitespace(self):
-        url = 'https://data.cyverse.org/dav-anon' + CURATED + '/G2F_2018 /README.txt'
-        self.assertEqual(resource_folder({'url': url}), u'G2F_2018')
+        self.assertEqual(resource_folder({'url': DAV + 'G2F_2018 /README.txt'}), u'G2F_2018')
         self.assertIsNone(resource_folder({'url': 'https://dc.cyverse.org/x.png'}))
+
+
+class ResolveTests(RedirectTestCase):
+
+    def test_commons_repo_and_curated_go_to_organization_without_lookups(self):
+        for path in ('/iplant/home/shared/commons_repo', '/iplant/home/shared/commons_repo/',
+                     CURATED, CURATED + '/', 'iplant/home/shared/commons_repo/curated',
+                     '/iplant/home/shared/commons_repo/something_else'):
+            self.assertEqual(dc_redirects.resolve(path), ORG, path)
+        self.assertEqual(self.api.calls, 0)
+
+    def test_dataset_folder(self):
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016'),
+                         DS + 'alcock_leaf_phenotyping')
+
+    def test_first_level_child(self):
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/README.txt'),
+                         DS + 'alcock_leaf_phenotyping/resource/alcock_leaf_phenotyping-1')
+
+    def test_deep_path_goes_to_first_level_child(self):
+        self.assertEqual(
+            dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/images/plot3/day7/leaf.png'),
+            DS + 'alcock_leaf_phenotyping/resource/alcock_leaf_phenotyping-0')
+
+    def test_unknown_child_falls_back_to_dataset(self):
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/gone/deeper'),
+                         DS + 'alcock_leaf_phenotyping')
+
+    def test_dataset_without_resources(self):
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019/viromes/a.fa'),
+                         DS + 'barrow_viromes_2019')
+
+    def test_collision_name(self):
+        self.api.folder('Dup', title=u'Data', identifier=u'10.1/abc')
+        self.api.dataset('data_10-1-abc')
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Dup'), DS + 'data_10-1-abc')
+
+    def test_folders_sharing_a_dataset_keep_their_own_resources(self):
+        self.api.folder('V1_July', title=u'Same')
+        self.api.folder('V2_Aug', Title=u'Same ')
+        self.api.dataset('same', ('data', 'V1_July'), ('new_in_v2', 'V2_Aug'))
+        self.assertEqual(dc_redirects.resolve(CURATED + '/V1_July/data/x'), DS + 'same/resource/same-0')
+        self.assertEqual(dc_redirects.resolve(CURATED + '/V2_Aug/new_in_v2'), DS + 'same/resource/same-1')
+        # V2's own "data" was never added to the dataset, so it must not point at V1's.
+        self.assertEqual(dc_redirects.resolve(CURATED + '/V2_Aug/data/x'), DS + 'same')
+
+    def test_exact_child_match_among_substring_hits(self):
+        self.api.add_resource('alcock_leaf_phenotyping', 'images_v2', DAV + 'Alcock_leafPhenotypingImages_2016/images_v2')
+        self.api.add_resource('alcock_leaf_phenotyping', 'old_images', DAV + 'Alcock_leafPhenotypingImages_2016/old_images')
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/images_v2/x'),
+                         DS + 'alcock_leaf_phenotyping/resource/alcock_leaf_phenotyping-2')
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/images/x'),
+                         DS + 'alcock_leaf_phenotyping/resource/alcock_leaf_phenotyping-0')
+
+    def test_child_with_stray_whitespace_in_resource_url(self):
+        self.api.folder('G2F_2018', title=u'G2F 2018')
+        self.api.dataset('g2f_2018')
+        self.api.add_resource('g2f_2018', 'README.txt', DAV + 'G2F_2018 /README.txt')
+        self.assertEqual(dc_redirects.resolve(CURATED + '/G2F_2018/README.txt'), DS + 'g2f_2018/resource/g2f_2018-0')
+
+    def test_same_child_name_in_another_dataset_is_ignored(self):
+        self.api.folder('Other_2020', title=u'Other 2020')
+        self.api.dataset('other_2020', ('README.txt', 'Other_2020'))
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Other_2020/README.txt'),
+                         DS + 'other_2020/resource/other_2020-0')
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/README.txt'),
+                         DS + 'alcock_leaf_phenotyping/resource/alcock_leaf_phenotyping-1')
+
+    def test_child_lookup_failure_still_goes_to_the_dataset(self):
+        dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019')  # folder cached
+        self.api.down = True
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019/viromes'), DS + 'barrow_viromes_2019')
+
+    def test_unmigrated_folder_is_not_redirected(self):
+        self.assertIsNone(dc_redirects.resolve(CURATED + '/Not_Migrated_Yet'))
+        self.assertIsNone(dc_redirects.resolve(CURATED + '/Not_Migrated_Yet/a/b'))
+
+    def test_missing_folder_is_not_redirected(self):
+        self.assertIsNone(dc_redirects.resolve(CURATED + '/No_Such_Folder/x'))
+
+    def test_deprecated_folders_are_not_looked_up(self):
+        self.assertIsNone(dc_redirects.resolve(CURATED + '/_deprecated_Old_2016/x'))
+        self.assertEqual(self.api.calls, 0)
+
+    def test_paths_outside_commons_repo_are_not_redirected(self):
+        for path in ('/iplant/home/shared', '/iplant/home/shared/TCIA/4D-Lung',
+                     '/iplant/home/shared/commons_repository'):
+            self.assertIsNone(dc_redirects.resolve(path), path)
+        self.assertEqual(self.api.calls, 0)
+
+    def test_double_slashes(self):
+        self.assertEqual(dc_redirects.resolve('//iplant/home/shared/commons_repo//curated/Zhong_Barrow_2019/'),
+                         DS + 'barrow_viromes_2019')
+
+    def test_unicode_names(self):
+        self.assertEqual(dc_redirects.resolve(CURATED + u'/Café_2020/données/x'),
+                         DS + 'caf%C3%A9_2020/resource/caf%C3%A9_2020-0')
+
+    def test_disabled(self):
+        with mock.patch.object(dc_redirects, 'ENABLED', False):
+            self.assertIsNone(dc_redirects.resolve(CURATED))
+
+    def test_folder_and_child_lookups_are_cached(self):
+        dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/images/a')
+        calls = self.api.calls
+        dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/images/b/c')
+        dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016')
+        self.assertEqual(self.api.calls, calls)
+        dc_redirects.resolve(CURATED + '/Alcock_leafPhenotypingImages_2016/README.txt')
+        self.assertEqual(self.api.calls, calls + 1)  # one resource_search for the new child
+
+    def test_misses_are_cached_briefly(self):
+        with mock.patch.object(dc_redirects.cache, 'set', wraps=dc_redirects.cache.set) as cache_set:
+            dc_redirects.resolve(CURATED + '/Not_Migrated_Yet')
+        self.assertEqual(cache_set.call_args[0][1:], (dc_redirects._MISS, dc_redirects.MISS_CACHE_SECONDS))
+        calls = self.api.calls
+        dc_redirects.resolve(CURATED + '/Not_Migrated_Yet/x')
+        self.assertEqual(self.api.calls, calls)
+
+    def test_newly_synced_dataset_redirects_once_the_miss_expires(self):
+        self.assertIsNone(dc_redirects.resolve(CURATED + '/Not_Migrated_Yet'))
+        self.api.dataset('not_synced_yet')
+        cache.clear()
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Not_Migrated_Yet'), DS + 'not_synced_yet')
+
+    def test_outage_serves_the_old_page_and_is_not_cached(self):
+        self.api.down = True
+        self.assertIsNone(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'))
+        self.api.down = False
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'), DS + 'barrow_viromes_2019')
+
+    def test_terrain_error_is_not_cached(self):
+        real = self.api.request
+        self.api.request = lambda *a, **k: FakeResponse(503, {})
+        with mock.patch.object(dc_redirects.requests, 'request', self.api.request):
+            self.assertIsNone(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'))
+        self.api.request = real
+        self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'), DS + 'barrow_viromes_2019')
+
+
+class BrowseViewTests(RedirectTestCase):
+
+    def test_curated_redirects(self):
+        resp = self.client.get('/browse' + CURATED)
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp['Location'], ORG)
+
+    def test_deep_path_redirects_to_resource(self):
+        resp = self.client.get('/browse' + CURATED + '/Alcock_leafPhenotypingImages_2016/images/plot3/')
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp['Location'], DS + 'alcock_leaf_phenotyping/resource/alcock_leaf_phenotyping-0')
+
+    def test_encoded_path(self):
+        resp = self.client.get('/browse/iplant/home/shared/commons_repo/curated/Caf%C3%A9_2020/donn%C3%A9es')
+        self.assertEqual(resp['Location'], DS + 'caf%C3%A9_2020/resource/caf%C3%A9_2020-0')
+
+    def test_permanent(self):
+        with mock.patch.object(dc_redirects, 'PERMANENT', True):
+            resp = self.client.get('/browse' + CURATED)
+        self.assertEqual(resp.status_code, 301)
+
+    def test_unmigrated_and_community_pages_still_render(self):
+        for path in (CURATED + '/Not_Migrated_Yet/sub', '/iplant/home/shared', '/iplant/home/shared/TCIA'):
+            resp = self.client.get('/browse' + path)
+            self.assertEqual(resp.status_code, 200, path)
+            self.assertContains(resp, 'DcrMainCtrl')
+
+    def test_downloads_are_not_redirected(self):
+        with mock.patch('datastore.apps.sra.views.AnonFilesClient') as client:
+            client.return_value.download_url.return_value = 'https://data.cyverse.org/dav-anon/x'
+            resp = self.client.get('/download' + CURATED + '/Alcock_leafPhenotypingImages_2016/README.txt')
+        self.assertEqual(resp['Location'], 'https://data.cyverse.org/dav-anon/x')
