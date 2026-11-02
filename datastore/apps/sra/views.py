@@ -11,10 +11,11 @@ from requests import RequestException
 from os.path import splitext
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, StreamingHttpResponse
-from django.http import JsonResponse
+from django.http import HttpResponsePermanentRedirect, JsonResponse
 from django.shortcuts import render
 from datastore.libs.terrain.client import TerrainClient
 from datastore.libs.anon_files.client import AnonFilesClient
+from datastore.apps.sra import dc_redirects
 import settings as sra_settings
 from datastore.apps.sra.dictionary import data_dictionary, metadata_order
 
@@ -31,11 +32,54 @@ def _check_path(path):
     return path
 
 
+def _dc_redirect_page(request, path, state, target=None, status=200):
+    if target is None:
+        destination = None
+    elif '/resource/' in target:
+        destination = 'this file or folder'
+    elif '/dataset/' in target:
+        destination = 'this dataset'
+    else:
+        destination = 'CyVerse curated data'
+    response = render(request, 'sra/dc_redirect.html', {
+        'state': state,
+        'target': target,
+        # json.dumps doesn't escape "<", which would let a value close the <script>.
+        'target_json': json.dumps(target).replace('<', '\\u003c'),
+        'destination': destination,
+        'delay': dc_redirects.PAGE_DELAY_SECONDS,
+        'give_up_ms': dc_redirects.PAGE_GIVE_UP_SECONDS * 1000,
+        # If the redirect fails, the data is still in the Data Store.
+        'data_store_url': dc_redirects.data_store_url(path),
+        'support_email': dc_redirects.SUPPORT_EMAIL,
+        'support_mailto': dc_redirects.support_mailto(request.build_absolute_uri()),
+    }, status=status)
+    response['X-Robots-Tag'] = 'noindex'
+    return response
+
+
+def _dc_redirect(request, path):
+    """Send the visitor to dc.cyverse.org if this path has been migrated there."""
+    try:
+        target = dc_redirects.resolve(path)
+    except dc_redirects.DCLookupError:
+        response = _dc_redirect_page(request, path, 'error', status=503)
+        response['Retry-After'] = '60'
+        return response
+    if target is None:
+        return None
+    if dc_redirects.PERMANENT:
+        return HttpResponsePermanentRedirect(target)
+    if not dc_redirects.SHOW_PAGE:
+        return HttpResponseRedirect(target)
+    return _dc_redirect_page(request, path, 'redirect', target)
+
+
 def home(request, **kwargs):
     return render(request, 'sra/home.html')
 
-def landing_page(request, **kwargs):
-    return render(request, 'sra/landing.html')
+def landing_page(request, path='', **kwargs):
+    return _dc_redirect(request, path) or render(request, 'sra/landing.html')
 
 def legacy_redirect(request, path=''):
     """

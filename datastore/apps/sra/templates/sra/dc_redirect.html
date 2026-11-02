@@ -1,0 +1,171 @@
+{% load staticfiles %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  {% if state == 'redirect' %}<meta http-equiv="refresh" content="{{ delay }};url={{ target }}">
+  <link rel="canonical" href="{{ target }}">{% endif %}
+  <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+  <title>{% if state == 'redirect' %}Redirecting to the new CyVerse Data Commons{% else %}Couldn't open the new CyVerse Data Commons{% endif %}</title>
+  <style>
+    /* Matches dc.cyverse.org (cyverse/data-commons ckan/templates). */
+    :root {
+      --navy: #004471;
+      --blue: #0971ab;
+      --ink: #142248;
+      --band: #f4f5f7;
+      --line: #e6e8eb;
+      --pill: #eef1f4;
+      --text: #333333;
+      --muted: #55606b;
+      --error: #b42318;
+      --error-bg: #fdecea;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: var(--band);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+    }
+    .account-masthead { height: 30px; background: var(--navy); }
+    .masthead { background: var(--blue) url("{% static 'img/dc_masthead_bg.png' %}"); }
+    .masthead .inner, .footer .inner { max-width: 1140px; margin: 0 auto; padding: 0 16px; }
+    .masthead .inner { display: flex; align-items: center; height: 92px; }
+    .masthead img { display: block; height: 42px; width: auto; }
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 16px; }
+    .tile {
+      width: 100%;
+      max-width: 520px;
+      padding: 36px 32px 32px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      animation: rise 0.35s ease-out both;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 3px 14px;
+      border-radius: 999px;
+      background: var(--pill);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); animation: pulse 1.4s ease-in-out infinite; }
+    .is-error .pill { background: var(--error-bg); color: var(--error); }
+    .is-error .pill .dot { background: var(--error); animation: none; }
+    h1 { margin: 0 0 10px; color: var(--text); font-size: 1.6rem; line-height: 1.25; font-weight: 700; }
+    p { margin: 0 0 22px; color: var(--muted); }
+    .host { color: var(--blue); font-weight: 600; }
+    .nowrap { white-space: nowrap; }
+    .progress { height: 4px; margin: 0 0 26px; overflow: hidden; border-radius: 999px; background: var(--pill); }
+    .progress span {
+      display: block; height: 100%;
+      background: var(--blue);
+      transform-origin: left;
+      animation: fill {{ delay }}s linear both;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .btn {
+      display: inline-block;
+      padding: 9px 22px;
+      border: 1px solid var(--blue);
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn-primary { background: var(--blue); color: #ffffff; }
+    .btn-primary:hover, .btn-primary:focus-visible { background: var(--navy); border-color: var(--navy); }
+    .btn-secondary { background: #ffffff; color: var(--blue); }
+    .btn-secondary:hover, .btn-secondary:focus-visible { background: var(--pill); }
+    .btn:focus-visible { outline: 3px solid rgba(9, 113, 171, 0.35); outline-offset: 2px; }
+    .support { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 0.9rem; }
+    .support a { color: var(--blue); font-weight: 600; }
+    .footer { background: var(--blue) url("{% static 'img/dc_masthead_bg.png' %}"); color: #ffffff; font-size: 0.85rem; }
+    .footer .inner { padding-top: 14px; padding-bottom: 14px; }
+    .footer a { color: #ffffff; }
+    [hidden] { display: none !important; }
+    @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .tile, .pill .dot, .progress span { animation: none; }
+    }
+    @media (max-width: 480px) {
+      .masthead .inner { height: 72px; }
+      .masthead img { height: 32px; }
+      .tile { padding: 28px 20px 24px; }
+      h1 { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="account-masthead" aria-hidden="true"></div>
+  <header class="masthead">
+    <div class="inner">
+      <img src="{% static 'img/dc_cyverse_white.png' %}" alt="CyVerse">
+    </div>
+  </header>
+
+  <main>
+    <section id="redirecting" class="tile"{% if state != 'redirect' %} hidden{% endif %}>
+      <div class="pill"><span class="dot" aria-hidden="true"></span>We've moved</div>
+      <h1>Redirecting to the new Data&nbsp;Commons</h1>
+      <p aria-live="polite">Taking you to {{ destination }} on <span class="host">dc.cyverse.org</span><span id="countdown" class="nowrap"> in {{ delay }} seconds</span>.</p>
+      <div class="progress" aria-hidden="true"><span></span></div>
+      <div class="actions"><a class="btn btn-primary go" href="{{ target }}">Go now</a></div>
+    </section>
+
+    <section id="error" class="tile is-error"{% if state != 'error' %} hidden{% endif %} role="alert">
+      <div class="pill"><span class="dot" aria-hidden="true"></span>Redirect failed</div>
+      <h1>We couldn't open this on the new Data&nbsp;Commons</h1>
+      <p>{% if state == 'error' %}The new Data Commons didn't respond, so we couldn't find where this moved.{% else %}<span class="host">dc.cyverse.org</span> is taking too long to respond.{% endif %} You can still get the files from the CyVerse Data Store.</p>
+      <div class="actions">
+        <a class="btn btn-primary data-store" href="{{ data_store_url }}">Open in the Data Store</a>
+        <a class="btn btn-secondary retry" href="{% if state == 'redirect' %}{{ target }}{% else %}{{ request.get_full_path }}{% endif %}">Try again</a>
+      </div>
+      <p class="support">If this keeps happening, please contact CyVerse support at <a href="{{ support_mailto }}">{{ support_email }}</a>.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="inner">CyVerse Data Commons &middot; <a href="https://dc.cyverse.org">dc.cyverse.org</a></div>
+  </footer>
+
+  {% if state == 'redirect' %}
+  <script>
+    (function () {
+      var left = {{ delay }}, el = document.getElementById('countdown');
+      var tick = setInterval(function () {
+        left -= 1;
+        if (left > 0) {
+          el.textContent = ' in ' + left + (left === 1 ? ' second' : ' seconds');
+          return;
+        }
+        clearInterval(tick);
+        el.textContent = '…';
+        window.location.replace({{ target_json|safe }});
+        /* Still here once the new site should have loaded: it isn't responding.
+           Stop waiting and show the error state. */
+        setTimeout(function () {
+          if (window.stop) { window.stop(); }
+          document.getElementById('redirecting').hidden = true;
+          document.getElementById('error').hidden = false;
+        }, {{ give_up_ms }});
+      }, 1000);
+    })();
+  </script>
+  {% endif %}
+</body>
+</html>
