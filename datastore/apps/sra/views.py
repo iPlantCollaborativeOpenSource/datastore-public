@@ -32,7 +32,7 @@ def _check_path(path):
     return path
 
 
-def _dc_redirect_page(request, state, target=None, status=200):
+def _dc_redirect_page(request, path, state, target=None, status=200):
     if target is None:
         destination = None
     elif '/resource/' in target:
@@ -49,8 +49,10 @@ def _dc_redirect_page(request, state, target=None, status=200):
         'destination': destination,
         'delay': dc_redirects.PAGE_DELAY_SECONDS,
         'give_up_ms': dc_redirects.PAGE_GIVE_UP_SECONDS * 1000,
-        # ?legacy=1 skips the redirect, for when it fails.
-        'legacy_url': request.path + '?legacy=1',
+        # If the redirect fails, the data is still in the Data Store.
+        'data_store_url': dc_redirects.data_store_url(path),
+        'support_email': dc_redirects.SUPPORT_EMAIL,
+        'support_mailto': dc_redirects.support_mailto(request.build_absolute_uri()),
     }, status=status)
     response['X-Robots-Tag'] = 'noindex'
     return response
@@ -58,12 +60,10 @@ def _dc_redirect_page(request, state, target=None, status=200):
 
 def _dc_redirect(request, path):
     """Send the visitor to dc.cyverse.org if this path has been migrated there."""
-    if request.GET.get('legacy'):
-        return None
     try:
         target = dc_redirects.resolve(path)
     except dc_redirects.DCLookupError:
-        response = _dc_redirect_page(request, 'error', status=503)
+        response = _dc_redirect_page(request, path, 'error', status=503)
         response['Retry-After'] = '60'
         return response
     if target is None:
@@ -72,7 +72,7 @@ def _dc_redirect(request, path):
         return HttpResponsePermanentRedirect(target)
     if not dc_redirects.SHOW_PAGE:
         return HttpResponseRedirect(target)
-    return _dc_redirect_page(request, 'redirect', target)
+    return _dc_redirect_page(request, path, 'redirect', target)
 
 
 def home(request, **kwargs):

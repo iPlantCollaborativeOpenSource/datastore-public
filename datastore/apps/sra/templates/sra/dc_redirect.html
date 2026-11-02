@@ -90,6 +90,8 @@
     .btn-secondary { background: #ffffff; color: var(--blue); }
     .btn-secondary:hover, .btn-secondary:focus-visible { background: var(--pill); }
     .btn:focus-visible { outline: 3px solid rgba(9, 113, 171, 0.35); outline-offset: 2px; }
+    .support { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 0.9rem; }
+    .support a { color: var(--blue); font-weight: 600; }
     .footer { background: var(--blue) url("{% static 'img/dc_masthead_bg.png' %}"); color: #ffffff; font-size: 0.85rem; }
     .footer .inner { padding-top: 14px; padding-bottom: 14px; }
     .footer a { color: #ffffff; }
@@ -128,11 +130,12 @@
     <section id="error" class="tile is-error"{% if state != 'error' %} hidden{% endif %} role="alert">
       <div class="pill"><span class="dot" aria-hidden="true"></span>Redirect failed</div>
       <h1>We couldn't open this on the new Data&nbsp;Commons</h1>
-      <p>{% if state == 'error' %}The new Data Commons didn't respond, so we couldn't find where this moved.{% else %}<span class="host">dc.cyverse.org</span> is taking too long to respond.{% endif %} You can view it in the legacy Data Commons instead.</p>
+      <p>{% if state == 'error' %}The new Data Commons didn't respond, so we couldn't find where this moved.{% else %}<span class="host">dc.cyverse.org</span> is taking too long to respond.{% endif %} You can still get the files from the CyVerse Data Store.</p>
       <div class="actions">
-        <a class="btn btn-primary legacy" href="{{ legacy_url }}">View in legacy Data Commons</a>
+        <a class="btn btn-primary data-store" href="{{ data_store_url }}">Open in the Data Store</a>
         <a class="btn btn-secondary retry" href="{% if state == 'redirect' %}{{ target }}{% else %}{{ request.get_full_path }}{% endif %}">Try again</a>
       </div>
+      <p class="support">If this keeps happening, please contact CyVerse support at <a href="{{ support_mailto }}">{{ support_email }}</a>.</p>
     </section>
   </main>
 
@@ -154,7 +157,7 @@
         el.textContent = '…';
         window.location.replace({{ target_json|safe }});
         /* Still here once the new site should have loaded: it isn't responding.
-           Stop waiting and offer the legacy page. */
+           Stop waiting and show the error state. */
         setTimeout(function () {
           if (window.stop) { window.stop(); }
           document.getElementById('redirecting').hidden = true;

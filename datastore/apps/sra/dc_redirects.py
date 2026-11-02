@@ -15,10 +15,11 @@ kando/sync), which names each dataset from the folder's Terrain title, so the
 same rule is applied to the folder's Terrain metadata and the name is checked
 with CKAN's package_search. The child's resource is found with resource_search.
 
-Anything that doesn't resolve to dc.cyverse.org (a folder that hasn't been
-migrated, or Terrain/CKAN not answering in time) is served by the legacy site
-instead. A child that isn't on dc.cyverse.org goes to its dataset page.
-Lookups are cached, misses for less time so newly synced datasets show up soon.
+A folder that hasn't been migrated is still served by the legacy site. If the
+lookup fails (Terrain/CKAN not answering in time), visitors get an error page
+pointing them to the Data Store and CyVerse support. A child that isn't on
+dc.cyverse.org goes to its dataset page. Lookups are cached, misses for less
+time so newly synced datasets show up soon.
 """
 import hashlib
 import logging
@@ -50,9 +51,14 @@ ENABLED = os.getenv('DC_REDIRECTS_ENABLED', 'True') == 'True'
 SHOW_PAGE = os.getenv('DC_REDIRECT_PAGE', 'True') == 'True'
 PAGE_DELAY_SECONDS = int(os.getenv('DC_REDIRECT_DELAY_SECONDS', '3'))
 # If dc.cyverse.org still hasn't loaded this long after forwarding, the page
-# stops waiting and offers the legacy page instead.
+# stops waiting and shows the error state.
 PAGE_GIVE_UP_SECONDS = int(os.getenv('DC_REDIRECT_GIVE_UP_SECONDS', '15'))
 PERMANENT = os.getenv('DC_REDIRECTS_PERMANENT', 'False') == 'True'
+
+# When a redirect fails, visitors are pointed at the same path in the Data
+# Store (anonymous, read-only) and at CyVerse support.
+DATA_STORE_URL = os.getenv('DC_DATA_STORE_URL', DAV_PREFIX).rstrip('/')
+SUPPORT_EMAIL = os.getenv('DC_SUPPORT_EMAIL', 'support@cyverse.org')
 
 CACHE_SECONDS = int(os.getenv('DC_REDIRECT_CACHE_SECONDS', '3600'))
 # Shorter, so a newly migrated dataset starts redirecting soon after kando syncs it.
@@ -72,6 +78,22 @@ def _normalize(path):
     while '//' in path:
         path = path.replace('//', '/')
     return path
+
+
+def data_store_url(path):
+    """The Data Store's anonymous web view of a legacy data store path."""
+    path = _normalize(path)
+    return DATA_STORE_URL + urllib.quote(path.encode('utf8') if isinstance(path, unicode) else path, safe='/')
+
+
+def support_mailto(page_url):
+    """A mailto: link to CyVerse support, pre-filled with the link that failed."""
+    params = urllib.urlencode([
+        ('subject', 'Data Commons link not opening'),
+        ('body', 'This link to the CyVerse Data Commons did not open on the new Data Commons:\n%s\n'
+                 % (page_url.encode('utf8') if isinstance(page_url, unicode) else page_url)),
+    ]).replace('+', '%20')
+    return 'mailto:%s?%s' % (SUPPORT_EMAIL, params)
 
 
 def _quote(value):

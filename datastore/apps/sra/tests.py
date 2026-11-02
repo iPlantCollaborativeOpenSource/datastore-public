@@ -254,6 +254,16 @@ class ResolveTests(RedirectTestCase):
         self.assertEqual(dc_redirects.resolve(CURATED + u'/Café_2020/données/x'),
                          DS + 'caf%C3%A9_2020/resource/caf%C3%A9_2020-0')
 
+    def test_data_store_url(self):
+        self.assertEqual(dc_redirects.data_store_url(u'//iplant/home/shared/commons_repo//curated/Café 2020/a b.txt/'),
+                         'https://data.cyverse.org/dav-anon/iplant/home/shared/commons_repo/curated/Caf%C3%A9%202020/a%20b.txt')
+
+    def test_support_mailto_includes_the_failed_link(self):
+        link = dc_redirects.support_mailto(u'http://datacommons.cyverse.org/browse/x?y=1&z=Café')
+        self.assertTrue(link.startswith('mailto:support@cyverse.org?subject=Data%20Commons%20link%20not%20opening&body='))
+        self.assertIn('http%3A%2F%2Fdatacommons.cyverse.org%2Fbrowse%2Fx%3Fy%3D1%26z%3DCaf%C3%A9', link)
+        self.assertNotIn('+', link)
+
     def test_disabled(self):
         with mock.patch.object(dc_redirects, 'ENABLED', False):
             self.assertIsNone(dc_redirects.resolve(CURATED))
@@ -378,8 +388,12 @@ class RedirectPageTests(RedirectTestCase):
         self.assertEqual(resp['Retry-After'], '60')
         self.assertContains(resp, 'Redirect failed', status_code=503)
         self.assertContains(resp, "We couldn't open this on the new Data&nbsp;Commons", status_code=503)
-        self.assertContains(resp, '<a class="btn btn-primary legacy" href="/browse%s/Zhong_Barrow_2019/viromes?legacy=1">'
-                            'View in legacy Data Commons</a>' % CURATED, status_code=503, html=False)
+        self.assertContains(resp, '<a class="btn btn-primary data-store" href="https://data.cyverse.org/dav-anon%s'
+                            '/Zhong_Barrow_2019/viromes">Open in the Data Store</a>' % CURATED,
+                            status_code=503, html=False)
+        self.assertContains(resp, 'please contact CyVerse support at <a href="mailto:support@cyverse.org?subject=',
+                            status_code=503)
+        self.assertNotContains(resp, 'legacy Data Commons', status_code=503)
         self.assertContains(resp, 'class="btn btn-secondary retry" href="/browse%s/Zhong_Barrow_2019/viromes"' % CURATED,
                             status_code=503, html=False)
         self.assertNotContains(resp, 'http-equiv="refresh"', status_code=503)
@@ -391,18 +405,14 @@ class RedirectPageTests(RedirectTestCase):
             resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019')
         self.assertEqual(resp.status_code, 503)
 
-    def test_legacy_button_shows_the_old_page_without_lookups(self):
-        self.api.down = True
-        resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019/viromes?legacy=1')
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'DcrMainCtrl')
-        self.assertEqual(self.api.calls, 0)
+    def test_redirect_page_carries_the_same_fallback_for_its_give_up_state(self):
+        resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019/viromes')
+        self.assertContains(resp, 'href="https://data.cyverse.org/dav-anon%s/Zhong_Barrow_2019/viromes"' % CURATED)
+        self.assertContains(resp, 'mailto:support@cyverse.org?subject=')
 
-    def test_legacy_parameter_shows_the_old_page(self):
+    def test_legacy_parameter_no_longer_skips_the_redirect(self):
         resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019?legacy=1')
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'DcrMainCtrl')
-        self.assertNotContains(resp, 'Redirecting to the new')
+        self.assertContains(resp, 'Redirecting to the new')
 
     def test_permanent_skips_the_page(self):
         with mock.patch.object(dc_redirects, 'PERMANENT', True):
