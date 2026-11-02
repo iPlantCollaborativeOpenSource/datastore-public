@@ -32,21 +32,54 @@ def _check_path(path):
     return path
 
 
-def _dc_redirect(path):
-    """Redirect to dc.cyverse.org if this path has been migrated there."""
-    target = dc_redirects.resolve(path)
+def _dc_redirect_page(request, state, target=None, status=200):
+    if target is None:
+        destination = None
+    elif '/resource/' in target:
+        destination = 'this file or folder'
+    elif '/dataset/' in target:
+        destination = 'this dataset'
+    else:
+        destination = 'CyVerse curated data'
+    response = render(request, 'sra/dc_redirect.html', {
+        'state': state,
+        'target': target,
+        # json.dumps doesn't escape "<", which would let a value close the <script>.
+        'target_json': json.dumps(target).replace('<', '\\u003c'),
+        'destination': destination,
+        'delay': dc_redirects.PAGE_DELAY_SECONDS,
+        'give_up_ms': dc_redirects.PAGE_GIVE_UP_SECONDS * 1000,
+        # ?legacy=1 skips the redirect, for when it fails.
+        'legacy_url': request.path + '?legacy=1',
+    }, status=status)
+    response['X-Robots-Tag'] = 'noindex'
+    return response
+
+
+def _dc_redirect(request, path):
+    """Send the visitor to dc.cyverse.org if this path has been migrated there."""
+    if request.GET.get('legacy'):
+        return None
+    try:
+        target = dc_redirects.resolve(path)
+    except dc_redirects.DCLookupError:
+        response = _dc_redirect_page(request, 'error', status=503)
+        response['Retry-After'] = '60'
+        return response
     if target is None:
         return None
     if dc_redirects.PERMANENT:
         return HttpResponsePermanentRedirect(target)
-    return HttpResponseRedirect(target)
+    if not dc_redirects.SHOW_PAGE:
+        return HttpResponseRedirect(target)
+    return _dc_redirect_page(request, 'redirect', target)
 
 
 def home(request, **kwargs):
     return render(request, 'sra/home.html')
 
 def landing_page(request, path='', **kwargs):
-    return _dc_redirect(path) or render(request, 'sra/landing.html')
+    return _dc_redirect(request, path) or render(request, 'sra/landing.html')
 
 def legacy_redirect(request, path=''):
     """

@@ -43,8 +43,15 @@ DAV_PREFIX = 'https://data.cyverse.org/dav-anon'
 
 ENABLED = os.getenv('DC_REDIRECTS_ENABLED', 'True') == 'True'
 
-# 302 while the migration is in progress, so browsers don't cache redirects
-# for datasets whose mapping may still change.
+# By default visitors see a short "Redirecting to the new Data Commons" page
+# that forwards them after PAGE_DELAY_SECONDS. PERMANENT skips the page and
+# sends a 301; leave it off while the migration is in progress, so browsers
+# don't cache redirects for datasets whose mapping may still change.
+SHOW_PAGE = os.getenv('DC_REDIRECT_PAGE', 'True') == 'True'
+PAGE_DELAY_SECONDS = int(os.getenv('DC_REDIRECT_DELAY_SECONDS', '3'))
+# If dc.cyverse.org still hasn't loaded this long after forwarding, the page
+# stops waiting and offers the legacy page instead.
+PAGE_GIVE_UP_SECONDS = int(os.getenv('DC_REDIRECT_GIVE_UP_SECONDS', '15'))
 PERMANENT = os.getenv('DC_REDIRECTS_PERMANENT', 'False') == 'True'
 
 CACHE_SECONDS = int(os.getenv('DC_REDIRECT_CACHE_SECONDS', '3600'))
@@ -226,7 +233,7 @@ def _cached(key, compute, *args):
         entry = compute(*args)
     except DCLookupError as e:
         logger.warning('DC redirect lookup failed for %s: %s', args, e)
-        return None
+        raise
     if entry is None:
         cache.set(key, _MISS, MISS_CACHE_SECONDS)
     else:
@@ -237,8 +244,12 @@ def _cached(key, compute, *args):
 def resolve(path):
     """
     Return the dc.cyverse.org URL for a legacy data store path, or None when it
-    doesn't resolve there (not migrated, or Terrain/CKAN unavailable), in which
-    case the legacy page is served.
+    isn't there (outside commons_repo, or a folder that hasn't been migrated),
+    in which case the legacy page is served.
+
+    Raises DCLookupError when Terrain or CKAN can't say where a curated folder
+    went, so the visitor can be told the redirect failed. A child that can't
+    be looked up goes to its dataset page.
     """
     if not ENABLED:
         return None
@@ -260,8 +271,11 @@ def resolve(path):
 
     url = '{0}/dataset/{1}'.format(DC_HOST, _quote(entry['dataset']))
     if len(parts) > 1 and parts[1]:
-        resource_id = _cached(u'resource:%s/%s' % (folder_name, parts[1]),
-                              lookup_resource, entry['id'], folder_name, parts[1])
+        try:
+            resource_id = _cached(u'resource:%s/%s' % (folder_name, parts[1]),
+                                  lookup_resource, entry['id'], folder_name, parts[1])
+        except DCLookupError:
+            resource_id = None
         if resource_id:
             url += '/resource/' + _quote(resource_id)
     return url

@@ -114,6 +114,7 @@ class RedirectTestCase(SimpleTestCase):
             mock.patch.object(dc_redirects.requests, 'get', self.api.get),
             mock.patch.object(dc_redirects, 'ENABLED', True),
             mock.patch.object(dc_redirects, 'PERMANENT', False),
+            mock.patch.object(dc_redirects, 'SHOW_PAGE', False),
         ]
         for p in patches:
             p.start()
@@ -280,9 +281,10 @@ class ResolveTests(RedirectTestCase):
         cache.clear()
         self.assertEqual(dc_redirects.resolve(CURATED + '/Not_Migrated_Yet'), DS + 'not_synced_yet')
 
-    def test_outage_serves_the_old_page_and_is_not_cached(self):
+    def test_outage_raises_and_is_not_cached(self):
         self.api.down = True
-        self.assertIsNone(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'))
+        with self.assertRaises(dc_redirects.DCLookupError):
+            dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019')
         self.api.down = False
         self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'), DS + 'barrow_viromes_2019')
 
@@ -290,7 +292,8 @@ class ResolveTests(RedirectTestCase):
         real = self.api.request
         self.api.request = lambda *a, **k: FakeResponse(503, {})
         with mock.patch.object(dc_redirects.requests, 'request', self.api.request):
-            self.assertIsNone(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'))
+            with self.assertRaises(dc_redirects.DCLookupError):
+                dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019')
         self.api.request = real
         self.assertEqual(dc_redirects.resolve(CURATED + '/Zhong_Barrow_2019'), DS + 'barrow_viromes_2019')
 
@@ -327,3 +330,88 @@ class BrowseViewTests(RedirectTestCase):
             client.return_value.download_url.return_value = 'https://data.cyverse.org/dav-anon/x'
             resp = self.client.get('/download' + CURATED + '/Alcock_leafPhenotypingImages_2016/README.txt')
         self.assertEqual(resp['Location'], 'https://data.cyverse.org/dav-anon/x')
+
+
+class RedirectPageTests(RedirectTestCase):
+
+    def setUp(self):
+        super(RedirectPageTests, self).setUp()
+        p = mock.patch.object(dc_redirects, 'SHOW_PAGE', True)
+        p.start()
+        self.addCleanup(p.stop)
+
+    def test_page_forwards_to_dc(self):
+        resp = self.client.get('/browse' + CURATED + '/Alcock_leafPhenotypingImages_2016/images/plot3')
+        target = DS + 'alcock_leaf_phenotyping/resource/alcock_leaf_phenotyping-0'
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp['X-Robots-Tag'], 'noindex')
+        self.assertContains(resp, 'Redirecting to the new Data&nbsp;Commons')
+        self.assertContains(resp, 'this file or folder')
+        self.assertContains(resp, '<meta http-equiv="refresh" content="3;url=%s">' % target, html=False)
+        self.assertContains(resp, '<a class="btn btn-primary go" href="%s">Go now</a>' % target, html=False)
+        self.assertContains(resp, 'window.location.replace("%s")' % target)
+        self.assertNotContains(resp, 'Stay on')
+        # The give-up state is there, hidden, in case dc.cyverse.org doesn't load.
+        self.assertContains(resp, '<section id="error" class="tile is-error" hidden role="alert">', html=False)
+        self.assertContains(resp, '}, 15000);')
+
+    def test_page_describes_the_destination(self):
+        self.assertContains(self.client.get('/browse' + CURATED), 'CyVerse curated data')
+        self.assertContains(self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019'), 'this dataset')
+
+    def test_delay_setting(self):
+        with mock.patch.object(dc_redirects, 'PAGE_DELAY_SECONDS', 5):
+            resp = self.client.get('/browse' + CURATED)
+        self.assertContains(resp, 'content="5;url=')
+        self.assertContains(resp, 'in 5 seconds')
+
+    def test_target_cannot_break_out_of_the_script(self):
+        with mock.patch.object(dc_redirects, 'resolve', return_value='https://dc.cyverse.org/x</script><b>'):
+            resp = self.client.get('/browse' + CURATED)
+        self.assertNotContains(resp, 'x</script><b>')
+        self.assertContains(resp, 'replace("https://dc.cyverse.org/x\\u003c/script>\\u003cb>")')
+
+    def test_error_page_when_dc_cannot_be_reached(self):
+        self.api.down = True
+        resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019/viromes')
+        self.assertEqual(resp.status_code, 503)
+        self.assertEqual(resp['Retry-After'], '60')
+        self.assertContains(resp, 'Redirect failed', status_code=503)
+        self.assertContains(resp, "We couldn't open this on the new Data&nbsp;Commons", status_code=503)
+        self.assertContains(resp, '<a class="btn btn-primary legacy" href="/browse%s/Zhong_Barrow_2019/viromes?legacy=1">'
+                            'View in legacy Data Commons</a>' % CURATED, status_code=503, html=False)
+        self.assertContains(resp, 'class="btn btn-secondary retry" href="/browse%s/Zhong_Barrow_2019/viromes"' % CURATED,
+                            status_code=503, html=False)
+        self.assertNotContains(resp, 'http-equiv="refresh"', status_code=503)
+        self.assertNotContains(resp, 'window.location.replace', status_code=503)
+
+    def test_error_page_even_without_the_redirect_page(self):
+        self.api.down = True
+        with mock.patch.object(dc_redirects, 'SHOW_PAGE', False):
+            resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019')
+        self.assertEqual(resp.status_code, 503)
+
+    def test_legacy_button_shows_the_old_page_without_lookups(self):
+        self.api.down = True
+        resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019/viromes?legacy=1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'DcrMainCtrl')
+        self.assertEqual(self.api.calls, 0)
+
+    def test_legacy_parameter_shows_the_old_page(self):
+        resp = self.client.get('/browse' + CURATED + '/Zhong_Barrow_2019?legacy=1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'DcrMainCtrl')
+        self.assertNotContains(resp, 'Redirecting to the new')
+
+    def test_permanent_skips_the_page(self):
+        with mock.patch.object(dc_redirects, 'PERMANENT', True):
+            resp = self.client.get('/browse' + CURATED)
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp['Location'], ORG)
+
+    def test_unmigrated_folder_gets_no_page(self):
+        resp = self.client.get('/browse' + CURATED + '/Not_Migrated_Yet')
+        self.assertNotContains(resp, 'Redirecting to the new')
+        self.assertContains(resp, 'DcrMainCtrl')
+

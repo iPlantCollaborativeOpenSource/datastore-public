@@ -156,7 +156,8 @@
                      * migrated yet are served here as before. Only for clicks, so the
                      * initial load of a non-redirected page doesn't loop. */
                     var path = item.path || '';
-                    if (path === DcrPaths.COMMONS_REPO || path.indexOf(DcrPaths.COMMONS_REPO + '/') === 0) {
+                    var legacy = $location.search().legacy;  /* "View in legacy Data Commons" after a failed redirect */
+                    if (!legacy && (path === DcrPaths.COMMONS_REPO || path.indexOf(DcrPaths.COMMONS_REPO + '/') === 0)) {
                         window.location.assign('/browse' + path);
                         return;
                     }
